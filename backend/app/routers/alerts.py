@@ -27,14 +27,16 @@ async def send_sms_alert_endpoint(payload: SmsAlertRequest, _ = Depends(verify_u
             supabase.table('messages').insert({
                 'sender_id': system_user_id,
                 'receiver_id': user_id,
-                'content': f"📱 SMS sent to {name} ({phone})",
+                'content': f"📱 SMS sent to {name}",
                 'is_read': False
             }).execute()
             return {"success": True}
         else:
             raise HTTPException(status_code=500, detail="Failed to send SMS")
+    except HTTPException:
+        raise
     except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+        raise HTTPException(status_code=500, detail="Internal server error while sending alert")
 
 @router.post("/send-voice")
 async def send_voice_alert_endpoint(payload: VoiceAlertRequest, _ = Depends(verify_user_id)):
@@ -50,14 +52,16 @@ async def send_voice_alert_endpoint(payload: VoiceAlertRequest, _ = Depends(veri
             supabase.table('messages').insert({
                 'sender_id': system_user_id,
                 'receiver_id': user_id,
-                'content': f"📞 Voice call initiated to {name} ({phone})",
+                'content': f"📞 Voice call initiated to {name}",
                 'is_read': False
             }).execute()
             return {"success": True}
         else:
             raise HTTPException(status_code=500, detail="Failed to initiate voice call")
+    except HTTPException:
+        raise
     except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+        raise HTTPException(status_code=500, detail="Internal server error while initiating voice alert")
 
 @router.post("/send-bulk")
 async def send_bulk_alerts_endpoint(payload: BulkAlertRequest, _ = Depends(verify_user_id)):

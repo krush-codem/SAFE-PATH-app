@@ -13,10 +13,8 @@ async def get_user_profile(user_id: str, _ = Depends(verify_user_id)):
         res = supabase.table('profiles').select('*').eq('id', user_id).execute()
         return res.data[0] if res.data else None
     except Exception as e:
-        print(f"ERROR fetching profile for {user_id}: {e}")
-        import traceback
-        traceback.print_exc()
-        raise HTTPException(status_code=500, detail=str(e))
+        # Use generic error message for security
+        raise HTTPException(status_code=500, detail="Internal server error while fetching profile")
 
 @router.put("/profile/{user_id}")
 async def update_user_profile(user_id: str, updates: dict, _ = Depends(verify_user_id)):
@@ -24,7 +22,7 @@ async def update_user_profile(user_id: str, updates: dict, _ = Depends(verify_us
         supabase.table('profiles').update(updates).eq('id', user_id).execute()
         return {"success": True}
     except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+        raise HTTPException(status_code=500, detail="Internal server error while updating profile")
 
 @router.get("/guardians/{user_id}")
 async def get_user_guardians(user_id: str, _ = Depends(verify_user_id)):
@@ -33,12 +31,11 @@ async def get_user_guardians(user_id: str, _ = Depends(verify_user_id)):
         guardians = res.data if res.data else []
         return guardians
     except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+        raise HTTPException(status_code=500, detail="Internal server error while fetching guardians")
 
 @router.post("/guardians/{user_id}")
 async def add_user_guardian(user_id: str, guardian_data: dict, background_tasks: BackgroundTasks, _ = Depends(verify_user_id)):
     try:
-        print(f"DEBUG: Adding new guardian for user {user_id}. Data: {guardian_data}")
         if 'full_name' in guardian_data and 'guardian_name' not in guardian_data:
             guardian_data['guardian_name'] = guardian_data.pop('full_name')
         if 'phone' in guardian_data and 'guardian_phone' not in guardian_data:
@@ -49,19 +46,16 @@ async def add_user_guardian(user_id: str, guardian_data: dict, background_tasks:
 
         phone = guardian_data.get('guardian_phone')
         name = guardian_data.get('guardian_name', 'Guardian')
-        print(f"DEBUG: New guardian added. Phone: {phone}, Name: {name}")
         
         if phone:
             user_res = supabase.table('profiles').select('full_name').eq('id', user_id).execute()
             user_name = user_res.data[0].get('full_name', 'Someone') if user_res.data else 'Someone'
             message = f"🛡️ SAFE PATH: Hi {name}, {user_name} has added you as a guardian."
-            print(f"DEBUG: Triggering SMS to {phone} via background task")
             background_tasks.add_task(send_sms_alert, phone, message)
 
         return {"success": True}
     except Exception as e:
-        print(f"DEBUG: Error in add_user_guardian: {e}")
-        raise HTTPException(status_code=500, detail=str(e))
+        raise HTTPException(status_code=500, detail="Internal server error while adding guardian")
 
 @router.delete("/guardians/{guardian_id}")
 async def delete_user_guardian(guardian_id: str, current_user = Depends(get_current_user)):
@@ -74,24 +68,20 @@ async def delete_user_guardian(guardian_id: str, current_user = Depends(get_curr
         supabase.table('guardians').delete().eq('id', guardian_id).execute()
         return {"success": True}
     except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+        raise HTTPException(status_code=500, detail="Internal server error while deleting guardian")
 
 @router.put("/guardians/{guardian_id}")
 async def update_user_guardian(guardian_id: str, guardian_data: dict, background_tasks: BackgroundTasks, current_user = Depends(get_current_user)):
     try:
-        print(f"DEBUG: Updating guardian {guardian_id} for user {current_user.id}")
         # 1. Fetch old data to check for phone change
         old_res = supabase.table('guardians').select('*').eq('id', guardian_id).single().execute()
         if not old_res.data:
-            print(f"DEBUG: Guardian {guardian_id} not found")
             raise HTTPException(status_code=404, detail="Guardian not found")
         
         if old_res.data['user_id'] != current_user.id:
-            print(f"DEBUG: Unauthorized update attempt: {old_res.data['user_id']} != {current_user.id}")
             raise HTTPException(status_code=403, detail="Not authorized")
 
         old_phone = old_res.data.get('guardian_phone')
-        print(f"DEBUG: Old phone: {old_phone}, New data: {guardian_data}")
         
         # 2. Update
         update_payload = {}
@@ -105,23 +95,19 @@ async def update_user_guardian(guardian_id: str, guardian_data: dict, background
 
         # 3. If phone changed, send notification to new number
         new_phone = update_payload.get('guardian_phone')
-        print(f"DEBUG: Comparing phones: new={new_phone}, old={old_phone}")
         
-        # We also send if the user explicitly wants a message or if it's a "new" update
         if new_phone and str(new_phone).strip() != str(old_phone).strip():
-            print(f"DEBUG: Phone changed! Sending SMS to {new_phone}")
             name = update_payload.get('guardian_name', old_res.data.get('guardian_name', 'Guardian'))
             user_res = supabase.table('profiles').select('full_name').eq('id', current_user.id).execute()
             user_name = user_res.data[0].get('full_name', 'Someone') if user_res.data else 'Someone'
             message = f"🛡️ SAFE PATH: Hi {name}, {user_name} has added you as a guardian."
             background_tasks.add_task(send_sms_alert, new_phone, message)
-        else:
-            print("DEBUG: Phone did not change, skipping SMS.")
 
         return {"success": True}
+    except HTTPException:
+        raise
     except Exception as e:
-        print(f"DEBUG: Error in update_user_guardian: {e}")
-        raise HTTPException(status_code=500, detail=str(e))
+        raise HTTPException(status_code=500, detail="Internal server error while updating guardian")
 
 @router.post("/delete")
 async def delete_user_account_handler(payload: UserRequest, _ = Depends(verify_user_id)):
@@ -141,4 +127,4 @@ async def delete_user_account_handler(payload: UserRequest, _ = Depends(verify_u
         
         return {"success": True, "message": "Account deleted."}
     except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+        raise HTTPException(status_code=500, detail="Internal server error during account deletion")

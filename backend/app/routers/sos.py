@@ -20,7 +20,10 @@ async def trigger_sos(payload: SosTrigger, background_tasks: BackgroundTasks, _ 
 @router.post("/stop")
 async def stop_sos(payload: UserRequest, _ = Depends(verify_user_id)):
     user_id = payload.user_id
-    if user_id in active_sos_tasks:
-        del active_sos_tasks[user_id]
-        return {"success": True, "message": "SOS deactivated."}
-    return {"message": "No active SOS found for user."}
+    try:
+        if user_id in active_sos_tasks:
+            del active_sos_tasks[user_id]
+            return {"success": True, "message": "SOS deactivated."}
+        return {"message": "No active SOS found for user."}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail="Internal server error while stopping SOS")
