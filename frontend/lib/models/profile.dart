@@ -39,15 +39,15 @@ class Profile {
   }
 
   Map<String, dynamic> toJson() => {
-        'id': id,
-        'full_name': fullName,
-        'email': email,
-        'avatar_url': avatarUrl,
-        'lifeline_setup_complete': lifelineSetupComplete,
-        'phone_number': phoneNumber,
-        'sos_phone': sosPhone,
-        'last_active': lastActive?.toIso8601String(),
-      };
+    'id': id,
+    'full_name': fullName,
+    'email': email,
+    'avatar_url': avatarUrl,
+    'lifeline_setup_complete': lifelineSetupComplete,
+    'phone_number': phoneNumber,
+    'sos_phone': sosPhone,
+    'last_active': lastActive?.toIso8601String(),
+  };
 
   Profile copyWith({
     String? fullName,
@@ -67,7 +67,7 @@ class Profile {
       createdAt: createdAt,
       phoneNumber: phoneNumber ?? this.phoneNumber,
       sosPhone: sosPhone ?? this.sosPhone,
-      lastActive: lastActive ?? this.lastActive,
+      lastActive: lastActive ?? lastActive,
     );
   }
 }

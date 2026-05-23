@@ -3,13 +3,14 @@ import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:flutter_polyline_points/flutter_polyline_points.dart';
 
 class DirectionsRepository {
-  static const String _baseUrl = 'https://maps.googleapis.com/maps/api/directions/json';
+  static const String _baseUrl =
+      'https://maps.googleapis.com/maps/api/directions/json';
   final Dio _dio;
   final String _apiKey;
 
   DirectionsRepository({required Dio dio, required String apiKey})
-      : _dio = dio,
-        _apiKey = apiKey;
+    : _dio = dio,
+      _apiKey = apiKey;
 
   static DateTime? _lastLogTime;
 
@@ -33,11 +34,13 @@ class DirectionsRepository {
 
         final route = data['routes'][0];
         final polyline = route['overview_polyline']['points'];
-        
+
         // Decode polyline points
         final polylinePoints = PolylinePoints();
-        List<PointLatLng> decodedPolyline = polylinePoints.decodePolyline(polyline);
-        
+        List<PointLatLng> decodedPolyline = polylinePoints.decodePolyline(
+          polyline,
+        );
+
         List<LatLng> points = decodedPolyline
             .map((p) => LatLng(p.latitude, p.longitude))
             .toList();
@@ -51,13 +54,16 @@ class DirectionsRepository {
         };
       }
     } catch (e) {
-      if (e is DioError && e.type == DioErrorType.connectionError) {
-         final now = DateTime.now();
-         if (_lastLogTime == null || now.difference(_lastLogTime!).inSeconds > 60) {
-           print('Directions CORS Fallback: Returning mock route for web (logs throttled).');
-           _lastLogTime = now;
-         }
-         return _getMockDirections(origin, destination);
+      if (e is DioException && e.type == DioExceptionType.connectionError) {
+        final now = DateTime.now();
+        if (_lastLogTime == null ||
+            now.difference(_lastLogTime!).inSeconds > 60) {
+          print(
+            'Directions CORS Fallback: Returning mock route for web (logs throttled).',
+          );
+          _lastLogTime = now;
+        }
+        return _getMockDirections(origin, destination);
       }
       print('Directions Error: $e');
     }
@@ -68,19 +74,30 @@ class DirectionsRepository {
     return {
       'polyline_points': [
         origin,
-        LatLng((origin.latitude + destination.latitude) / 2, (origin.longitude + destination.longitude) / 2),
+        LatLng(
+          (origin.latitude + destination.latitude) / 2,
+          (origin.longitude + destination.longitude) / 2,
+        ),
         destination,
       ],
       'distance': '5.2 km',
       'duration': '12 mins',
       'bounds': LatLngBounds(
         southwest: LatLng(
-          origin.latitude < destination.latitude ? origin.latitude : destination.latitude,
-          origin.longitude < destination.longitude ? origin.longitude : destination.longitude,
+          origin.latitude < destination.latitude
+              ? origin.latitude
+              : destination.latitude,
+          origin.longitude < destination.longitude
+              ? origin.longitude
+              : destination.longitude,
         ),
         northeast: LatLng(
-          origin.latitude > destination.latitude ? origin.latitude : destination.latitude,
-          origin.longitude > destination.longitude ? origin.longitude : destination.longitude,
+          origin.latitude > destination.latitude
+              ? origin.latitude
+              : destination.latitude,
+          origin.longitude > destination.longitude
+              ? origin.longitude
+              : destination.longitude,
         ),
       ),
     };

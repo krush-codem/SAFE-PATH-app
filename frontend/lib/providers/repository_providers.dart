@@ -6,6 +6,8 @@ import '../repositories/directions_repository.dart';
 import '../repositories/journey_repository.dart';
 import '../providers/auth_provider.dart';
 
+import '../core/config/env_config.dart';
+
 final dioProvider = Provider<Dio>((ref) {
   return Dio();
 });
@@ -17,12 +19,12 @@ final chatRepositoryProvider = Provider<ChatRepository>((ref) {
 final directionsRepositoryProvider = Provider<DirectionsRepository>((ref) {
   return DirectionsRepository(
     dio: ref.watch(dioProvider),
-    apiKey: 'AIzaSyAw7b860LoKMIG5vChw20OE6a44y16ty5s',
+    apiKey: EnvConfig.googleMapsApiKey,
   );
 });
 
 final placeRepositoryProvider = Provider<PlaceRepository>((ref) {
-  return PlaceRepository("AIzaSyAw7b860LoKMIG5vChw20OE6a44y16ty5s");
+  return PlaceRepository(EnvConfig.googleMapsApiKey);
 });
 
 final journeyRepositoryProvider = Provider<JourneyRepository>((ref) {

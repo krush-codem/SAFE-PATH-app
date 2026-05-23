@@ -1,4 +1,3 @@
-import 'dart:convert';
 import 'dart:typed_data';
 import 'package:dio/dio.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -47,11 +46,13 @@ class VirusTotalRepository {
   late final Dio _dio;
 
   VirusTotalRepository() {
-    _dio = Dio(BaseOptions(
-      baseUrl: ApiService.baseUrl,
-      connectTimeout: const Duration(seconds: 15),
-      receiveTimeout: const Duration(seconds: 60), // Longer for polling
-    ));
+    _dio = Dio(
+      BaseOptions(
+        baseUrl: ApiService.baseUrl,
+        connectTimeout: const Duration(seconds: 15),
+        receiveTimeout: const Duration(seconds: 60), // Longer for polling
+      ),
+    );
   }
 
   /// Returns [ScanResult] for the analyzed URL.
@@ -81,10 +82,7 @@ class VirusTotalRepository {
         'file': MultipartFile.fromBytes(bytes, filename: fileName),
       });
 
-      final response = await _dio.post(
-        '/security/scan-file',
-        data: formData,
-      );
+      final response = await _dio.post('/security/scan-file', data: formData);
 
       if (response.statusCode == 200) {
         return ScanResult.fromJson(response.data);
@@ -98,4 +96,3 @@ class VirusTotalRepository {
     }
   }
 }
-

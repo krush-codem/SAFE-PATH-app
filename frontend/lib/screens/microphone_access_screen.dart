@@ -7,11 +7,13 @@ class MicrophoneAccessScreen extends ConsumerStatefulWidget {
   const MicrophoneAccessScreen({super.key});
 
   @override
-  ConsumerState<MicrophoneAccessScreen> createState() => _MicrophoneAccessScreenState();
+  ConsumerState<MicrophoneAccessScreen> createState() =>
+      _MicrophoneAccessScreenState();
 }
 
-class _MicrophoneAccessScreenState extends ConsumerState<MicrophoneAccessScreen> {
-  bool _whileUsing = true;
+class _MicrophoneAccessScreenState
+    extends ConsumerState<MicrophoneAccessScreen> {
+  final bool _whileUsing = true;
   bool _sosRecording = true;
   bool _safetyCheck = true;
 
@@ -72,10 +74,10 @@ class _MicrophoneAccessScreenState extends ConsumerState<MicrophoneAccessScreen>
                 child: Container(
                   padding: const EdgeInsets.all(20),
                   decoration: BoxDecoration(
-                    color: const Color(0xFF4CAF50).withValues(alpha: 0.1),
+                    color: const Color(0xFF4CAF50).withOpacity(0.1),
                     borderRadius: BorderRadius.circular(16),
                     border: Border.all(
-                      color: const Color(0xFF4CAF50).withValues(alpha: 0.3),
+                      color: const Color(0xFF4CAF50).withOpacity(0.3),
                     ),
                   ),
                   child: Row(
@@ -153,12 +155,15 @@ class _MicrophoneAccessScreenState extends ConsumerState<MicrophoneAccessScreen>
                         title: 'SOS Audio Recording',
                         subtitle: 'Record audio during emergency SOS alerts',
                         value: _sosRecording,
-                        onChanged: (value) => setState(() => _sosRecording = value),
+                        onChanged: (value) =>
+                            setState(() => _sosRecording = value),
                         textColor: textColor,
                         mutedTextColor: mutedTextColor,
                       ),
                       Divider(
-                        color: isDark ? const Color(0xFF2D3A5C) : const Color(0xFFE8ECF4),
+                        color: isDark
+                            ? const Color(0xFF2D3A5C)
+                            : const Color(0xFFE8ECF4),
                         height: 1,
                         indent: 70,
                       ),
@@ -167,7 +172,8 @@ class _MicrophoneAccessScreenState extends ConsumerState<MicrophoneAccessScreen>
                         title: 'Safety Check Voice',
                         subtitle: 'Use voice commands for safety checks',
                         value: _safetyCheck,
-                        onChanged: (value) => setState(() => _safetyCheck = value),
+                        onChanged: (value) =>
+                            setState(() => _safetyCheck = value),
                         textColor: textColor,
                         mutedTextColor: mutedTextColor,
                       ),
@@ -205,7 +211,8 @@ class _MicrophoneAccessScreenState extends ConsumerState<MicrophoneAccessScreen>
                       _buildInfoTile(
                         icon: Icons.security,
                         title: 'Emergency Evidence',
-                        description: 'Audio recordings during SOS are encrypted and stored securely',
+                        description:
+                            'Audio recordings during SOS are encrypted and stored securely',
                         textColor: textColor,
                         mutedTextColor: mutedTextColor,
                       ),
@@ -213,7 +220,8 @@ class _MicrophoneAccessScreenState extends ConsumerState<MicrophoneAccessScreen>
                       _buildInfoTile(
                         icon: Icons.privacy_tip,
                         title: 'Your Privacy',
-                        description: 'We never record audio without your knowledge',
+                        description:
+                            'We never record audio without your knowledge',
                         textColor: textColor,
                         mutedTextColor: mutedTextColor,
                       ),
@@ -221,7 +229,8 @@ class _MicrophoneAccessScreenState extends ConsumerState<MicrophoneAccessScreen>
                       _buildInfoTile(
                         icon: Icons.delete,
                         title: 'Data Control',
-                        description: 'You can delete recorded audio anytime from settings',
+                        description:
+                            'You can delete recorded audio anytime from settings',
                         textColor: textColor,
                         mutedTextColor: mutedTextColor,
                       ),
@@ -246,10 +255,7 @@ class _MicrophoneAccessScreenState extends ConsumerState<MicrophoneAccessScreen>
                         color: textColor,
                       ),
                     ),
-                    TextButton(
-                      onPressed: () {},
-                      child: const Text('View All'),
-                    ),
+                    TextButton(onPressed: () {}, child: const Text('View All')),
                   ],
                 ),
               ),
@@ -275,7 +281,9 @@ class _MicrophoneAccessScreenState extends ConsumerState<MicrophoneAccessScreen>
                         mutedTextColor: mutedTextColor,
                       ),
                       Divider(
-                        color: isDark ? const Color(0xFF2D3A5C) : const Color(0xFFE8ECF4),
+                        color: isDark
+                            ? const Color(0xFF2D3A5C)
+                            : const Color(0xFFE8ECF4),
                         height: 1,
                       ),
                       _buildRecordingTile(
@@ -335,7 +343,7 @@ class _MicrophoneAccessScreenState extends ConsumerState<MicrophoneAccessScreen>
             width: 44,
             height: 44,
             decoration: BoxDecoration(
-              color: const Color(0xFFF25C05).withValues(alpha: 0.15),
+              color: const Color(0xFFF25C05).withOpacity(0.15),
               borderRadius: BorderRadius.circular(10),
             ),
             child: Icon(icon, color: const Color(0xFFF25C05), size: 22),
@@ -356,10 +364,7 @@ class _MicrophoneAccessScreenState extends ConsumerState<MicrophoneAccessScreen>
                 const SizedBox(height: 4),
                 Text(
                   subtitle,
-                  style: TextStyle(
-                    fontSize: 12,
-                    color: mutedTextColor,
-                  ),
+                  style: TextStyle(fontSize: 12, color: mutedTextColor),
                 ),
               ],
             ),
@@ -367,7 +372,7 @@ class _MicrophoneAccessScreenState extends ConsumerState<MicrophoneAccessScreen>
           Switch(
             value: value,
             onChanged: onChanged,
-            activeColor: const Color(0xFF4CAF50),
+            activeThumbColor: const Color(0xFF4CAF50),
           ),
         ],
       ),
@@ -387,7 +392,7 @@ class _MicrophoneAccessScreenState extends ConsumerState<MicrophoneAccessScreen>
           width: 40,
           height: 40,
           decoration: BoxDecoration(
-            color: const Color(0xFF4A90E2).withValues(alpha: 0.15),
+            color: const Color(0xFF4A90E2).withOpacity(0.15),
             borderRadius: BorderRadius.circular(10),
           ),
           child: Icon(icon, color: const Color(0xFF4A90E2), size: 20),
@@ -408,10 +413,7 @@ class _MicrophoneAccessScreenState extends ConsumerState<MicrophoneAccessScreen>
               const SizedBox(height: 2),
               Text(
                 description,
-                style: TextStyle(
-                  fontSize: 13,
-                  color: mutedTextColor,
-                ),
+                style: TextStyle(fontSize: 13, color: mutedTextColor),
               ),
             ],
           ),
@@ -437,7 +439,7 @@ class _MicrophoneAccessScreenState extends ConsumerState<MicrophoneAccessScreen>
             width: 44,
             height: 44,
             decoration: BoxDecoration(
-              color: iconColor.withValues(alpha: 0.15),
+              color: iconColor.withOpacity(0.15),
               borderRadius: BorderRadius.circular(10),
             ),
             child: Icon(icon, color: iconColor, size: 22),
@@ -458,10 +460,7 @@ class _MicrophoneAccessScreenState extends ConsumerState<MicrophoneAccessScreen>
                 const SizedBox(height: 4),
                 Text(
                   time,
-                  style: TextStyle(
-                    fontSize: 12,
-                    color: mutedTextColor,
-                  ),
+                  style: TextStyle(fontSize: 12, color: mutedTextColor),
                 ),
               ],
             ),
@@ -469,7 +468,7 @@ class _MicrophoneAccessScreenState extends ConsumerState<MicrophoneAccessScreen>
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
             decoration: BoxDecoration(
-              color: iconColor.withValues(alpha: 0.15),
+              color: iconColor.withOpacity(0.15),
               borderRadius: BorderRadius.circular(20),
             ),
             child: Text(
