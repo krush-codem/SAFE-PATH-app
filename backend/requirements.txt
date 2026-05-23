@@ -1,0 +1,21 @@
+# FastAPI and Server
+fastapi>=0.115.0
+uvicorn[standard]>=0.30.0
+python-multipart>=0.0.6
+
+# Database
+supabase>=2.12.0
+
+# Twilio for SMS and Voice Alerts
+twilio>=8.12.0
+
+# Environment Variables
+python-dotenv>=1.0.0
+
+# Data Validation
+pydantic>=2.10.0
+
+# Async Support
+anyio>=4.2.0
+httpx>=0.27.0
+

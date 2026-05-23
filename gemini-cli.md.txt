@@ -1,0 +1,53 @@
+# SafePath - Gemini CLI Session Summary
+
+**Date:** May 22, 2026
+
+This document serves as a summary of the analysis, architectural changes, and bug fixes made during the Gemini CLI session for the SafePath project.
+
+## 1. Frontend Stability & Compilation Fixes
+*   **Duplicate Variable Fix:** Resolved a compilation error in `lib/routing/app_router.dart` where `isPhoneVerified` was declared twice in the same scope.
+*   **Self-Healing Profile Logic:** Updated `AuthRepository.updateProfileAndAddPhone` to use `upsert()` instead of `update()`. This ensures that a user's profile is created or updated in the `public.profiles` table even if the automated database trigger fails to initialize it.
+
+## 2. Backend Cleanup & Hardening
+*   **Deprecated Code Removal:** Cleaned up `backend/main.py` by removing the obsolete `/api/v1/auth/finalize` endpoint and the `FinalizeAuthRequest` model, fully transitioning to the Postgres-trigger-based synchronization architecture.
+*   **Profile Retrieval Fix (500 Error):** Identified and fixed a critical bug where `supabase-py`'s `maybe_single()` method returned `None` when a profile was missing, causing a crash. Refactored the `get_user_profile` endpoint to use a safer `select().execute()` pattern with explicit data checks.
+*   **Enhanced Logging:** Added detailed exception tracebacks to backend profile endpoints to accelerate future diagnostics.
+
+## 3. Database & Security (RLS)
+*   **Ultra-Safe Trigger:** Provided and verified the "Ultra-Safe" Postgres trigger (`handle_new_user`) logic, which handles unique constraint collisions on phone numbers and ensures consistent metadata sync from `auth.users`.
+*   **RLS Policy Implementation:** Identified a `42501` permission error during the SMS-OTP flow. Provided SQL policies to allow authenticated users to `INSERT`, `UPDATE`, and `SELECT` their own records in the `profiles` table while maintaining security.
+
+---
+
+**Date:** May 23, 2026
+
+## 1. Authentication & Onboarding Workflow
+*   **Sequential Auth Refactor:** Implemented a more reliable "Sequential Flow": **Email OTP -> Login -> Phone OTP -> Lifeline**. This ensures session integrity and fresh security tokens at every stage.
+*   **Account Linking Fix:** Switched phone verification from `signInWithOtp` to `updateUser(phone: ...)`. This correctly links the phone number to the existing email account instead of creating a duplicate user.
+*   **Router Logic Update:** Modified `app_router.dart` to allow users to remain on the `CompleteProfileScreen` during phone verification, preventing competing redirects.
+*   **Database Conflict Resolution:** Provided deep-search SQL to identify and delete unconfirmed "ghost" identities that caused `phone_exists` (422) errors.
+
+## 2. Automated SOS Circle Notifications
+*   **Twilio Integration:** Integrated Twilio SMS to automatically notify guardians when they are added to a user's SOS circle.
+*   **Settings Persistence:** Added a backend `PUT` endpoint (`/api/v1/user/guardians/{id}`) to ensure guardians added or updated via the Settings menu also receive automated notifications if their phone number changes.
+*   **Diagnostic Logging:** Added `DEBUG` print statements to the backend router to track phone number comparisons and SMS task queuing.
+
+## 3. UI Modernization (Midnight Security Theme)
+*   **Aesthetic Overhaul:** Transitioned the app to a "Midnight Security" theme with a pitch-black background (`#000000`) and smooth **Steel Blue** (`#5C79FF`) accents.
+*   **Dynamic UI Components:** Created a suite of reusable, dynamic widgets in `lib/widgets/dynamic_ui.dart`:
+    *   `UserAvatar`: Dynamically displays profile pictures or initials (HK, etc.).
+    *   `GlassCard`: Implements a premium "Frosted Glass" effect.
+    *   `SkeletonBox`: Replaces spinning loaders with modern shimmering placeholders.
+*   **Security HUD:** Added visual "Security Strength" indicators in the Lifeline and Guardian screens that update in real-time based on contact count.
+
+## 4. Flutter Web Stability & Graphics Hardening
+*   **CanvasKit Fixes:** Resolved the persistent `LateInitializationError` (Context Lost) on Web by implementing an aggressive graphics blackout for the browser.
+*   **Platform Fallbacks:**
+    *   Disabled `BackdropFilter` (blur) and `Shimmer` animations on Web to reduce GPU pressure.
+    *   Implemented a 500ms stabilization delay in `main.dart` to let the WebGL context initialize before the first frame.
+*   **Syntax Migration:** Completed a project-wide migration from the old `.withOpacity()` to the modern `.withValues(alpha: ...)` standard for all colors, ensuring compatibility with the latest Flutter engine.
+
+## Action Items for Next Session
+*   **Mobile Testing:** Confirm the new "Midnight" gradients and blur effects look premium on physical iOS/Android devices.
+*   **Guardian Presence:** Implement the backend logic to update the `is_online` status in the guardian list for real-time visibility.
+*   **SOS Route Polish:** Refine the custom map markers for guardians to show their avatars inside safety bubbles.
