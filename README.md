@@ -141,7 +141,7 @@ The SafePath project was built collaboratively by an amazing team:
 | Name | Role | GitHub |
 |------|------|--------|
 | **Harekrushna Behera** | Frontend UI, Supabase Configuration | [@krush-codem](https://github.com/krush-codem/) |
-| **Kollur Sai Ram** | Backend , Web-Socket | [@sairamkollur]((https://github.com/sairamkollur)) |
+| **Kollur Sai Ram** | Backend , Web-Socket | [@sairamkollur]((https://github.com/sairamkollur/)) |
 
 ## 🤝 Contributing
 
