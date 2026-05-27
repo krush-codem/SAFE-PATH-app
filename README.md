@@ -136,7 +136,11 @@ SafePath features a highly optimized chat system built from scratch to replace d
 
 ## 👥 Contributors
 
-The SafePath project was built collaboratively by an amazing team of out collaborators.
+The SafePath project was built collaboratively by an amazing team:
+
+## 🤝 Contributing
+
+Contributions are welcome! Please feel free to submit a Pull Request.
 
 ## 📄 License
 
