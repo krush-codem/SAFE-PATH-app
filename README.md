@@ -138,6 +138,10 @@ SafePath features a highly optimized chat system built from scratch to replace d
 
 The SafePath project was built collaboratively by an amazing team:
 
+| Name | Role | GitHub |
+|------|------|--------|
+| **Harekrushna Behera** | Frontend UI, Supabase Configuration | [@krush-codem](https://github.com/krush-codem/) |
+
 ## 🤝 Contributing
 
 Contributions are welcome! Please feel free to submit a Pull Request.
