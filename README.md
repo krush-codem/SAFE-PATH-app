@@ -143,14 +143,6 @@ Required tables:
 
 The SafePath project was built collaboratively by an amazing team:
 
-| Name | Role | GitHub |
-|------|------|--------|
-| **Payal Nayak** | Frontend Design, Backend VirusTotal & Twilio Integration | [@Dynamicpayal](https://github.com/Dynamicpayal/) |
-| **Harekrushna Behera** | Frontend UI, Supabase Configuration | [@krush-codem](https://github.com/krush-codem/) |
-| **Smruti Rekha Sahoo** | Documentation | [@smruti-18](https://github.com/smruti-18) |
-| **Suraj Kumar Sahoo** | Testing | [@Dynamicsuraj](https://github.com/Dynamicsuraj/) |
-| **Deepika Gouda** | Documentation | [@deepikagouda966-tech](https://github.com/deepikagouda966-tech) |
-
 ## 🤝 Contributing
 
 Contributions are welcome! Please feel free to submit a Pull Request.
