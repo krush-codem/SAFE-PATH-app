@@ -95,48 +95,54 @@ class _SplashScreenState extends State<SplashScreen>
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+    final primaryColor = theme.colorScheme.primary;
+    final backgroundColor = theme.scaffoldBackgroundColor;
+    final textColor = theme.colorScheme.onSurface;
+    final mutedTextColor = theme.textTheme.bodySmall?.color ?? Colors.grey;
+
     if (kIsWeb) {
       return Scaffold(
-        backgroundColor: Colors.black,
         body: Center(
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              const Icon(Icons.security, color: Color(0xFF5C79FF), size: 80),
+              Icon(Icons.security, color: primaryColor, size: 80),
               const SizedBox(height: 32),
-              const Text(
+              Text(
                 'Safe Path',
                 style: TextStyle(
                   fontFamily: kIsWeb ? null : 'Manrope',
                   fontSize: 36,
                   fontWeight: FontWeight.w800,
-                  color: Colors.white,
+                  color: textColor,
                   letterSpacing: -0.5,
                 ),
               ),
               const SizedBox(height: 12),
-              const Text(
+              Text(
                 'THE INVISIBLE BODYGUARD',
                 style: TextStyle(
                   fontFamily: kIsWeb ? null : 'Manrope',
                   fontSize: 11,
                   fontWeight: FontWeight.w600,
-                  color: Color(0xFF5C79FF),
+                  color: primaryColor,
                   letterSpacing: 3.5,
                 ),
               ),
               const SizedBox(height: 48),
-              const SizedBox(
+              SizedBox(
                 width: 200,
                 child: LinearProgressIndicator(
-                  backgroundColor: Colors.white12,
-                  valueColor: AlwaysStoppedAnimation<Color>(Color(0xFF5C79FF)),
+                  backgroundColor: primaryColor.withValues(alpha: 0.1),
+                  valueColor: AlwaysStoppedAnimation<Color>(primaryColor),
                 ),
               ),
               const SizedBox(height: 24),
               Text(
                 _statusMessages[_currentMessage],
-                style: const TextStyle(color: Colors.white70, fontSize: 14),
+                style: TextStyle(color: mutedTextColor, fontSize: 14),
               ),
             ],
           ),
@@ -146,17 +152,7 @@ class _SplashScreenState extends State<SplashScreen>
 
     return Scaffold(
       body: Container(
-        decoration: const BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
-            colors: [
-              Color(0xFF0D1B2E),
-              Color(0xFF0A1628),
-              Color(0xFF091220),
-            ],
-          ),
-        ),
+        color: backgroundColor,
         child: SafeArea(
           child: Column(
             children: [
@@ -175,11 +171,11 @@ class _SplashScreenState extends State<SplashScreen>
                         width: 120,
                         height: 120,
                         decoration: BoxDecoration(
-                          color: const Color(0xFF1A2744).withValues(alpha: 0.9),
+                          color: primaryColor.withValues(alpha: 0.1),
                           borderRadius: BorderRadius.circular(28),
                           boxShadow: [
                             BoxShadow(
-                              color: const Color(0xFF4A90D9).withValues(alpha: 0.25),
+                              color: primaryColor.withValues(alpha: 0.1),
                               blurRadius: 40,
                               spreadRadius: 10,
                             ),
@@ -190,16 +186,16 @@ class _SplashScreenState extends State<SplashScreen>
                             width: 72,
                             height: 72,
                             decoration: BoxDecoration(
-                              color: const Color(0xFF1E2D4A),
+                              color: isDark ? const Color(0xFF1E2D4A) : Colors.white,
                               borderRadius: BorderRadius.circular(16),
                               border: Border.all(
-                                color: const Color(0xFF4A90D9).withValues(alpha: 0.3),
+                                color: primaryColor.withValues(alpha: 0.2),
                                 width: 1.5,
                               ),
                             ),
-                            child: const Icon(
+                            child: Icon(
                               Icons.security,
-                              color: Color(0xFF7BB8F0),
+                              color: primaryColor,
                               size: 40,
                             ),
                           ),
@@ -207,24 +203,24 @@ class _SplashScreenState extends State<SplashScreen>
                       ),
                       const SizedBox(height: 28),
                       // App name
-                      const Text(
+                      Text(
                         'Safe Path',
                         style: TextStyle(
                           fontFamily: 'Manrope',
                           fontSize: 36,
                           fontWeight: FontWeight.w800,
-                          color: Colors.white,
+                          color: textColor,
                           letterSpacing: -0.5,
                         ),
                       ),
                       const SizedBox(height: 8),
                       // Tagline
-                      const Text(
+                      Text(
                         'THE INVISIBLE BODYGUARD',
                         style: TextStyle(
                           fontSize: 11,
                           fontWeight: FontWeight.w600,
-                          color: Color(0xFF7BB8F0),
+                          color: primaryColor,
                           letterSpacing: 3.5,
                         ),
                       ),
@@ -256,7 +252,7 @@ class _SplashScreenState extends State<SplashScreen>
                                     Container(
                                       height: 3,
                                       width: double.infinity,
-                                      color: Colors.white.withValues(alpha: 0.1),
+                                      color: primaryColor.withValues(alpha: 0.1),
                                     ),
                                     // Progress fill
                                     Container(
@@ -264,11 +260,12 @@ class _SplashScreenState extends State<SplashScreen>
                                       width: MediaQuery.of(context).size.width *
                                           0.75 *
                                           _progressController.value,
-                                      decoration: const BoxDecoration(
+                                      decoration: BoxDecoration(
+                                        color: primaryColor,
                                         gradient: LinearGradient(
                                           colors: [
-                                            Color(0xFF4A90D9),
-                                            Color(0xFF7BB8F0),
+                                            primaryColor,
+                                            primaryColor.withValues(alpha: 0.7),
                                           ],
                                         ),
                                       ),
@@ -287,16 +284,16 @@ class _SplashScreenState extends State<SplashScreen>
                         child: Row(
                           key: ValueKey(_currentMessage),
                           children: [
-                            const Icon(
+                            Icon(
                               Icons.lock_outline,
-                              color: Color(0xFF7BB8F0),
+                              color: primaryColor,
                               size: 16,
                             ),
                             const SizedBox(width: 8),
                             Text(
                               _statusMessages[_currentMessage],
-                              style: const TextStyle(
-                                color: Colors.white,
+                              style: TextStyle(
+                                color: textColor,
                                 fontSize: 14,
                                 fontWeight: FontWeight.w500,
                               ),
@@ -309,7 +306,7 @@ class _SplashScreenState extends State<SplashScreen>
                         'VERIFYING LOCAL SAFETY PROTOCOLS',
                         style: TextStyle(
                           fontSize: 10,
-                          color: Colors.white.withValues(alpha: 0.4),
+                          color: mutedTextColor,
                           letterSpacing: 2,
                           fontWeight: FontWeight.w500,
                         ),
@@ -329,9 +326,9 @@ class _SplashScreenState extends State<SplashScreen>
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      _buildBadge(Icons.shield_outlined, 'ENCRYPTION 256-BIT'),
+                      _buildBadge(Icons.shield_outlined, 'ENCRYPTION 256-BIT', mutedTextColor),
                       const SizedBox(width: 32),
-                      _buildBadge(Icons.privacy_tip_outlined, 'PRIVACY FIRST'),
+                      _buildBadge(Icons.privacy_tip_outlined, 'PRIVACY FIRST', mutedTextColor),
                     ],
                   ),
                 ),
@@ -343,15 +340,15 @@ class _SplashScreenState extends State<SplashScreen>
     );
   }
 
-  Widget _buildBadge(IconData icon, String label) {
+  Widget _buildBadge(IconData icon, String label, Color color) {
     return Row(
       children: [
-        Icon(icon, color: Colors.white.withValues(alpha: 0.3), size: 14),
+        Icon(icon, color: color, size: 14),
         const SizedBox(width: 6),
         Text(
           label,
           style: TextStyle(
-            color: Colors.white.withValues(alpha: 0.3),
+            color: color,
             fontSize: 10,
             letterSpacing: 1.5,
             fontWeight: FontWeight.w500,

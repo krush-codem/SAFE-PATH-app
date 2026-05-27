@@ -31,8 +31,31 @@ final journeyRepositoryProvider = Provider<JourneyRepository>((ref) {
   return JourneyRepository(ref.watch(supabaseClientProvider));
 });
 
-final chatMessagesProvider = StreamProvider.family<List<dynamic>, String>((ref, otherUserId) {
+final chatMessagesProvider = StreamProvider.family<List<dynamic>, String>((ref, otherUserId) async* {
   final currentUserId = ref.watch(currentUserProvider)?.id;
-  if (currentUserId == null) return Stream.value([]);
-  return ref.watch(chatRepositoryProvider).messageStream(currentUserId, otherUserId);
+  if (currentUserId == null) {
+    yield [];
+    return;
+  }
+
+  final repo = ref.watch(chatRepositoryProvider);
+  
+  // 1. Initial Load
+  List<dynamic> currentMessages = await repo.getMessageHistory(currentUserId, otherUserId);
+  yield currentMessages;
+
+  // 2. Listen to Real-time Stream
+  await for (final newMessage in repo.realTimeMessages) {
+    // Only yield if the message belongs to this conversation
+    if ((newMessage.senderId == currentUserId && newMessage.receiverId == otherUserId) ||
+        (newMessage.senderId == otherUserId && newMessage.receiverId == currentUserId)) {
+      
+      // Prevent duplicates from optimistic UI or double-sync
+      if (!currentMessages.any((m) => m.id == newMessage.id)) {
+        currentMessages = [...currentMessages, newMessage];
+        currentMessages.sort((a, b) => a.createdAt.compareTo(b.createdAt));
+        yield currentMessages;
+      }
+    }
+  }
 });

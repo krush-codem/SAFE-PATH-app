@@ -6,6 +6,7 @@ import '../providers/auth_provider.dart';
 import '../routing/app_router.dart';
 import '../models/guardian.dart';
 import '../widgets/dynamic_ui.dart';
+import '../theme/app_theme.dart';
 
 class LifelineScreen extends ConsumerStatefulWidget {
   final String? initialName;
@@ -160,13 +161,13 @@ class _LifelineScreenState extends ConsumerState<LifelineScreen>
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     final profile = ref.watch(profileProvider).value;
     final securityLevel = (_pendingGuardians.length / 7).clamp(0.0, 1.0);
     final levelText = _pendingGuardians.length < 2 ? 'BASIC' : _pendingGuardians.length < 4 ? 'MODERATE' : 'ULTRA-SECURE';
     final levelColor = _pendingGuardians.length < 2 ? Colors.orangeAccent : _pendingGuardians.length < 4 ? Colors.blueAccent : const Color(0xFF4CAF50);
 
     return Scaffold(
-      backgroundColor: Colors.black,
       body: SafeArea(
         child: SingleChildScrollView(
           padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 20),
@@ -183,9 +184,9 @@ class _LifelineScreenState extends ConsumerState<LifelineScreen>
                       Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          const Text('INITIALIZING', style: TextStyle(color: Color(0xFF5C79FF), fontSize: 10, letterSpacing: 2, fontWeight: FontWeight.bold)),
+                          Text('INITIALIZING PROTOCOL', style: TextStyle(color: theme.colorScheme.onSurface.withValues(alpha: 0.38), fontSize: 10, letterSpacing: 2, fontWeight: FontWeight.w900)),
                           const SizedBox(height: 4),
-                          const Text('Lifeline Setup', style: TextStyle(color: Colors.white, fontSize: 24, fontWeight: FontWeight.bold)),
+                          Text('Lifeline Setup', style: TextStyle(color: theme.colorScheme.onSurface, fontSize: 28, fontWeight: FontWeight.w900)),
                         ],
                       ),
                       UserAvatar(
@@ -197,8 +198,13 @@ class _LifelineScreenState extends ConsumerState<LifelineScreen>
                   ),
                   const SizedBox(height: 32),
                   
-                  GlassCard(
-                    padding: const EdgeInsets.all(20),
+                  Container(
+                    padding: const EdgeInsets.all(24),
+                    decoration: BoxDecoration(
+                      color: theme.colorScheme.surface,
+                      borderRadius: BorderRadius.circular(24),
+                      border: Border.all(color: theme.dividerColor, width: 2),
+                    ),
                     child: Column(
                       children: [
                         Row(
@@ -207,50 +213,50 @@ class _LifelineScreenState extends ConsumerState<LifelineScreen>
                               alignment: Alignment.center,
                               children: [
                                 SizedBox(
-                                  width: 64,
-                                  height: 64,
+                                  width: 72,
+                                  height: 72,
                                   child: CircularProgressIndicator(
                                     value: securityLevel,
-                                    strokeWidth: 6,
-                                    backgroundColor: Colors.white.withValues(alpha: 0.05),
+                                    strokeWidth: 8,
+                                    backgroundColor: theme.colorScheme.onSurface.withValues(alpha: 0.05),
                                     valueColor: AlwaysStoppedAnimation<Color>(levelColor),
                                   ),
                                 ),
                                 Text(
                                   '${_pendingGuardians.length}/7',
-                                  style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 16),
+                                  style: TextStyle(color: theme.colorScheme.onSurface, fontWeight: FontWeight.w900, fontSize: 16),
                                 ),
                               ],
                             ),
-                            const SizedBox(width: 20),
+                            const SizedBox(width: 24),
                             Expanded(
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
-                                  const Text('SECURITY STATUS', style: TextStyle(color: Colors.white38, fontSize: 10, letterSpacing: 1.5)),
-                                  const SizedBox(height: 2),
+                                  Text('SECURITY STATUS', style: TextStyle(color: theme.colorScheme.onSurface.withValues(alpha: 0.38), fontSize: 10, letterSpacing: 2, fontWeight: FontWeight.w900)),
+                                  const SizedBox(height: 4),
                                   Text(
                                     levelText,
-                                    style: TextStyle(color: levelColor, fontWeight: FontWeight.bold, fontSize: 18),
+                                    style: TextStyle(color: levelColor, fontWeight: FontWeight.w900, fontSize: 20, letterSpacing: 1),
                                   ),
                                   const SizedBox(height: 4),
-                                  const Text('Guardian network strength', style: TextStyle(color: Colors.white24, fontSize: 11)),
+                                  Text('Guardian network strength', style: TextStyle(color: theme.colorScheme.onSurface.withValues(alpha: 0.24), fontSize: 11, fontWeight: FontWeight.w600)),
                                 ],
                               ),
                             ),
                           ],
                         ),
-                        const SizedBox(height: 20),
-                        const Divider(color: Colors.white10),
-                        const SizedBox(height: 12),
-                        const Row(
+                        const SizedBox(height: 24),
+                        Divider(color: theme.dividerColor.withValues(alpha: 0.1)),
+                        const SizedBox(height: 16),
+                        Row(
                           children: [
-                            Icon(Icons.warning_amber_rounded, color: Colors.orangeAccent, size: 16),
-                            SizedBox(width: 8),
+                            Icon(Icons.security, color: theme.colorScheme.onSurface.withValues(alpha: 0.38), size: 16),
+                            const SizedBox(width: 12),
                             Expanded(
                               child: Text(
-                                'Guardians will receive real-time SOS alerts and automated messages.',
-                                style: TextStyle(color: Colors.white38, fontSize: 11),
+                                'Guardians will receive real-time SOS alerts and automated messages via secure channel.',
+                                style: TextStyle(color: theme.colorScheme.onSurface.withValues(alpha: 0.38), fontSize: 11, fontWeight: FontWeight.w600),
                               ),
                             ),
                           ],
@@ -259,37 +265,37 @@ class _LifelineScreenState extends ConsumerState<LifelineScreen>
                     ),
                   ),
 
-                  const SizedBox(height: 32),
+                  const SizedBox(height: 40),
 
-                  const Text('ADD EMERGENCY CONTACT', style: TextStyle(color: Colors.white54, fontSize: 11, letterSpacing: 1.5, fontWeight: FontWeight.bold)),
+                  Text('ADD EMERGENCY OPERATIVE', style: TextStyle(color: theme.colorScheme.onSurface.withValues(alpha: 0.54), fontSize: 11, letterSpacing: 2, fontWeight: FontWeight.w900)),
                   const SizedBox(height: 16),
                   
-                  _buildInputField(controller: _nameCtrl, label: 'GUARDIAN NAME', icon: Icons.person_outline),
+                  _buildInputField(context, controller: _nameCtrl, label: 'FULL NAME', icon: Icons.person_outline),
                   const SizedBox(height: 16),
                   
-                  _buildPhoneField(),
-                  const SizedBox(height: 20),
+                  _buildPhoneField(context),
+                  const SizedBox(height: 24),
 
                   SizedBox(
                     width: double.infinity,
-                    child: ElevatedButton.icon(
+                    height: 56,
+                    child: OutlinedButton.icon(
                       onPressed: _addPendingGuardian,
                       icon: const Icon(Icons.add_moderator),
                       label: const Text('ADD TO SOS CIRCLE'),
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: const Color(0xFF5C79FF).withValues(alpha: 0.1),
-                        foregroundColor: const Color(0xFF5C79FF),
-                        side: const BorderSide(color: Color(0xFF5C79FF), width: 1.5),
-                        padding: const EdgeInsets.symmetric(vertical: 16),
+                      style: OutlinedButton.styleFrom(
+                        foregroundColor: theme.colorScheme.onSurface,
+                        side: BorderSide(color: theme.colorScheme.onSurface, width: 2),
                         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                        textStyle: const TextStyle(fontWeight: FontWeight.w900, letterSpacing: 1),
                       ),
                     ),
                   ),
 
-                  const SizedBox(height: 40),
+                  const SizedBox(height: 48),
 
                   if (_pendingGuardians.isNotEmpty) ...[
-                    const Text('YOUR SOS CIRCLE', style: TextStyle(color: Colors.white54, fontSize: 11, letterSpacing: 1.5, fontWeight: FontWeight.bold)),
+                    Text('ACTIVE SOS CIRCLE', style: TextStyle(color: theme.colorScheme.onSurface.withValues(alpha: 0.54), fontSize: 11, letterSpacing: 2, fontWeight: FontWeight.w900)),
                     const SizedBox(height: 16),
                     ListView.builder(
                       shrinkWrap: true,
@@ -299,8 +305,13 @@ class _LifelineScreenState extends ConsumerState<LifelineScreen>
                         final g = _pendingGuardians[index];
                         return Padding(
                           padding: const EdgeInsets.only(bottom: 12),
-                          child: GlassCard(
-                            padding: const EdgeInsets.all(12),
+                          child: Container(
+                            padding: const EdgeInsets.all(16),
+                            decoration: BoxDecoration(
+                              color: theme.colorScheme.surface,
+                              borderRadius: BorderRadius.circular(16),
+                              border: Border.all(color: theme.dividerColor, width: 1.5),
+                            ),
                             child: Row(
                               children: [
                                 UserAvatar(name: g.name, size: 40),
@@ -309,13 +320,13 @@ class _LifelineScreenState extends ConsumerState<LifelineScreen>
                                   child: Column(
                                     crossAxisAlignment: CrossAxisAlignment.start,
                                     children: [
-                                      Text(g.name, style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
-                                      Text(g.phone, style: const TextStyle(color: Colors.white38, fontSize: 12)),
+                                      Text(g.name, style: TextStyle(color: theme.colorScheme.onSurface, fontWeight: FontWeight.w900, fontSize: 15)),
+                                      Text(g.phone, style: TextStyle(color: theme.colorScheme.onSurface.withValues(alpha: 0.38), fontSize: 12, fontWeight: FontWeight.w600)),
                                     ],
                                   ),
                                 ),
                                 IconButton(
-                                  icon: const Icon(Icons.remove_circle_outline, color: Colors.redAccent, size: 20),
+                                  icon: Icon(Icons.remove_circle_outline, color: theme.colorScheme.onSurface.withValues(alpha: 0.38), size: 22),
                                   onPressed: () => _removeGuardian(index),
                                 ),
                               ],
@@ -330,22 +341,20 @@ class _LifelineScreenState extends ConsumerState<LifelineScreen>
                   
                   SizedBox(
                     width: double.infinity,
+                    height: 64,
                     child: ElevatedButton(
                       onPressed: _isSaving ? null : _saveAndContinue,
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: const Color(0xFF5C79FF),
-                        foregroundColor: Colors.white,
-                        padding: const EdgeInsets.symmetric(vertical: 20),
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-                        elevation: 8,
-                        shadowColor: const Color(0xFF5C79FF).withValues(alpha: 0.5),
+                        backgroundColor: theme.colorScheme.onSurface,
+                        foregroundColor: theme.colorScheme.surface,
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                       ),
                       child: _isSaving
-                        ? const SizedBox(height: 20, width: 20, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2))
-                        : const Text('INITIALIZE SOS CIRCLE', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w800, letterSpacing: 1)),
+                        ? SizedBox(height: 24, width: 24, child: CircularProgressIndicator(color: theme.colorScheme.surface, strokeWidth: 3))
+                        : const Text('INITIALIZE NETWORK', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w900, letterSpacing: 2)),
                     ),
                   ),
-                  const SizedBox(height: 40),
+                  const SizedBox(height: 60),
                 ],
               ),
             ),
@@ -355,88 +364,96 @@ class _LifelineScreenState extends ConsumerState<LifelineScreen>
     );
   }
 
-  Widget _buildInputField({required TextEditingController controller, required String label, required IconData icon}) {
+  Widget _buildInputField(BuildContext context, {required TextEditingController controller, required String label, required IconData icon}) {
+    final theme = Theme.of(context);
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
       decoration: BoxDecoration(
-        color: const Color(0xFF111111),
+        color: theme.colorScheme.surface,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: Colors.white.withValues(alpha: 0.05)),
+        border: Border.all(color: theme.dividerColor, width: 1.5),
       ),
       child: TextField(
         controller: controller,
-        style: const TextStyle(color: Colors.white),
+        style: TextStyle(color: theme.colorScheme.onSurface, fontWeight: FontWeight.w600),
         decoration: InputDecoration(
-          icon: Icon(icon, color: Colors.white38, size: 20),
+          icon: Icon(icon, color: theme.colorScheme.onSurface.withValues(alpha: 0.38), size: 20),
           labelText: label,
-          labelStyle: const TextStyle(color: Colors.white38, fontSize: 12),
+          labelStyle: TextStyle(color: theme.colorScheme.onSurface.withValues(alpha: 0.38), fontSize: 10, fontWeight: FontWeight.w900, letterSpacing: 1),
           border: InputBorder.none,
         ),
       ),
     );
   }
 
-  Widget _buildPhoneField() {
+  Widget _buildPhoneField(BuildContext context) {
+    final theme = Theme.of(context);
     return Container(
       decoration: BoxDecoration(
-        color: const Color(0xFF111111),
+        color: theme.colorScheme.surface,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: Colors.white.withValues(alpha: 0.05)),
+        border: Border.all(color: theme.dividerColor, width: 1.5),
       ),
       child: IntlPhoneField(
         controller: _phoneCtrl,
         initialCountryCode: 'IN',
-        dropdownTextStyle: const TextStyle(color: Colors.white),
-        style: const TextStyle(color: Colors.white),
-        dropdownIcon: const Icon(Icons.arrow_drop_down, color: Colors.white38),
+        dropdownTextStyle: TextStyle(color: theme.colorScheme.onSurface, fontWeight: FontWeight.w600),
+        style: TextStyle(color: theme.colorScheme.onSurface, fontWeight: FontWeight.w600),
+        dropdownIcon: Icon(Icons.arrow_drop_down, color: theme.colorScheme.onSurface.withValues(alpha: 0.38)),
         onChanged: (phone) {
           _fullPhoneNumber = phone.completeNumber;
         },
-        decoration: const InputDecoration(
+        decoration: InputDecoration(
           labelText: 'PHONE NUMBER',
-          labelStyle: TextStyle(color: Colors.white38, fontSize: 12),
+          labelStyle: TextStyle(color: theme.colorScheme.onSurface.withValues(alpha: 0.38), fontSize: 10, fontWeight: FontWeight.w900, letterSpacing: 1),
           border: InputBorder.none,
-          contentPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+          contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
         ),
       ),
     );
   }
 
   void _showSnack(String msg) {
+    final theme = Theme.of(context);
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
-        content: Text(msg),
-        backgroundColor: const Color(0xFF1E2633),
+        content: Text(msg, style: const TextStyle(fontWeight: FontWeight.bold)),
+        backgroundColor: theme.colorScheme.surface,
         behavior: SnackBarBehavior.floating,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10), side: BorderSide(color: theme.colorScheme.onSurface.withValues(alpha: 0.12))),
       ),
     );
   }
 
   Future<bool> _showConfirmationDialog() async {
+    final theme = Theme.of(context);
     return await showDialog<bool>(
           context: context,
           builder: (ctx) => AlertDialog(
-            backgroundColor: const Color(0xFF1E2633),
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-            title: const Row(
+            backgroundColor: theme.colorScheme.surface,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(20),
+              side: BorderSide(color: theme.dividerColor, width: 2),
+            ),
+            title: Row(
               children: [
-                Icon(Icons.verified_user, color: Colors.blueAccent),
-                SizedBox(width: 12),
-                Text('Final Confirmation', style: TextStyle(color: Colors.white)),
+                Icon(Icons.verified_user, color: theme.colorScheme.onSurface),
+                const SizedBox(width: 12),
+                Text('VERIFY CIRCLE', style: TextStyle(color: theme.colorScheme.onSurface, fontWeight: FontWeight.w900, letterSpacing: 1)),
               ],
             ),
-            content: const Text(
+            content: Text(
               'These contacts will be alerted immediately if you trigger an SOS. Ensure these numbers are correct and the people are trusted.',
-              style: TextStyle(color: Colors.white70),
+              style: TextStyle(color: theme.colorScheme.onSurface.withValues(alpha: 0.7), fontWeight: FontWeight.w600),
             ),
             actions: [
               TextButton(
                 onPressed: () => Navigator.pop(ctx, false),
-                child: const Text('RE-CHECK', style: TextStyle(color: Colors.white38)),
+                child: Text('RE-CHECK', style: TextStyle(color: theme.colorScheme.onSurface.withValues(alpha: 0.38), fontWeight: FontWeight.w900)),
               ),
               ElevatedButton(
                 onPressed: () => Navigator.pop(ctx, true),
+                style: ElevatedButton.styleFrom(backgroundColor: theme.colorScheme.onSurface, foregroundColor: theme.colorScheme.surface),
                 child: const Text('CONFIRM'),
               ),
             ],

@@ -18,17 +18,17 @@ class _PrivacyScreenState extends ConsumerState<PrivacyScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     final guardiansAsync = ref.watch(guardiansProvider);
-    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final isDark = theme.brightness == Brightness.dark;
     final textColor = AppTheme.getTextColor(context);
     final mutedTextColor = AppTheme.getTextColor(context, muted: true);
     final surfaceColor = AppTheme.getSurfaceColor(context);
-    final backgroundColor = AppTheme.getBackgroundColor(context);
+    final primaryColor = theme.colorScheme.primary;
     
     final guardianCount = guardiansAsync.value?.length ?? 0;
 
     return Scaffold(
-      backgroundColor: backgroundColor,
       body: SafeArea(
         child: SingleChildScrollView(
           physics: const BouncingScrollPhysics(),
@@ -68,21 +68,12 @@ class _PrivacyScreenState extends ConsumerState<PrivacyScreen> {
                   children: [
                     Text(
                       'Privacy',
-                      style: TextStyle(
-                        fontSize: 32,
-                        fontWeight: FontWeight.w800,
-                        color: textColor,
-                      ),
+                      style: theme.textTheme.displayLarge,
                     ),
                     const SizedBox(height: 8),
                     Text(
                       'Manage location sharing, app permissions, and data settings.',
-                      style: TextStyle(
-                        fontSize: 14,
-                        fontWeight: FontWeight.w400,
-                        color: mutedTextColor,
-                        height: 1.5,
-                      ),
+                      style: theme.textTheme.bodyMedium,
                     ),
                   ],
                 ),
@@ -91,7 +82,7 @@ class _PrivacyScreenState extends ConsumerState<PrivacyScreen> {
               const SizedBox(height: 32),
 
               // Location Sharing Section
-              _buildSectionTitle('Location Sharing', textColor),
+              _buildSectionTitle('Location Sharing', theme),
               const SizedBox(height: 16),
 
               Padding(
@@ -106,7 +97,7 @@ class _PrivacyScreenState extends ConsumerState<PrivacyScreen> {
                       // Location Sharing Toggle
                       _buildToggleTile(
                         icon: Icons.location_on,
-                        iconColor: const Color(0xFF4A90E2),
+                        iconColor: primaryColor,
                         title: 'Location Sharing',
                         subtitle: 'Allow SafePath to share your location with emergency contacts and trusted circles.',
                         value: _locationSharing,
@@ -117,7 +108,7 @@ class _PrivacyScreenState extends ConsumerState<PrivacyScreen> {
                       ),
                       
                       Divider(
-                        color: isDark ? const Color(0xFF2D3A5C) : const Color(0xFFE8ECF4),
+                        color: theme.dividerColor,
                         height: 1,
                         indent: 70,
                       ),
@@ -125,7 +116,7 @@ class _PrivacyScreenState extends ConsumerState<PrivacyScreen> {
                       // Manage Location Sharing
                       _buildNavigationTile(
                         icon: Icons.shield,
-                        iconColor: const Color(0xFF7BB8F0),
+                        iconColor: primaryColor,
                         title: 'Manage Location Sharing',
                         subtitle: 'Control who sees your live location and when.\nActive Circles: 1 | Emergency Contacts: $guardianCount',
                         onTap: () => context.push(AppRoutes.manageLocationSharing),
@@ -140,7 +131,7 @@ class _PrivacyScreenState extends ConsumerState<PrivacyScreen> {
               const SizedBox(height: 32),
 
               // App Permissions Section
-              _buildSectionTitle('App Permissions', textColor),
+              _buildSectionTitle('App Permissions', theme),
               const SizedBox(height: 16),
 
               Padding(
@@ -155,7 +146,7 @@ class _PrivacyScreenState extends ConsumerState<PrivacyScreen> {
                       // Location Permissions
                       _buildNavigationTile(
                         icon: Icons.shield,
-                        iconColor: const Color(0xFF7BB8F0),
+                        iconColor: primaryColor,
                         title: 'Location Permissions',
                         subtitle: 'Precise Location Access (Always Allow)\nSafePath uses location to enhance safety features.',
                         onTap: () => context.push(AppRoutes.locationPermissions),
@@ -164,7 +155,7 @@ class _PrivacyScreenState extends ConsumerState<PrivacyScreen> {
                       ),
 
                       Divider(
-                        color: isDark ? const Color(0xFF2D3A5C) : const Color(0xFFE8ECF4),
+                        color: theme.dividerColor,
                         height: 1,
                         indent: 70,
                       ),
@@ -172,7 +163,7 @@ class _PrivacyScreenState extends ConsumerState<PrivacyScreen> {
                       // Microphone Access
                       _buildNavigationTile(
                         icon: Icons.mic,
-                        iconColor: const Color(0xFF8B92A8),
+                        iconColor: primaryColor,
                         title: 'Microphone Access',
                         subtitle: 'Allow while using',
                         onTap: () => context.push(AppRoutes.microphoneAccess),
@@ -181,7 +172,7 @@ class _PrivacyScreenState extends ConsumerState<PrivacyScreen> {
                       ),
 
                       Divider(
-                        color: isDark ? const Color(0xFF2D3A5C) : const Color(0xFFE8ECF4),
+                        color: theme.dividerColor,
                         height: 1,
                         indent: 70,
                       ),
@@ -189,7 +180,7 @@ class _PrivacyScreenState extends ConsumerState<PrivacyScreen> {
                       // Contacts Access
                       _buildNavigationTile(
                         icon: Icons.contacts,
-                        iconColor: const Color(0xFF8B92A8),
+                        iconColor: primaryColor,
                         title: 'Contacts Access',
                         subtitle: 'Allow while using',
                         onTap: () => context.push(AppRoutes.contactsAccess),
@@ -204,7 +195,7 @@ class _PrivacyScreenState extends ConsumerState<PrivacyScreen> {
               const SizedBox(height: 32),
 
               // Recent Location Activity Section
-              _buildSectionTitle('Recent Location Activity', textColor),
+              _buildSectionTitle('Recent Location Activity', theme),
               const SizedBox(height: 16),
 
               Padding(
@@ -216,7 +207,7 @@ class _PrivacyScreenState extends ConsumerState<PrivacyScreen> {
                   ),
                   child: _buildActivityTile(
                     icon: Icons.map,
-                    iconBackgroundColor: const Color(0xFF4CAF50),
+                    iconBackgroundColor: Colors.green,
                     title: 'SafePath accessed your location',
                     subtitle: '2 minutes ago',
                     textColor: textColor,
@@ -233,16 +224,12 @@ class _PrivacyScreenState extends ConsumerState<PrivacyScreen> {
     );
   }
 
-  Widget _buildSectionTitle(String title, Color textColor) {
+  Widget _buildSectionTitle(String title, ThemeData theme) {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 20),
       child: Text(
         title,
-        style: TextStyle(
-          fontSize: 20,
-          fontWeight: FontWeight.w700,
-          color: textColor,
-        ),
+        style: theme.textTheme.titleLarge,
       ),
     );
   }
@@ -304,10 +291,7 @@ class _PrivacyScreenState extends ConsumerState<PrivacyScreen> {
           Switch(
             value: value,
             onChanged: onChanged,
-            activeColor: const Color(0xFF4CAF50),
-            activeTrackColor: const Color(0xFF4CAF50).withValues(alpha: 0.3),
-            inactiveThumbColor: Colors.white,
-            inactiveTrackColor: const Color(0xFF8B92A8).withValues(alpha: 0.3),
+            activeColor: Colors.green,
           ),
         ],
       ),

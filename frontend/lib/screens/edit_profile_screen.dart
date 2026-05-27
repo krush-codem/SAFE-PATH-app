@@ -132,12 +132,16 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
     final profile = ref.watch(profileProvider).value;
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
+    final primaryColor = theme.colorScheme.primary;
+    final secondaryColor = theme.colorScheme.secondary;
+    final textColor = theme.colorScheme.onSurface;
+    final mutedTextColor = theme.textTheme.bodyMedium?.color ?? Colors.grey;
 
     return Scaffold(
       appBar: AppBar(
         title: Text(
           'PROFILE SETTINGS',
-          style: GoogleFonts.manrope(
+          style: theme.appBarTheme.titleTextStyle?.copyWith(
             fontSize: 14,
             fontWeight: FontWeight.w800,
             letterSpacing: 2,
@@ -154,20 +158,12 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
               const SizedBox(height: 16),
               Text(
                 'Profile Settings',
-                style: GoogleFonts.manrope(
-                  fontSize: 32,
-                  fontWeight: FontWeight.w800,
-                  color: theme.textTheme.displayLarge?.color,
-                ),
+                style: theme.textTheme.displayLarge,
               ),
               const SizedBox(height: 8),
               Text(
                 'Manage your security profile and personal preferences.',
-                style: GoogleFonts.inter(
-                  fontSize: 14,
-                  color: theme.textTheme.bodyMedium?.color,
-                  height: 1.5,
-                ),
+                style: theme.textTheme.bodyLarge,
               ),
               const SizedBox(height: 40),
               Center(
@@ -216,20 +212,21 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
                         ),
                       ),
                       style: TextButton.styleFrom(
-                        foregroundColor: theme.primaryColor,
+                        foregroundColor: primaryColor,
                       ),
                     ),
                   ],
                 ),
               ),
               const SizedBox(height: 32),
-              _buildSecurityStatusCard(context),
+              _buildSecurityStatusCard(context, primaryColor, textColor, mutedTextColor),
               const SizedBox(height: 32),
               _buildInputField(
                 context,
                 label: 'FULL NAME',
                 controller: _nameController,
                 hint: 'Enter your full name',
+                primaryColor: primaryColor,
               ),
               const SizedBox(height: 24),
               _buildInputField(
@@ -238,6 +235,7 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
                 controller: _emailController,
                 hint: 'Enter your email address',
                 keyboardType: TextInputType.emailAddress,
+                primaryColor: primaryColor,
               ),
               const SizedBox(height: 24),
               _FieldLabel(context, 'PHONE NUMBER'),
@@ -246,15 +244,18 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
                 context,
                 initialValue: _fullPhoneNumber,
                 onChanged: (phone) => _fullPhoneNumber = phone.completeNumber,
+                primaryColor: primaryColor,
               ),
               const SizedBox(height: 24),
-              _FieldLabel(context, 'SOS MESSAGE NUMBER', isSOS: true),
+              _FieldLabel(context, 'SOS MESSAGE NUMBER', isSOS: true, sosColor: secondaryColor),
               const SizedBox(height: 8),
               _buildPhoneField(
                 context,
                 initialValue: _fullSOSPhoneNumber,
                 isSOS: true,
                 onChanged: (phone) => _fullSOSPhoneNumber = phone.completeNumber,
+                primaryColor: primaryColor,
+                sosColor: secondaryColor,
               ),
               const SizedBox(height: 48),
               Row(
@@ -265,11 +266,7 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
                       child: Text(
                         'Discard\nChanges',
                         textAlign: TextAlign.center,
-                        style: GoogleFonts.manrope(
-                          fontSize: 15,
-                          fontWeight: FontWeight.w700,
-                          color: theme.textTheme.bodyLarge?.color,
-                        ),
+                        style: theme.textTheme.titleMedium,
                       ),
                     ),
                   ),
@@ -279,22 +276,11 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
                     child: ElevatedButton(
                       onPressed: _updateProfile,
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: theme.brightness == Brightness.dark 
-                            ? theme.primaryColor.withValues(alpha: 0.8) 
-                            : theme.primaryColor,
-                        padding: const EdgeInsets.symmetric(vertical: 18),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12),
-                        ),
+                        backgroundColor: isDark 
+                            ? primaryColor.withValues(alpha: 0.8) 
+                            : primaryColor,
                       ),
-                      child: Text(
-                        'Update Profile',
-                        style: GoogleFonts.manrope(
-                          fontSize: 16,
-                          fontWeight: FontWeight.w700,
-                          color: Colors.white,
-                        ),
-                      ),
+                      child: const Text('Update Profile'),
                     ),
                   ),
                 ],
@@ -307,12 +293,12 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
     );
   }
 
-  Widget _buildSecurityStatusCard(BuildContext context) {
+  Widget _buildSecurityStatusCard(BuildContext context, Color primaryColor, Color textColor, Color mutedTextColor) {
     final theme = Theme.of(context);
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: theme.primaryColor.withValues(alpha: 0.1),
+        color: primaryColor.withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(16),
       ),
       child: Column(
@@ -320,11 +306,7 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
         children: [
           Text(
             'Security Status',
-            style: GoogleFonts.manrope(
-              fontSize: 14,
-              fontWeight: FontWeight.w700,
-              color: theme.textTheme.bodyLarge?.color,
-            ),
+            style: theme.textTheme.titleSmall,
           ),
           const SizedBox(height: 12),
           Row(
@@ -334,7 +316,7 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
                 height: 10,
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
-                  color: theme.primaryColor,
+                  color: primaryColor,
                 ),
               ),
               const SizedBox(width: 8),
@@ -343,7 +325,7 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
                 style: GoogleFonts.manrope(
                   fontSize: 12,
                   fontWeight: FontWeight.w800,
-                  color: theme.primaryColor,
+                  color: primaryColor,
                   letterSpacing: 1,
                 ),
               ),
@@ -352,25 +334,21 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
           const SizedBox(height: 12),
           Text(
             'Your personal data is protected by AES-256 military-grade encryption.',
-            style: GoogleFonts.inter(
-              fontSize: 11,
-              color: theme.textTheme.bodyMedium?.color?.withValues(alpha: 0.7),
-              height: 1.4,
-            ),
+            style: theme.textTheme.bodySmall,
           ),
         ],
       ),
     );
   }
 
-  Widget _FieldLabel(BuildContext context, String label, {bool isSOS = false}) {
+  Widget _FieldLabel(BuildContext context, String label, {bool isSOS = false, Color? sosColor}) {
     final theme = Theme.of(context);
     return Text(
       label,
       style: GoogleFonts.manrope(
         fontSize: 11,
         fontWeight: FontWeight.w800,
-        color: isSOS ? const Color(0xFFF25C05) : theme.textTheme.bodySmall?.color?.withValues(alpha: 0.5),
+        color: isSOS ? sosColor : theme.textTheme.bodySmall?.color?.withValues(alpha: 0.5),
         letterSpacing: 1,
       ),
     );
@@ -381,32 +359,39 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
     required String? initialValue,
     required Function(PhoneNumber) onChanged,
     bool isSOS = false,
+    required Color primaryColor,
+    Color? sosColor,
   }) {
     final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+    
     return Container(
       decoration: BoxDecoration(
         color: isSOS 
-            ? const Color(0xFFF25C05).withValues(alpha: 0.05) 
-            : theme.colorScheme.surface,
+            ? (sosColor ?? Colors.red).withValues(alpha: 0.05) 
+            : theme.inputDecorationTheme.fillColor,
         borderRadius: BorderRadius.circular(12),
         border: Border.all(
-          color: isSOS ? const Color(0xFFF25C05).withValues(alpha: 0.1) : theme.dividerColor.withValues(alpha: 0.1),
+          color: isSOS ? (sosColor ?? Colors.red).withValues(alpha: 0.1) : theme.dividerColor,
         ),
       ),
       child: IntlPhoneField(
         initialValue: initialValue,
-        style: GoogleFonts.inter(
-          fontSize: 16,
-          fontWeight: FontWeight.w500,
-          color: theme.textTheme.bodyLarge?.color,
-        ),
-        dropdownTextStyle: TextStyle(color: theme.textTheme.bodyLarge?.color),
+        style: theme.textTheme.bodyLarge,
+        dropdownTextStyle: TextStyle(color: theme.colorScheme.onSurface),
         decoration: InputDecoration(
           hintText: 'Phone Number',
-          hintStyle: GoogleFonts.inter(color: theme.textTheme.bodySmall?.color?.withValues(alpha: 0.3)),
           border: InputBorder.none,
+          enabledBorder: InputBorder.none,
+          focusedBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(12),
+            borderSide: BorderSide(
+              color: isSOS ? (sosColor ?? Colors.red) : primaryColor,
+              width: 2,
+            ),
+          ),
           contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 20),
-          suffixIcon: isSOS ? const Icon(Icons.emergency_share, color: Color(0xFFF25C05), size: 20) : null,
+          suffixIcon: isSOS ? Icon(Icons.emergency_share, color: sosColor, size: 20) : null,
         ),
         onChanged: onChanged,
       ),
@@ -420,39 +405,36 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
     required String hint,
     TextInputType? keyboardType,
     bool isSOS = false,
+    required Color primaryColor,
+    Color? sosColor,
   }) {
+    final theme = Theme.of(context);
+    
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        _FieldLabel(context, label, isSOS: isSOS),
+        _FieldLabel(context, label, isSOS: isSOS, sosColor: sosColor),
         const SizedBox(height: 8),
         TextFormField(
           controller: controller,
           keyboardType: keyboardType,
-          style: GoogleFonts.inter(
-            fontSize: 16,
-            fontWeight: FontWeight.w500,
-            color: Theme.of(context).textTheme.bodyLarge?.color,
-          ),
+          style: theme.textTheme.bodyLarge,
           decoration: InputDecoration(
             hintText: hint,
-            hintStyle: GoogleFonts.inter(color: Theme.of(context).textTheme.bodySmall?.color?.withValues(alpha: 0.3)),
-            filled: true,
             fillColor: isSOS 
-                ? const Color(0xFFF25C05).withValues(alpha: 0.05) 
-                : Theme.of(context).colorScheme.surface,
-            contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 20),
-            suffixIcon: isSOS ? const Icon(Icons.emergency_share, color: Color(0xFFF25C05), size: 20) : null,
+                ? (sosColor ?? Colors.red).withValues(alpha: 0.05) 
+                : theme.inputDecorationTheme.fillColor,
+            suffixIcon: isSOS ? Icon(Icons.emergency_share, color: sosColor, size: 20) : null,
             enabledBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12),
               borderSide: BorderSide(
-                color: isSOS ? const Color(0xFFF25C05).withValues(alpha: 0.1) : Theme.of(context).dividerColor.withValues(alpha: 0.1),
+                color: isSOS ? (sosColor ?? Colors.red).withValues(alpha: 0.1) : theme.dividerColor,
               ),
             ),
             focusedBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12),
               borderSide: BorderSide(
-                color: isSOS ? const Color(0xFFF25C05) : Theme.of(context).primaryColor,
+                color: isSOS ? (sosColor ?? Colors.red) : primaryColor,
                 width: 2,
               ),
             ),

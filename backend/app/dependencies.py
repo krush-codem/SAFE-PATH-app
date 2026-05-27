@@ -1,17 +1,18 @@
 from fastapi import Header, HTTPException, Depends
+from typing import Optional
 from app.config import supabase
 
-async def get_current_user(authorization: str = Header(...)):
+def get_current_user(authorization: Optional[str] = Header(None)):
     """
     Verify the Supabase JWT and return the user object.
     Expects 'Authorization: Bearer <token>'
     """
-    if not authorization.startswith("Bearer "):
-        raise HTTPException(status_code=401, detail="Invalid authorization header")
-    
+    if not authorization or not authorization.startswith("Bearer "):
+        raise HTTPException(status_code=401, detail="Missing or invalid authorization header")
+
     token = authorization.split(" ")[1]
     try:
-        # get_user verifies the JWT with Supabase
+        # get_user verifies the JWT with Supabase (blocking call)
         res = supabase.auth.get_user(token)
         if not res or not res.user:
             raise HTTPException(status_code=401, detail="Invalid or expired token")

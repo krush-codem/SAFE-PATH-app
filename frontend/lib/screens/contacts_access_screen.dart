@@ -10,14 +10,13 @@ class ContactsAccessScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final guardiansAsync = ref.watch(guardiansProvider);
-    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
     final textColor = AppTheme.getTextColor(context);
     final mutedTextColor = AppTheme.getTextColor(context, muted: true);
     final surfaceColor = AppTheme.getSurfaceColor(context);
-    final backgroundColor = AppTheme.getBackgroundColor(context);
 
     return Scaffold(
-      backgroundColor: backgroundColor,
       body: SafeArea(
         child: SingleChildScrollView(
           child: Column(
@@ -48,11 +47,7 @@ class ContactsAccessScreen extends ConsumerWidget {
                     Expanded(
                       child: Text(
                         'Contacts Access',
-                        style: TextStyle(
-                          fontSize: 20,
-                          fontWeight: FontWeight.w700,
-                          color: textColor,
-                        ),
+                        style: theme.textTheme.displaySmall,
                       ),
                     ),
                   ],
@@ -65,10 +60,10 @@ class ContactsAccessScreen extends ConsumerWidget {
                 child: Container(
                   padding: const EdgeInsets.all(20),
                   decoration: BoxDecoration(
-                    color: const Color(0xFF4CAF50).withValues(alpha: 0.1),
+                    color: Colors.green.withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(16),
                     border: Border.all(
-                      color: const Color(0xFF4CAF50).withValues(alpha: 0.3),
+                      color: Colors.green.withValues(alpha: 0.3),
                     ),
                   ),
                   child: Row(
@@ -76,8 +71,8 @@ class ContactsAccessScreen extends ConsumerWidget {
                       Container(
                         width: 56,
                         height: 56,
-                        decoration: BoxDecoration(
-                          color: const Color(0xFF4CAF50),
+                        decoration: const BoxDecoration(
+                          color: Colors.green,
                           shape: BoxShape.circle,
                         ),
                         child: const Icon(
@@ -93,20 +88,12 @@ class ContactsAccessScreen extends ConsumerWidget {
                           children: [
                             Text(
                               'Allowed While Using',
-                              style: TextStyle(
-                                fontSize: 18,
-                                fontWeight: FontWeight.w700,
-                                color: textColor,
-                              ),
+                              style: theme.textTheme.titleMedium,
                             ),
                             const SizedBox(height: 4),
                             Text(
                               'SafePath can access contacts when app is in use',
-                              style: TextStyle(
-                                fontSize: 13,
-                                color: mutedTextColor,
-                                height: 1.4,
-                              ),
+                              style: theme.textTheme.bodyMedium,
                             ),
                           ],
                         ),
@@ -128,7 +115,7 @@ class ContactsAccessScreen extends ConsumerWidget {
                         'Saved Contacts',
                         '${guardiansAsync.value?.length ?? 0}',
                         Icons.person_add,
-                        const Color(0xFF4A90E2),
+                        theme.colorScheme.primary,
                         surfaceColor,
                         textColor,
                       ),
@@ -139,7 +126,7 @@ class ContactsAccessScreen extends ConsumerWidget {
                         'Safe Circles',
                         '1',
                         Icons.people,
-                        const Color(0xFF4CAF50),
+                        Colors.green,
                         surfaceColor,
                         textColor,
                       ),
@@ -155,11 +142,7 @@ class ContactsAccessScreen extends ConsumerWidget {
                 padding: const EdgeInsets.symmetric(horizontal: 20),
                 child: Text(
                   'How We Use Contacts',
-                  style: TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.w700,
-                    color: textColor,
-                  ),
+                  style: theme.textTheme.titleLarge,
                 ),
               ),
               const SizedBox(height: 12),
@@ -180,6 +163,7 @@ class ContactsAccessScreen extends ConsumerWidget {
                         description: 'Quickly send SOS alerts to your trusted guardians',
                         textColor: textColor,
                         mutedTextColor: mutedTextColor,
+                        primaryColor: theme.colorScheme.primary,
                       ),
                       const SizedBox(height: 16),
                       _buildInfoTile(
@@ -188,6 +172,7 @@ class ContactsAccessScreen extends ConsumerWidget {
                         description: 'Share your live location with selected contacts',
                         textColor: textColor,
                         mutedTextColor: mutedTextColor,
+                        primaryColor: theme.colorScheme.primary,
                       ),
                       const SizedBox(height: 16),
                       _buildInfoTile(
@@ -196,6 +181,7 @@ class ContactsAccessScreen extends ConsumerWidget {
                         description: 'Create groups of contacts for group safety features',
                         textColor: textColor,
                         mutedTextColor: mutedTextColor,
+                        primaryColor: theme.colorScheme.primary,
                       ),
                     ],
                   ),
@@ -210,28 +196,24 @@ class ContactsAccessScreen extends ConsumerWidget {
                 child: Container(
                   padding: const EdgeInsets.all(16),
                   decoration: BoxDecoration(
-                    color: const Color(0xFFF25C05).withValues(alpha: 0.1),
+                    color: theme.colorScheme.secondary.withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(12),
                     border: Border.all(
-                      color: const Color(0xFFF25C05).withValues(alpha: 0.2),
+                      color: theme.colorScheme.secondary.withValues(alpha: 0.2),
                     ),
                   ),
                   child: Row(
                     children: [
                       Icon(
                         Icons.privacy_tip,
-                        color: const Color(0xFFF25C05),
+                        color: theme.colorScheme.secondary,
                         size: 24,
                       ),
                       const SizedBox(width: 12),
                       Expanded(
                         child: Text(
                           'We never upload your contacts to our servers. All contact data stays on your device.',
-                          style: TextStyle(
-                            fontSize: 13,
-                            color: textColor,
-                            height: 1.4,
-                          ),
+                          style: theme.textTheme.bodyMedium?.copyWith(color: textColor),
                         ),
                       ),
                     ],
@@ -249,18 +231,14 @@ class ContactsAccessScreen extends ConsumerWidget {
                   children: [
                     Text(
                       'Emergency Contacts',
-                      style: TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.w700,
-                        color: textColor,
-                      ),
+                      style: theme.textTheme.titleLarge,
                     ),
                     TextButton(
                       onPressed: () => context.push('/settings/manage_guardians'),
                       child: Text(
                         'Manage',
                         style: TextStyle(
-                          color: const Color(0xFF4A90E2),
+                          color: theme.colorScheme.primary,
                           fontWeight: FontWeight.w600,
                         ),
                       ),
@@ -314,7 +292,7 @@ class ContactsAccessScreen extends ConsumerWidget {
                         physics: const NeverScrollableScrollPhysics(),
                         itemCount: guardians.length,
                         separatorBuilder: (context, index) => Divider(
-                          color: isDark ? const Color(0xFF2D3A5C) : const Color(0xFFE8ECF4),
+                          color: theme.dividerColor,
                           height: 1,
                           indent: 70,
                         ),
@@ -358,9 +336,6 @@ class ContactsAccessScreen extends ConsumerWidget {
                     onPressed: () {},
                     icon: const Icon(Icons.settings),
                     label: const Text('Open System Settings'),
-                    style: ElevatedButton.styleFrom(
-                      padding: const EdgeInsets.symmetric(vertical: 16),
-                    ),
                   ),
                 ),
               ),
@@ -386,6 +361,7 @@ class ContactsAccessScreen extends ConsumerWidget {
       decoration: BoxDecoration(
         color: surfaceColor,
         borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: iconColor.withValues(alpha: 0.1)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -394,7 +370,7 @@ class ContactsAccessScreen extends ConsumerWidget {
             width: 40,
             height: 40,
             decoration: BoxDecoration(
-              color: iconColor.withValues(alpha: 0.15),
+              color: iconColor.withValues(alpha: 0.1),
               borderRadius: BorderRadius.circular(10),
             ),
             child: Icon(icon, color: iconColor, size: 20),
@@ -427,6 +403,7 @@ class ContactsAccessScreen extends ConsumerWidget {
     required String description,
     required Color textColor,
     required Color mutedTextColor,
+    required Color primaryColor,
   }) {
     return Row(
       children: [
@@ -434,10 +411,10 @@ class ContactsAccessScreen extends ConsumerWidget {
           width: 40,
           height: 40,
           decoration: BoxDecoration(
-            color: const Color(0xFF4A90E2).withValues(alpha: 0.15),
+            color: primaryColor.withValues(alpha: 0.1),
             borderRadius: BorderRadius.circular(10),
           ),
-          child: Icon(icon, color: const Color(0xFF4A90E2), size: 20),
+          child: Icon(icon, color: primaryColor, size: 20),
         ),
         const SizedBox(width: 16),
         Expanded(
@@ -482,12 +459,12 @@ class ContactsAccessScreen extends ConsumerWidget {
             width: 44,
             height: 44,
             decoration: BoxDecoration(
-              color: const Color(0xFF4CAF50).withValues(alpha: 0.15),
+              color: Colors.green.withValues(alpha: 0.1),
               borderRadius: BorderRadius.circular(10),
             ),
             child: const Icon(
               Icons.person,
-              color: Color(0xFF4CAF50),
+              color: Colors.green,
               size: 22,
             ),
           ),
@@ -516,14 +493,14 @@ class ContactsAccessScreen extends ConsumerWidget {
                 Container(
                   padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
                   decoration: BoxDecoration(
-                    color: const Color(0xFF4CAF50).withValues(alpha: 0.15),
+                    color: Colors.green.withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(4),
                   ),
                   child: Text(
                     relation,
                     style: const TextStyle(
                       fontSize: 11,
-                      color: Color(0xFF4CAF50),
+                      color: Colors.green,
                       fontWeight: FontWeight.w500,
                     ),
                   ),

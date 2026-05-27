@@ -5,6 +5,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:intl_phone_field/intl_phone_field.dart';
 import '../providers/auth_provider.dart';
 import '../routing/app_router.dart';
+import '../theme/app_theme.dart';
 
 class LoginPageScreen extends ConsumerStatefulWidget {
   const LoginPageScreen({super.key});
@@ -82,10 +83,8 @@ class _LoginPageScreenState extends ConsumerState<LoginPageScreen>
     if (authState.hasError) {
       if (mounted) _showSnack(_friendlyError(authState.error.toString()));
     } else {
-      // Login succeeded, determine the initial route dynamically
       if (mounted) {
         try {
-          // Invalidate profile to ensure we have the freshest state
           ref.invalidate(profileProvider);
           final nextRoute = await ref.read(authNotifierProvider.notifier).determineInitialRoute();
           if (mounted) {
@@ -99,20 +98,6 @@ class _LoginPageScreenState extends ConsumerState<LoginPageScreen>
   }
 
   Future<void> _handleGoogleLogin() async {
-    final existingSession = Supabase.instance.client.auth.currentSession;
-    if (existingSession != null) {
-      if (mounted) _showSnack('Existing session detected. Resuming...');
-    }
-
-    if (mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Redirecting to Google...'),
-          duration: Duration(seconds: 2),
-        ),
-      );
-    }
-
     final success = await ref.read(authNotifierProvider.notifier).signInWithGoogle();
     
     if (success && mounted) {
@@ -134,10 +119,11 @@ class _LoginPageScreenState extends ConsumerState<LoginPageScreen>
   }
 
   void _showSnack(String msg, {bool isError = true}) {
+    final theme = Theme.of(context);
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
-        content: Text(msg, style: const TextStyle(color: Colors.white)),
-        backgroundColor: isError ? const Color(0xFF8B0000) : Colors.green.withValues(alpha: 0.8),
+        content: Text(msg, style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+        backgroundColor: isError ? theme.colorScheme.error : AppColors.successEmerald,
         behavior: SnackBarBehavior.floating,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
       ),
@@ -149,50 +135,50 @@ class _LoginPageScreenState extends ConsumerState<LoginPageScreen>
       return 'Incorrect email/phone or password.';
     }
     if (raw.contains('Email not confirmed')) {
-      return 'Account unverified. Please check your email or try signing up again to resend the code.';
+      return 'Account unverified. Please check your email or resend verification.';
     }
-    if (raw.contains('network')) return 'Network error. Check your connection.';
     return raw;
   }
 
   @override
   Widget build(BuildContext context) {
     final isLoading = ref.watch(authNotifierProvider).isLoading;
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
 
     return Scaffold(
-      backgroundColor: const Color(0xFF0D1527),
       body: SafeArea(
         child: Column(
           children: [
             // App bar
             Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  const Row(
+                  Row(
                     children: [
-                      Icon(Icons.shield, color: Colors.white, size: 20),
-                      SizedBox(width: 8),
+                      Icon(Icons.shield, color: colorScheme.primary, size: 24),
+                      const SizedBox(width: 12),
                       Text(
-                        'Safe Path',
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 16,
-                          fontWeight: FontWeight.w700,
+                        'SAFE PATH',
+                        style: theme.textTheme.titleLarge?.copyWith(
+                          fontWeight: FontWeight.w900,
+                          letterSpacing: 2,
                         ),
                       ),
                     ],
                   ),
                   Container(
-                    width: 36,
-                    height: 36,
+                    width: 40,
+                    height: 40,
                     decoration: BoxDecoration(
-                      color: Colors.white.withValues(alpha: 0.1),
+                      color: colorScheme.surface,
                       shape: BoxShape.circle,
+                      border: Border.all(color: theme.dividerColor),
                     ),
-                    child: const Icon(Icons.help_outline,
-                        color: Colors.white, size: 18),
+                    child: Icon(Icons.help_outline,
+                        color: colorScheme.onSurface, size: 20),
                   ),
                 ],
               ),
@@ -201,76 +187,67 @@ class _LoginPageScreenState extends ConsumerState<LoginPageScreen>
             // Main content
             Expanded(
               child: SingleChildScrollView(
-                padding: const EdgeInsets.symmetric(horizontal: 20),
+                padding: const EdgeInsets.symmetric(horizontal: 24),
                 child: FadeTransition(
                   opacity: _fadeAnim,
                   child: SlideTransition(
                     position: _slideAnim,
                     child: Column(
                       children: [
-                        const SizedBox(height: 12),
+                        const SizedBox(height: 20),
 
-                        // Card
+                        // Authentication Card
                         Container(
-                          padding: const EdgeInsets.all(28),
+                          padding: const EdgeInsets.all(32),
                           decoration: BoxDecoration(
-                            color: const Color(0xFF111D35),
-                            borderRadius: BorderRadius.circular(16),
+                            color: colorScheme.surface,
+                            borderRadius: BorderRadius.circular(20),
                             border: Border.all(
-                              color: Colors.white.withValues(alpha: 0.07),
-                              width: 1,
+                              color: theme.dividerColor,
+                              width: 1.5,
                             ),
                           ),
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.stretch,
                             children: [
                               // Title
-                              const Text(
-                                'Identity\nAuthentication',
-                                textAlign: TextAlign.center,
-                                style: TextStyle(
-                                  color: Colors.white,
-                                  fontSize: 28,
-                                  fontWeight: FontWeight.w800,
-                                  height: 1.2,
-                                ),
-                              ),
-                              const SizedBox(height: 10),
                               Text(
-                                'Verification protocol required to access the Safe Path safety network.',
+                                'Sign In',
                                 textAlign: TextAlign.center,
-                                style: TextStyle(
-                                  color: Colors.white.withValues(alpha: 0.55),
-                                  fontSize: 13,
-                                  height: 1.5,
-                                ),
+                                style: theme.textTheme.displayMedium,
+                              ),
+                              const SizedBox(height: 12),
+                              Text(
+                                'Login to access your safe circle and stay protected.',
+                                textAlign: TextAlign.center,
+                                style: theme.textTheme.bodyMedium,
                               ),
 
-                              const SizedBox(height: 24),
+                              const SizedBox(height: 32),
 
                               // Email / Phone toggle selector
                               _buildToggleSelector(),
 
-                              const SizedBox(height: 24),
+                              const SizedBox(height: 32),
 
                               if (_isEmailTab) ...[
-                                _FieldLabel('SECURE EMAIL'),
-                                const SizedBox(height: 8),
+                                const _FieldLabel('EMAIL ADDRESS'),
+                                const SizedBox(height: 10),
                                 _buildEmailField(),
                               ] else ...[
-                                _FieldLabel('PHONE NUMBER'),
-                                const SizedBox(height: 8),
+                                const _FieldLabel('PHONE NUMBER'),
+                                const SizedBox(height: 10),
                                 _buildPhoneField(),
                               ],
 
-                              const SizedBox(height: 20),
+                              const SizedBox(height: 24),
 
                               // Password
                               Row(
                                 mainAxisAlignment:
                                     MainAxisAlignment.spaceBetween,
                                 children: [
-                                  const _FieldLabel('MASTER KEY (PASSWORD)'),
+                                  const _FieldLabel('PASSWORD'),
                                   GestureDetector(
                                     onTap: () async {
                                       if (_isEmailTab) {
@@ -290,22 +267,21 @@ class _LoginPageScreenState extends ConsumerState<LoginPageScreen>
                                         _showSnack('Password resets are only available via Email.');
                                       }
                                     },
-                                    child: const Text(
-                                      'RECOVER KEY',
-                                      style: TextStyle(
-                                        color: Color(0xFF7BB8F0),
-                                        fontSize: 10,
-                                        letterSpacing: 1.5,
-                                        fontWeight: FontWeight.w600,
+                                    child: Text(
+                                      'FORGOT PASSWORD?',
+                                      style: theme.textTheme.bodySmall?.copyWith(
+                                        color: colorScheme.primary,
+                                        fontWeight: FontWeight.w900,
+                                        decoration: TextDecoration.underline,
                                       ),
                                     ),
                                   ),
                                 ],
                               ),
-                              const SizedBox(height: 8),
+                              const SizedBox(height: 10),
                               _buildPasswordField(),
 
-                              const SizedBox(height: 18),
+                              const SizedBox(height: 24),
 
                               // Trust device checkbox
                               Row(
@@ -316,67 +292,62 @@ class _LoginPageScreenState extends ConsumerState<LoginPageScreen>
                                     child: AnimatedContainer(
                                       duration:
                                           const Duration(milliseconds: 180),
-                                      width: 18,
-                                      height: 18,
+                                      width: 20,
+                                      height: 20,
                                       decoration: BoxDecoration(
                                         color: _trustDevice
-                                            ? const Color(0xFF4A90D9)
+                                            ? colorScheme.primary
                                             : Colors.transparent,
                                         border: Border.all(
-                                          color: Colors.white.withValues(alpha: 0.35),
-                                          width: 1.5,
+                                          color: _trustDevice ? colorScheme.primary : theme.dividerColor,
+                                          width: 2,
                                         ),
-                                        borderRadius: BorderRadius.circular(3),
+                                        borderRadius: BorderRadius.circular(4),
                                       ),
                                       child: _trustDevice
                                           ? const Icon(Icons.check,
-                                              size: 12, color: Colors.white)
+                                              size: 14, color: Colors.white)
                                           : null,
                                     ),
                                   ),
-                                  const SizedBox(width: 10),
+                                  const SizedBox(width: 12),
                                   Text(
                                     'Trust this encrypted device',
-                                    style: TextStyle(
-                                      color: Colors.white.withValues(alpha: 0.7),
-                                      fontSize: 13,
+                                    style: theme.textTheme.bodyMedium?.copyWith(
+                                      fontWeight: FontWeight.w700,
                                     ),
                                   ),
                                 ],
                               ),
 
-                              const SizedBox(height: 24),
+                              const SizedBox(height: 32),
 
-                              // LOGIN button
+                              // ACCESS NETWORK button
                               _buildLoginButton(isLoading),
 
-                              const SizedBox(height: 14),
+                              const SizedBox(height: 16),
 
                               // Google login
                               _buildGoogleButton(isLoading),
 
-                              const SizedBox(height: 20),
+                              const SizedBox(height: 24),
 
                               // Create account link
                               Center(
                                 child: RichText(
                                   text: TextSpan(
                                     text: 'New operative?  ',
-                                    style: TextStyle(
-                                      color: Colors.white.withValues(alpha: 0.5),
-                                      fontSize: 13,
-                                    ),
+                                    style: theme.textTheme.bodyMedium,
                                     children: [
                                       WidgetSpan(
                                         child: GestureDetector(
                                           onTap: () =>
                                               context.go(AppRoutes.signup),
-                                          child: const Text(
+                                          child: Text(
                                             'Create a new Account',
-                                            style: TextStyle(
-                                              color: Colors.white,
-                                              fontSize: 13,
-                                              fontWeight: FontWeight.w700,
+                                            style: theme.textTheme.bodyMedium?.copyWith(
+                                              color: colorScheme.primary,
+                                              fontWeight: FontWeight.w900,
                                             ),
                                           ),
                                         ),
@@ -389,7 +360,7 @@ class _LoginPageScreenState extends ConsumerState<LoginPageScreen>
                           ),
                         ),
 
-                        const SizedBox(height: 24),
+                        const SizedBox(height: 32),
 
                         // Bottom encryption label
                         Column(
@@ -399,33 +370,23 @@ class _LoginPageScreenState extends ConsumerState<LoginPageScreen>
                               children: [
                                 Icon(
                                   Icons.lock_outline,
-                                  color: Colors.white.withValues(alpha: 0.3),
-                                  size: 12,
+                                  color: colorScheme.onSurface.withValues(alpha: 0.3),
+                                  size: 14,
                                 ),
-                                const SizedBox(width: 6),
+                                const SizedBox(width: 8),
                                 Text(
                                   'END-TO-END ENCRYPTED TUNNEL',
-                                  style: TextStyle(
-                                    color: Colors.white.withValues(alpha: 0.3),
-                                    fontSize: 10,
+                                  style: theme.textTheme.bodySmall?.copyWith(
                                     letterSpacing: 2,
+                                    fontWeight: FontWeight.w900,
                                   ),
                                 ),
-                              ],
-                            ),
-                            const SizedBox(height: 10),
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                _encryptBadge(Icons.lock),
-                                const SizedBox(width: 8),
-                                _encryptBadge(Icons.verified_user_outlined),
                               ],
                             ),
                           ],
                         ),
 
-                        const SizedBox(height: 30),
+                        const SizedBox(height: 40),
                       ],
                     ),
                   ),
@@ -439,12 +400,15 @@ class _LoginPageScreenState extends ConsumerState<LoginPageScreen>
   }
 
   Widget _buildToggleSelector() {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
     return Container(
-      height: 44,
+      height: 48,
+      padding: const EdgeInsets.all(4),
       decoration: BoxDecoration(
-        color: const Color(0xFF1E2540),
-        borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: Colors.white.withValues(alpha: 0.06)),
+        color: colorScheme.surface,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: theme.dividerColor, width: 1.5),
       ),
       child: Row(
         children: [
@@ -455,16 +419,16 @@ class _LoginPageScreenState extends ConsumerState<LoginPageScreen>
                 duration: const Duration(milliseconds: 200),
                 alignment: Alignment.center,
                 decoration: BoxDecoration(
-                  color: _selectedTab == 0 ? Colors.white.withValues(alpha: 0.12) : Colors.transparent,
-                  borderRadius: BorderRadius.circular(6),
+                  color: _selectedTab == 0 ? colorScheme.primary : Colors.transparent,
+                  borderRadius: BorderRadius.circular(8),
                 ),
                 child: Text(
                   'EMAIL',
                   style: TextStyle(
-                    color: _selectedTab == 0 ? Colors.white : Colors.white38,
+                    color: _selectedTab == 0 ? Colors.white : colorScheme.onSurface.withValues(alpha: 0.38),
                     fontSize: 12,
-                    fontWeight: FontWeight.bold,
-                    letterSpacing: 1.2,
+                    fontWeight: FontWeight.w900,
+                    letterSpacing: 1.5,
                   ),
                 ),
               ),
@@ -477,16 +441,16 @@ class _LoginPageScreenState extends ConsumerState<LoginPageScreen>
                 duration: const Duration(milliseconds: 200),
                 alignment: Alignment.center,
                 decoration: BoxDecoration(
-                  color: _selectedTab == 1 ? Colors.white.withValues(alpha: 0.12) : Colors.transparent,
-                  borderRadius: BorderRadius.circular(6),
+                  color: _selectedTab == 1 ? colorScheme.primary : Colors.transparent,
+                  borderRadius: BorderRadius.circular(8),
                 ),
                 child: Text(
                   'PHONE',
                   style: TextStyle(
-                    color: _selectedTab == 1 ? Colors.white : Colors.white38,
+                    color: _selectedTab == 1 ? Colors.white : colorScheme.onSurface.withValues(alpha: 0.38),
                     fontSize: 12,
-                    fontWeight: FontWeight.bold,
-                    letterSpacing: 1.2,
+                    fontWeight: FontWeight.w900,
+                    letterSpacing: 1.5,
                   ),
                 ),
               ),
@@ -498,176 +462,113 @@ class _LoginPageScreenState extends ConsumerState<LoginPageScreen>
   }
 
   Widget _buildEmailField() {
-    return Container(
-      decoration: BoxDecoration(
-        color: const Color(0xFF1A2540),
-        borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: Colors.white.withValues(alpha: 0.08)),
-      ),
-      child: TextField(
-        controller: _emailCtrl,
-        keyboardType: TextInputType.emailAddress,
-        style: const TextStyle(color: Colors.white, fontSize: 14),
-        decoration: InputDecoration(
-          hintText: 'name@security.core',
-          hintStyle: TextStyle(
-              color: Colors.white.withValues(alpha: 0.3), fontSize: 14),
-          prefixIcon: Icon(Icons.alternate_email,
-              color: Colors.white.withValues(alpha: 0.35), size: 18),
-          border: InputBorder.none,
-          contentPadding:
-              const EdgeInsets.symmetric(vertical: 14, horizontal: 14),
-        ),
+    return TextField(
+      controller: _emailCtrl,
+      keyboardType: TextInputType.emailAddress,
+      decoration: const InputDecoration(
+        hintText: 'name@security.core',
+        prefixIcon: Icon(Icons.alternate_email, size: 18),
       ),
     );
   }
 
   Widget _buildPhoneField() {
-    return Container(
-      decoration: BoxDecoration(
-        color: const Color(0xFF1A2540),
-        borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: Colors.white.withValues(alpha: 0.08)),
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+    return IntlPhoneField(
+      initialCountryCode: 'IN',
+      style: theme.textTheme.bodyLarge,
+      dropdownTextStyle: theme.textTheme.bodyLarge,
+      decoration: const InputDecoration(
+        hintText: 'Phone Number',
       ),
-      child: IntlPhoneField(
-        initialCountryCode: 'IN',
-        style: const TextStyle(color: Colors.white, fontSize: 14),
-        dropdownTextStyle: const TextStyle(color: Colors.white),
-        decoration: InputDecoration(
-          hintText: 'Phone Number',
-          hintStyle: TextStyle(
-              color: Colors.white.withValues(alpha: 0.3), fontSize: 14),
-          border: InputBorder.none,
-          contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-        ),
-        onChanged: (phone) {
-          _fullPhoneNumber = phone.completeNumber;
-        },
-      ),
+      onChanged: (phone) {
+        _fullPhoneNumber = phone.completeNumber;
+      },
     );
   }
 
   Widget _buildPasswordField() {
-    return Container(
-      decoration: BoxDecoration(
-        color: const Color(0xFF1A2540),
-        borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: Colors.white.withValues(alpha: 0.08)),
-      ),
-      child: TextField(
-        controller: _passCtrl,
-        obscureText: _obscurePass,
-        style: const TextStyle(color: Colors.white, fontSize: 14),
-        decoration: InputDecoration(
-          hintText: '• • • • • • • • • • • •',
-          hintStyle:
-              TextStyle(color: Colors.white.withValues(alpha: 0.3)),
-          prefixIcon: Icon(Icons.lock_outline,
-              color: Colors.white.withValues(alpha: 0.35), size: 18),
-          suffixIcon: GestureDetector(
-            onTap: () => setState(() => _obscurePass = !_obscurePass),
-            child: Icon(
-              _obscurePass
-                  ? Icons.visibility_off_outlined
-                  : Icons.visibility_outlined,
-              color: Colors.white.withValues(alpha: 0.35),
-              size: 18,
-            ),
+    return TextField(
+      controller: _passCtrl,
+      obscureText: _obscurePass,
+      decoration: InputDecoration(
+        hintText: '• • • • • • • • • • • •',
+        prefixIcon: const Icon(Icons.lock_outline, size: 18),
+        suffixIcon: GestureDetector(
+          onTap: () => setState(() => _obscurePass = !_obscurePass),
+          child: Icon(
+            _obscurePass
+                ? Icons.visibility_off_outlined
+                : Icons.visibility_outlined,
+            size: 18,
           ),
-          border: InputBorder.none,
-          contentPadding:
-              const EdgeInsets.symmetric(vertical: 14, horizontal: 14),
         ),
       ),
     );
   }
 
   Widget _buildLoginButton(bool isLoading) {
-    return GestureDetector(
-      onTap: isLoading ? null : _handleLogin,
-      child: Container(
-        padding: const EdgeInsets.symmetric(vertical: 15),
-        decoration: BoxDecoration(
-          color: Colors.white.withValues(alpha: 0.88),
-          borderRadius: BorderRadius.circular(8),
-        ),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            if (isLoading)
-              const SizedBox(
-                width: 18,
-                height: 18,
-                child: CircularProgressIndicator(
-                  color: Color(0xFF0D1527),
-                  strokeWidth: 2,
-                ),
-              )
-            else ...[
-              const Text(
-                'LOGIN',
-                style: TextStyle(
-                  color: Color(0xFF0D1527),
-                  fontSize: 14,
-                  fontWeight: FontWeight.w800,
-                  letterSpacing: 2,
-                ),
+    return ElevatedButton(
+      onPressed: isLoading ? null : _handleLogin,
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          if (isLoading)
+            const SizedBox(
+              width: 18,
+              height: 18,
+              child: CircularProgressIndicator(
+                color: Colors.white,
+                strokeWidth: 2,
               ),
-              const SizedBox(width: 8),
-              const Icon(Icons.shield, color: Color(0xFF0D1527), size: 18),
-            ],
+            )
+          else ...[
+            const Text(
+              'LOGIN',
+              style: TextStyle(
+                fontWeight: FontWeight.w900,
+                letterSpacing: 2,
+              ),
+            ),
+            const SizedBox(width: 8),
+            const Icon(Icons.arrow_forward, size: 18),
           ],
-        ),
+        ],
       ),
     );
   }
 
   Widget _buildGoogleButton(bool isLoading) {
-    return GestureDetector(
-      onTap: isLoading ? null : _handleGoogleLogin,
-      child: Container(
-        padding: const EdgeInsets.symmetric(vertical: 15),
-        decoration: BoxDecoration(
-          color: const Color(0xFF1A2540),
-          borderRadius: BorderRadius.circular(8),
-          border: Border.all(color: Colors.white.withValues(alpha: 0.1)),
+    final theme = Theme.of(context);
+    return OutlinedButton(
+      onPressed: isLoading ? null : _handleGoogleLogin,
+      style: OutlinedButton.styleFrom(
+        minimumSize: const Size.fromHeight(56),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(12),
         ),
-        child: const Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Text(
-              'G',
-              style: TextStyle(
-                color: Colors.white,
-                fontSize: 15,
-                fontWeight: FontWeight.w700,
-              ),
-            ),
-            SizedBox(width: 8),
-            Text(
-              'Login with Google',
-              style: TextStyle(
-                color: Colors.white,
-                fontSize: 14,
-                fontWeight: FontWeight.w600,
-              ),
-            ),
-          ],
-        ),
+        side: BorderSide(color: theme.dividerColor),
       ),
-    );
-  }
-
-  Widget _encryptBadge(IconData icon) {
-    return Container(
-      width: 32,
-      height: 32,
-      decoration: BoxDecoration(
-        color: Colors.white.withValues(alpha: 0.07),
-        borderRadius: BorderRadius.circular(6),
+      child: const Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Text(
+            'G',
+            style: TextStyle(
+              fontSize: 15,
+              fontWeight: FontWeight.w900,
+            ),
+          ),
+          SizedBox(width: 12),
+          Text(
+            'Sign in with Google',
+            style: TextStyle(
+              fontWeight: FontWeight.w700,
+            ),
+          ),
+        ],
       ),
-      child:
-          Icon(icon, color: Colors.white.withValues(alpha: 0.3), size: 16),
     );
   }
 }
@@ -680,12 +581,11 @@ class _FieldLabel extends StatelessWidget {
   Widget build(BuildContext context) {
     return Text(
       text,
-      style: TextStyle(
-        color: Colors.white.withValues(alpha: 0.5),
-        fontSize: 10,
+      style: Theme.of(context).textTheme.bodySmall?.copyWith(
         letterSpacing: 2,
-        fontWeight: FontWeight.w600,
+        fontWeight: FontWeight.w900,
       ),
     );
   }
 }
+

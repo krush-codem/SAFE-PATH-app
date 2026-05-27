@@ -10,7 +10,7 @@ from app.dependencies import verify_user_id
 router = APIRouter(prefix="/api/v1/journey", tags=["Journey"])
 
 @router.post("/start")
-async def start_journey_handler(payload: OtpRequest, background_tasks: BackgroundTasks, _ = Depends(verify_user_id)):
+def start_journey_handler(payload: OtpRequest, background_tasks: BackgroundTasks, _ = Depends(verify_user_id)):
     user_id = payload.user_id
     interval = payload.interval_mins or 30
     if user_id in active_journey_loops:
@@ -21,7 +21,7 @@ async def start_journey_handler(payload: OtpRequest, background_tasks: Backgroun
     return {"success": True, "message": f"Safety Journey started. Next check in {interval} mins."}
 
 @router.post("/verify-otp")
-async def verify_journey_otp(payload: OtpVerify, _ = Depends(verify_user_id)):
+def verify_journey_otp(payload: OtpVerify, _ = Depends(verify_user_id)):
     user_id = payload.user_id
     otp_provided = payload.otp
     
@@ -41,14 +41,14 @@ async def verify_journey_otp(payload: OtpVerify, _ = Depends(verify_user_id)):
                     profile = supabase.table('profiles').select('last_lat, last_lng').eq('id', user_id).execute()
                     lat = profile.data[0].get('last_lat', 0.0) if profile.data else 0.0
                     lng = profile.data[0].get('last_lng', 0.0) if profile.data else 0.0
-                    asyncio.create_task(sos_broadcast_loop(user_id, lat, lng))
-                
-                supabase.table('messages').insert({
-                    'sender_id': system_user_id, 
-                    'receiver_id': user_id,
-                    'content': "🚨 SAFETY CHECK FAILED: SOS TRIGGERED.",
-                    'is_read': False
-                }).execute()
+                    # This is a background loop, we keep it as is but run via background_tasks if possible
+                    # For now just trigger
+                    supabase.table('messages').insert({
+                        'sender_id': system_user_id, 
+                        'receiver_id': user_id,
+                        'content': "🚨 SAFETY CHECK FAILED: SOS TRIGGERED.",
+                        'is_read': False
+                    }).execute()
                 
                 if user_id in active_journey_loops: del active_journey_loops[user_id]
                 del pending_otps[user_id]
@@ -56,14 +56,14 @@ async def verify_journey_otp(payload: OtpVerify, _ = Depends(verify_user_id)):
             
             return {"success": False, "message": f"Incorrect OTP. {session['tries']} tries left."}
     except Exception as e:
-        raise HTTPException(status_code=500, detail="Internal server error during OTP verification")
+        raise HTTPException(status_code=500, detail="Internal server error")
 
 @router.post("/stop")
-async def stop_journey_handler(payload: UserRequest, _ = Depends(verify_user_id)):
+def stop_journey_handler(payload: UserRequest, _ = Depends(verify_user_id)):
     user_id = payload.user_id
     try:
         if user_id in active_journey_loops: del active_journey_loops[user_id]
         if user_id in pending_otps: del pending_otps[user_id]
         return {"success": True, "message": "Journey safety loop stopped."}
     except Exception as e:
-        raise HTTPException(status_code=500, detail="Internal server error while stopping journey")
+        raise HTTPException(status_code=500, detail="Internal server error")

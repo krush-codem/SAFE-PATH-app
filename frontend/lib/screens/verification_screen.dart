@@ -8,6 +8,7 @@ import 'package:go_router/go_router.dart';
 import '../providers/auth_provider.dart';
 import '../widgets/dynamic_ui.dart';
 import '../routing/app_router.dart';
+import '../theme/app_theme.dart';
 
 class VerificationScreen extends ConsumerStatefulWidget {
   final String name;
@@ -166,14 +167,18 @@ class _VerificationScreenState extends ConsumerState<VerificationScreen> {
 
   void _showSnack(String msg, {bool isSuccess = false}) {
     if (!mounted) return;
+    final colorScheme = Theme.of(context).colorScheme;
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
-        content: Text(msg, style: const TextStyle(color: Colors.white, fontSize: 13)),
-        backgroundColor:
-            isSuccess ? const Color(0xFF1A7A4A) : const Color(0xFF8B0000),
-        behavior: SnackBarBehavior.floating,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-        margin: const EdgeInsets.all(16),
+        content: Text(
+          msg,
+          style: TextStyle(
+            color: isSuccess ? AppColors.successEmerald : colorScheme.error,
+            fontSize: 13,
+            fontWeight: FontWeight.w600,
+          ),
+        ),
+        backgroundColor: Theme.of(context).cardTheme.color,
       ),
     );
   }
@@ -186,20 +191,21 @@ class _VerificationScreenState extends ConsumerState<VerificationScreen> {
   Widget build(BuildContext context) {
     final phone = _phoneNumber;
     final maskedPhone = _masked(phone);
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
 
     return Scaffold(
-      backgroundColor: const Color(0xFF080F1E),
       body: Stack(
         children: [
           _buildGlowOrb(
-              top: -80, left: -80, color: const Color(0xFF1A3A6E), size: 250),
+              top: -80, left: -80, color: colorScheme.primary.withValues(alpha: 0.15), size: 250),
           _buildGlowOrb(
               bottom: -60,
               right: -60,
-              color: const Color(0xFF0E2A50),
+              color: colorScheme.secondary.withValues(alpha: 0.1),
               size: 220),
           _buildGlowOrb(
-              top: 160, right: 40, color: const Color(0xFF112244), size: 140),
+              top: 160, right: 40, color: colorScheme.primary.withValues(alpha: 0.08), size: 140),
           SafeArea(
             child: Column(
               children: [
@@ -209,7 +215,7 @@ class _VerificationScreenState extends ConsumerState<VerificationScreen> {
                   child: Align(
                     alignment: Alignment.centerLeft,
                     child: IconButton(
-                      icon: const Icon(Icons.arrow_back_ios_new, color: Colors.white70, size: 20),
+                      icon: Icon(Icons.arrow_back_ios_new, color: colorScheme.onSurface, size: 20),
                       onPressed: () => _handleChangePhoneNumber(),
                     ),
                   ),
@@ -224,44 +230,31 @@ class _VerificationScreenState extends ConsumerState<VerificationScreen> {
                         height: 68,
                         decoration: BoxDecoration(
                           shape: BoxShape.circle,
-                          gradient: const LinearGradient(
-                            colors: [Color(0xFF1E3F7A), Color(0xFF102040)],
-                            begin: Alignment.topLeft,
-                            end: Alignment.bottomRight,
-                          ),
+                          color: colorScheme.surface,
                           border: Border.all(
-                              color: const Color(0xFF3A6FD8).withValues(alpha: 0.5),
+                              color: colorScheme.primary.withValues(alpha: 0.2),
                               width: 1.5),
                           boxShadow: [
                             BoxShadow(
-                              color: const Color(0xFF3A6FD8).withValues(alpha: 0.35),
+                              color: colorScheme.primary.withValues(alpha: 0.15),
                               blurRadius: 28,
                               spreadRadius: 4,
                             ),
                           ],
                         ),
-                        child: const Icon(Icons.verified_user,
-                            color: Color(0xFF7EB3FF), size: 30),
+                        child: Icon(Icons.verified_user,
+                            color: colorScheme.primary, size: 30),
                       ),
                       const SizedBox(height: 16),
-                      const Text(
+                      Text(
                         'Secure OTP Verification',
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 22,
-                          fontWeight: FontWeight.w800,
-                          letterSpacing: 0.3,
-                        ),
+                        style: theme.textTheme.displaySmall,
                       ),
-                      const SizedBox(height: 6),
+                      const SizedBox(height: 8),
                       Text(
                         'A 6-digit transmission code has been sent to your phone number.',
                         textAlign: TextAlign.center,
-                        style: TextStyle(
-                          color: Colors.white.withValues(alpha: 0.45),
-                          fontSize: 12.5,
-                          height: 1.5,
-                        ),
+                        style: theme.textTheme.bodyMedium,
                       ),
                       const SizedBox(height: 18),
                       _buildAttemptsRow(),
@@ -283,10 +276,10 @@ class _VerificationScreenState extends ConsumerState<VerificationScreen> {
                               Container(
                                 padding: const EdgeInsets.all(10),
                                 decoration: BoxDecoration(
-                                  color: const Color(0xFF1E3F7A).withValues(alpha: 0.5),
+                                  color: colorScheme.primary.withValues(alpha: 0.1),
                                   borderRadius: BorderRadius.circular(10),
                                 ),
-                                child: const Icon(Icons.phone_android_outlined, color: Color(0xFF7EB3FF), size: 20),
+                                child: Icon(Icons.phone_android_outlined, color: colorScheme.primary, size: 20),
                               ),
                               const SizedBox(width: 14),
                               Expanded(
@@ -295,21 +288,15 @@ class _VerificationScreenState extends ConsumerState<VerificationScreen> {
                                   children: [
                                     Text(
                                       'PHONE NUMBER',
-                                      style: TextStyle(
-                                        color: Colors.white.withValues(alpha: 0.4),
-                                        fontSize: 9,
+                                      style: theme.textTheme.bodySmall?.copyWith(
                                         letterSpacing: 2,
+                                        fontWeight: FontWeight.bold,
                                       ),
                                     ),
                                     const SizedBox(height: 3),
                                     Text(
                                       phone.isEmpty ? 'Not provided' : maskedPhone,
-                                      style: const TextStyle(
-                                        color: Colors.white,
-                                        fontSize: 15,
-                                        fontWeight: FontWeight.w700,
-                                        letterSpacing: 0.5,
-                                      ),
+                                      style: theme.textTheme.titleMedium,
                                     ),
                                   ],
                                 ),
@@ -318,15 +305,15 @@ class _VerificationScreenState extends ConsumerState<VerificationScreen> {
                                 Container(
                                   padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                                   decoration: BoxDecoration(
-                                    color: const Color(0xFF1A7A4A).withValues(alpha: 0.2),
+                                    color: AppColors.successEmerald.withValues(alpha: 0.1),
                                     borderRadius: BorderRadius.circular(6),
                                     border: Border.all(
-                                        color: const Color(0xFF4CAF50).withValues(alpha: 0.4)),
+                                        color: AppColors.successEmerald.withValues(alpha: 0.4)),
                                   ),
-                                  child: const Text(
+                                  child: Text(
                                     'SENT',
                                     style: TextStyle(
-                                      color: Color(0xFF4CAF50),
+                                      color: AppColors.successEmerald,
                                       fontSize: 9,
                                       fontWeight: FontWeight.w800,
                                       letterSpacing: 1.5,
@@ -341,11 +328,9 @@ class _VerificationScreenState extends ConsumerState<VerificationScreen> {
                         const SizedBox(height: 28),
                         Text(
                           'ENTER VERIFICATION CODE',
-                          style: TextStyle(
-                            color: Colors.white.withValues(alpha: 0.4),
-                            fontSize: 9,
+                          style: theme.textTheme.bodySmall?.copyWith(
                             letterSpacing: 2,
-                            fontWeight: FontWeight.w700,
+                            fontWeight: FontWeight.bold,
                           ),
                         ),
                         const SizedBox(height: 12),
@@ -357,11 +342,11 @@ class _VerificationScreenState extends ConsumerState<VerificationScreen> {
                         Center(
                           child: TextButton.icon(
                             onPressed: _handleChangePhoneNumber,
-                            icon: const Icon(Icons.edit_note, color: Colors.blueAccent, size: 18),
-                            label: const Text(
+                            icon: Icon(Icons.edit_note, color: colorScheme.primary, size: 18),
+                            label: Text(
                               'Change phone number',
                               style: TextStyle(
-                                color: Colors.blueAccent,
+                                color: colorScheme.primary,
                                 fontWeight: FontWeight.bold,
                                 fontSize: 13,
                               ),
@@ -374,16 +359,12 @@ class _VerificationScreenState extends ConsumerState<VerificationScreen> {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Icon(Icons.info_outline,
-                                  color: Colors.white.withValues(alpha: 0.3), size: 16),
+                                  color: colorScheme.onSurface.withValues(alpha: 0.3), size: 16),
                               const SizedBox(width: 10),
                               Expanded(
                                 child: Text(
                                   'Your OTP expires in 10 minutes. After 3 failed attempts you will be redirected to login to maintain network integrity.',
-                                  style: TextStyle(
-                                    color: Colors.white.withValues(alpha: 0.4),
-                                    fontSize: 11.5,
-                                    height: 1.5,
-                                  ),
+                                  style: theme.textTheme.bodySmall,
                                 ),
                               ),
                             ],
@@ -402,16 +383,13 @@ class _VerificationScreenState extends ConsumerState<VerificationScreen> {
   }
 
   Widget _buildAttemptsRow() {
+    final theme = Theme.of(context);
     return Row(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
         Text(
           'ATTEMPTS:  ',
-          style: TextStyle(
-            color: Colors.white.withValues(alpha: 0.35),
-            fontSize: 10,
-            letterSpacing: 2,
-          ),
+          style: theme.textTheme.bodySmall?.copyWith(letterSpacing: 2),
         ),
         ...List.generate(3, (i) {
           final active = i < _attemptsLeft;
@@ -424,12 +402,12 @@ class _VerificationScreenState extends ConsumerState<VerificationScreen> {
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
                 color: active
-                    ? const Color(0xFF4CAF50)
-                    : const Color(0xFF3A3A3A),
+                    ? AppColors.successEmerald
+                    : theme.dividerColor,
                 boxShadow: active
                     ? [
                         BoxShadow(
-                            color: const Color(0xFF4CAF50).withValues(alpha: 0.6),
+                            color: AppColors.successEmerald.withValues(alpha: 0.4),
                             blurRadius: 6)
                       ]
                     : [],
@@ -442,6 +420,8 @@ class _VerificationScreenState extends ConsumerState<VerificationScreen> {
   }
 
   Widget _buildSendOtpButton() {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
     final canResend = _resendSeconds == 0;
     final label = !_otpSent
         ? 'SEND VERIFICATION CODE'
@@ -458,36 +438,36 @@ class _VerificationScreenState extends ConsumerState<VerificationScreen> {
           borderRadius: BorderRadius.circular(10),
           border: Border.all(
             color: canResend
-                ? const Color(0xFF3A6FD8).withValues(alpha: 0.7)
-                : Colors.white.withValues(alpha: 0.1),
+                ? colorScheme.primary.withValues(alpha: 0.5)
+                : theme.dividerColor,
           ),
           color: canResend
-              ? const Color(0xFF1E3F7A).withValues(alpha: 0.4)
-              : Colors.white.withValues(alpha: 0.03),
+              ? colorScheme.primary.withValues(alpha: 0.1)
+              : colorScheme.surface,
         ),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             if (_isLoading && !_otpSent)
-              const SizedBox(
+              SizedBox(
                 width: 16,
                 height: 16,
                 child: CircularProgressIndicator(
                   strokeWidth: 2,
-                  color: Color(0xFF7EB3FF),
+                  color: colorScheme.primary,
                 ),
               )
             else
               Icon(
                 Icons.send_outlined,
                 size: 16,
-                color: canResend ? const Color(0xFF7EB3FF) : Colors.white24,
+                color: canResend ? colorScheme.primary : colorScheme.onSurface.withValues(alpha: 0.3),
               ),
             const SizedBox(width: 10),
             Text(
               label,
               style: TextStyle(
-                color: canResend ? const Color(0xFF7EB3FF) : Colors.white24,
+                color: canResend ? colorScheme.primary : colorScheme.onSurface.withValues(alpha: 0.3),
                 fontSize: 12,
                 fontWeight: FontWeight.w700,
                 letterSpacing: 1.3,
@@ -500,6 +480,8 @@ class _VerificationScreenState extends ConsumerState<VerificationScreen> {
   }
 
   Widget _buildOtpBoxes() {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: List.generate(6, (i) {
@@ -523,39 +505,28 @@ class _VerificationScreenState extends ConsumerState<VerificationScreen> {
               keyboardType: TextInputType.number,
               textAlign: TextAlign.center,
               maxLength: 1,
-              style: const TextStyle(
-                color: Colors.white,
-                fontSize: 22,
-                fontWeight: FontWeight.w900,
-                height: 1,
-              ),
+              style: theme.textTheme.displayMedium?.copyWith(fontSize: 22),
               inputFormatters: [FilteringTextInputFormatter.digitsOnly],
               decoration: InputDecoration(
                 counterText: '',
                 filled: true,
-                fillColor: _otpSent
-                    ? const Color(0xFF111D35)
-                    : const Color(0xFF0D1525),
+                fillColor: colorScheme.surface,
                 contentPadding: EdgeInsets.zero,
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(10),
-                  borderSide:
-                      BorderSide(color: Colors.white.withValues(alpha: 0.08)),
+                  borderSide: BorderSide(color: theme.dividerColor),
                 ),
                 focusedBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(10),
-                  borderSide:
-                      const BorderSide(color: Color(0xFF3A6FD8), width: 1.5),
+                  borderSide: BorderSide(color: colorScheme.primary, width: 1.5),
                 ),
                 enabledBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(10),
-                  borderSide:
-                      BorderSide(color: Colors.white.withValues(alpha: 0.10)),
+                  borderSide: BorderSide(color: theme.dividerColor),
                 ),
                 disabledBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(10),
-                  borderSide:
-                      BorderSide(color: Colors.white.withValues(alpha: 0.04)),
+                  borderSide: BorderSide(color: theme.dividerColor.withValues(alpha: 0.5)),
                 ),
               ),
               onChanged: (val) {
@@ -572,6 +543,8 @@ class _VerificationScreenState extends ConsumerState<VerificationScreen> {
   }
 
   Widget _buildVerifyButton() {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
     final isReady =
         _otpToken.length == 6 && _otpSent && !_isLoading && _attemptsLeft > 0;
 
@@ -582,20 +555,14 @@ class _VerificationScreenState extends ConsumerState<VerificationScreen> {
         padding: const EdgeInsets.symmetric(vertical: 15),
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(10),
-          gradient: isReady
-              ? const LinearGradient(
-                  colors: [Color(0xFF1E3F7A), Color(0xFF3A6FD8)],
-                  begin: Alignment.centerLeft,
-                  end: Alignment.centerRight,
-                )
-              : null,
-          color: isReady ? null : const Color(0xFF111D35),
+          color: isReady ? colorScheme.primary : colorScheme.surface,
+          border: isReady ? null : Border.all(color: theme.dividerColor),
           boxShadow: isReady
               ? [
                   BoxShadow(
-                    color: const Color(0xFF3A6FD8).withValues(alpha: 0.35),
-                    blurRadius: 20,
-                    offset: const Offset(0, 6),
+                    color: colorScheme.primary.withValues(alpha: 0.3),
+                    blurRadius: 12,
+                    offset: const Offset(0, 4),
                   ),
                 ]
               : [],
@@ -611,16 +578,16 @@ class _VerificationScreenState extends ConsumerState<VerificationScreen> {
                     strokeWidth: 2, color: Colors.white),
               )
             else
-              const Icon(
+              Icon(
                 Icons.verified_user,
                 size: 18,
-                color: Colors.white,
+                color: isReady ? Colors.white : colorScheme.onSurface.withValues(alpha: 0.3),
               ),
             const SizedBox(width: 10),
             Text(
               _isLoading ? 'VERIFYING...' : 'VERIFY IDENTITY',
               style: TextStyle(
-                color: isReady ? Colors.white : Colors.white24,
+                color: isReady ? Colors.white : colorScheme.onSurface.withValues(alpha: 0.3),
                 fontSize: 13,
                 fontWeight: FontWeight.w800,
                 letterSpacing: 1.5,
@@ -633,19 +600,22 @@ class _VerificationScreenState extends ConsumerState<VerificationScreen> {
   }
 
   Widget _buildGlassCard({required Widget child}) {
-    return ClipRRect(
-      borderRadius: BorderRadius.circular(14),
-      child: SafeBackdrop(
-        blur: 12,
-        fallbackColor: const Color(0xFF111D35).withValues(alpha: 0.7),
-        child: Container(
-          padding: const EdgeInsets.all(16),
-          decoration: BoxDecoration(
-            color: kIsWeb ? Colors.transparent : const Color(0xFF111D35).withValues(alpha: 0.7),
-            borderRadius: BorderRadius.circular(14),
-            border: Border.all(color: Colors.white.withValues(alpha: 0.07)),
+    final theme = Theme.of(context);
+    return Container(
+      decoration: BoxDecoration(
+        color: theme.cardTheme.color,
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(color: theme.dividerColor),
+      ),
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(14),
+        child: SafeBackdrop(
+          blur: 10,
+          fallbackColor: Colors.transparent,
+          child: Padding(
+            padding: const EdgeInsets.all(16),
+            child: child,
           ),
-          child: child,
         ),
       ),
     );
@@ -669,7 +639,7 @@ class _VerificationScreenState extends ConsumerState<VerificationScreen> {
         height: size,
         decoration: BoxDecoration(
           shape: BoxShape.circle,
-          color: color.withValues(alpha: 0.45),
+          color: color,
         ),
         child: SafeBackdrop(
           blur: 60,

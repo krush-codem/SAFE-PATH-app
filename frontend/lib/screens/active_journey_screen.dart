@@ -6,6 +6,8 @@ import 'package:google_maps_flutter/google_maps_flutter.dart';
 import '../providers/journey_provider.dart';
 import '../providers/auth_provider.dart';
 import '../widgets/dynamic_ui.dart';
+import '../core/utils/map_marker_helper.dart';
+import '../theme/app_theme.dart';
 
 class ActiveJourneyScreen extends ConsumerStatefulWidget {
   const ActiveJourneyScreen({super.key});
@@ -32,26 +34,31 @@ class _ActiveJourneyScreenState extends ConsumerState<ActiveJourneyScreen> with 
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
     final journeyState = ref.watch(journeyProvider);
     final isJourneyActive = journeyState.status != JourneyStatus.inactive;
     final isSOSActive = journeyState.status == JourneyStatus.sosTriggered;
     final profileAsync = ref.watch(profileProvider);
 
     return Scaffold(
-      backgroundColor: Colors.black,
       appBar: AppBar(
-        backgroundColor: isSOSActive ? Colors.red.withValues(alpha: 0.2) : Colors.black,
-        elevation: 0,
-        leading: IconButton(icon: const Icon(Icons.arrow_back_ios_new, color: Colors.white, size: 20), onPressed: () => context.pop()),
+        leading: IconButton(
+          icon: Icon(Icons.arrow_back_ios_new, color: colorScheme.onSurface, size: 20), 
+          onPressed: () => context.pop()
+        ),
         title: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
               isSOSActive ? 'SOS: EMERGENCY PROTOCOL' : 'Safe Path Active', 
-              style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16, color: Colors.white)
+              style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold)
             ),
             if (isSOSActive) 
-              const Text('CALCULATING SHORTEST ROUTE', style: TextStyle(color: Colors.redAccent, fontSize: 10, fontWeight: FontWeight.bold, letterSpacing: 1)),
+              Text(
+                'CALCULATING SHORTEST ROUTE', 
+                style: theme.textTheme.bodySmall?.copyWith(color: colorScheme.error, fontWeight: FontWeight.bold, letterSpacing: 1)
+              ),
           ],
         ),
         actions: [
@@ -76,7 +83,13 @@ class _ActiveJourneyScreenState extends ConsumerState<ActiveJourneyScreen> with 
         ],
       ),
       body: !isJourneyActive 
-        ? const Center(child: Text('No Active Journey.\nStart a journey to see mapping and SOS tools.', style: TextStyle(color: Colors.white38), textAlign: TextAlign.center))
+        ? Center(
+            child: Text(
+              'No Active Journey.\nStart a journey to see mapping and SOS tools.', 
+              style: theme.textTheme.bodyMedium, 
+              textAlign: TextAlign.center
+            )
+          )
         : TabBarView(
             controller: _tabController,
             physics: const NeverScrollableScrollPhysics(), 
@@ -91,14 +104,19 @@ class _ActiveJourneyScreenState extends ConsumerState<ActiveJourneyScreen> with 
               ),
               
               // Tab 2: Settings (Placeholder)
-              const Center(child: Text('Settings Coming Soon', style: TextStyle(color: Colors.white24))),
+              Center(
+                child: Text(
+                  'Settings Coming Soon', 
+                  style: theme.textTheme.bodyMedium?.copyWith(color: colorScheme.onSurface.withValues(alpha: 0.2))
+                )
+              ),
             ],
           ),
       bottomNavigationBar: Container(
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-        decoration: const BoxDecoration(
-          color: Colors.black, 
-          border: Border(top: BorderSide(color: Colors.white10))
+        decoration: BoxDecoration(
+          color: colorScheme.surface, 
+          border: Border(top: BorderSide(color: theme.dividerColor))
         ),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceAround,
@@ -113,36 +131,141 @@ class _ActiveJourneyScreenState extends ConsumerState<ActiveJourneyScreen> with 
   }
 }
 
-class _MapTab extends ConsumerWidget {
+class _MapTab extends ConsumerStatefulWidget {
   final JourneyState journeyState;
   final Function(GoogleMapController) onMapCreated;
 
   const _MapTab({required this.journeyState, required this.onMapCreated});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final LatLng userPos = LatLng(journeyState.currentLat ?? 0.0, journeyState.currentLng ?? 0.0);
-    
-    // Create markers for guardians with permission
-    final Set<Marker> markers = journeyState.guardianLocations
-      .where((g) => journeyState.locationPermissionIds.contains(g['id']))
-      .map((g) {
-        return Marker(
-          markerId: MarkerId(g['id']),
-          position: LatLng(g['lat'], g['lng']),
-          infoWindow: InfoWindow(title: g['name']),
-          icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueAzure),
-        );
-      }).toSet();
+  ConsumerState<_MapTab> createState() => _MapTabState();
 
-    // User marker
-    markers.add(Marker(
+  static const String _darkMapStyle = '''
+[
+  {
+    "elementType": "geometry",
+    "stylers": [{"color": "#000000"}]
+  },
+  {
+    "elementType": "labels.text.fill",
+    "stylers": [{"color": "#888888"}]
+  },
+  {
+    "elementType": "labels.text.stroke",
+    "stylers": [{"color": "#000000"}]
+  },
+  {
+    "featureType": "administrative.locality",
+    "elementType": "labels.text.fill",
+    "stylers": [{"color": "#B87333"}]
+  },
+  {
+    "featureType": "poi",
+    "elementType": "labels.text.fill",
+    "stylers": [{"color": "#B87333"}]
+  },
+  {
+    "featureType": "poi.park",
+    "elementType": "geometry",
+    "stylers": [{"color": "#111111"}]
+  },
+  {
+    "featureType": "road",
+    "elementType": "geometry",
+    "stylers": [{"color": "#222222"}]
+  },
+  {
+    "featureType": "road",
+    "elementType": "geometry.stroke",
+    "stylers": [{"color": "#111111"}]
+  },
+  {
+    "featureType": "water",
+    "elementType": "geometry",
+    "stylers": [{"color": "#000B1A"}]
+  }
+]
+''';
+}
+
+class _MapTabState extends ConsumerState<_MapTab> {
+  final Map<String, Marker> _markers = {};
+  bool _isLoadingMarkers = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _updateMarkers();
+  }
+
+  @override
+  void didUpdateWidget(_MapTab oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.journeyState.guardianLocations != widget.journeyState.guardianLocations ||
+        oldWidget.journeyState.currentLat != widget.journeyState.currentLat ||
+        oldWidget.journeyState.locationPermissionIds != widget.journeyState.locationPermissionIds) {
+      _updateMarkers();
+    }
+  }
+
+  Future<void> _updateMarkers() async {
+    if (_isLoadingMarkers) return;
+    _isLoadingMarkers = true;
+
+    final journeyState = widget.journeyState;
+    final profile = ref.read(profileProvider).value;
+    
+    final Map<String, Marker> newMarkers = {};
+
+    // 1. User marker
+    final LatLng userPos = LatLng(journeyState.currentLat ?? 0.0, journeyState.currentLng ?? 0.0);
+    final userIcon = await MapMarkerHelper.getCustomMarker(
+      profile?.avatarUrl, 
+      profile?.fullName ?? 'You',
+      color: Colors.blueAccent
+    );
+    
+    newMarkers['user'] = Marker(
       markerId: const MarkerId('user'),
       position: userPos,
       infoWindow: const InfoWindow(title: 'You'),
-      icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueRed),
-    ));
+      icon: userIcon,
+      zIndex: 10,
+    );
 
+    // 2. Guardian markers
+    final permittedGuardians = journeyState.guardianLocations
+      .where((g) => journeyState.locationPermissionIds.contains(g['id']));
+
+    for (var g in permittedGuardians) {
+      final icon = await MapMarkerHelper.getCustomMarker(
+        g['avatar_url'], 
+        g['name'],
+        color: const Color(0xFF5C79FF)
+      );
+      
+      newMarkers[g['id']] = Marker(
+        markerId: MarkerId(g['id']),
+        position: LatLng(g['lat'], g['lng']),
+        infoWindow: InfoWindow(title: g['name']),
+        icon: icon,
+      );
+    }
+
+    if (mounted) {
+      setState(() {
+        _markers.clear();
+        _markers.addAll(newMarkers);
+        _isLoadingMarkers = false;
+      });
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final journeyState = widget.journeyState;
+    final LatLng userPos = LatLng(journeyState.currentLat ?? 0.0, journeyState.currentLng ?? 0.0);
+    
     // Polylines for SOS route
     final Set<Polyline> polylines = {};
     if (journeyState.sosRoutePoints != null) {
@@ -159,12 +282,12 @@ class _MapTab extends ConsumerWidget {
         GoogleMap(
           initialCameraPosition: CameraPosition(target: userPos, zoom: 15),
           onMapCreated: (controller) {
-            controller.setMapStyle(_darkMapStyle);
-            onMapCreated(controller);
+            controller.setMapStyle(_MapTab._darkMapStyle);
+            widget.onMapCreated(controller);
           },
-          markers: markers,
+          markers: _markers.values.toSet(),
           polylines: polylines,
-          myLocationEnabled: true,
+          myLocationEnabled: false, // Using custom marker for precision and style
           myLocationButtonEnabled: true,
           zoomControlsEnabled: false,
         ),
@@ -267,13 +390,14 @@ class _ChatTab extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final theme = Theme.of(context);
     return SingleChildScrollView(
       padding: const EdgeInsets.all(24.0),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text('Safe Stories', style: TextStyle(color: Colors.white, fontSize: 20, fontWeight: FontWeight.bold)),
-          const Text('TRANSIENT: DELETES AFTER JOURNEY', style: TextStyle(color: Colors.white38, fontSize: 10, letterSpacing: 1.5)),
+          Text('Safe Stories', style: theme.textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold)),
+          Text('TRANSIENT: DELETES AFTER JOURNEY', style: theme.textTheme.bodySmall?.copyWith(letterSpacing: 1.5)),
           const SizedBox(height: 16),
           SingleChildScrollView(
             scrollDirection: Axis.horizontal,
@@ -287,7 +411,7 @@ class _ChatTab extends ConsumerWidget {
             ),
           ),
           const SizedBox(height: 32),
-          const Text('Active Threads', style: TextStyle(color: Colors.white, fontSize: 20, fontWeight: FontWeight.bold)),
+          Text('Active Threads', style: theme.textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold)),
           const SizedBox(height: 16),
           ...journeyState.guardianLocations.map((g) {
             final hasPermission = journeyState.locationPermissionIds.contains(g['id']);
@@ -319,6 +443,8 @@ class _StoryItem extends StatelessWidget {
   const _StoryItem({this.isAdd = false, this.imageUrl, required this.label, this.onTap});
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
     return Padding(
       padding: const EdgeInsets.only(right: 16),
       child: GestureDetector(
@@ -329,14 +455,15 @@ class _StoryItem extends StatelessWidget {
               width: 72, 
               height: 72, 
               decoration: BoxDecoration(
+                color: colorScheme.surface,
                 borderRadius: BorderRadius.circular(12), 
-                border: Border.all(color: const Color(0xFF5C79FF), width: 1.5), 
+                border: Border.all(color: colorScheme.primary, width: 1.5), 
                 image: isAdd ? null : DecorationImage(image: NetworkImage(imageUrl ?? 'https://i.pravatar.cc/150?u=$label'), fit: BoxFit.cover)
               ), 
-              child: isAdd ? const Icon(Icons.add, color: Color(0xFF5C79FF), size: 32) : null
+              child: isAdd ? Icon(Icons.add, color: colorScheme.primary, size: 32) : null
             ),
             const SizedBox(height: 8),
-            Text(label, style: const TextStyle(color: Colors.white70, fontSize: 12)),
+            Text(label, style: theme.textTheme.bodySmall),
           ],
         ),
       ),
@@ -362,29 +489,40 @@ class _ThreadItem extends StatelessWidget {
   });
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
     return Container(
       padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(color: const Color(0xFF111111), borderRadius: BorderRadius.circular(12), border: Border.all(color: Colors.white.withValues(alpha: 0.05))),
+      decoration: BoxDecoration(
+        color: colorScheme.surface, 
+        borderRadius: BorderRadius.circular(16), 
+        border: Border.all(color: theme.dividerColor, width: 1)
+      ),
       child: Row(
         children: [
-          CircleAvatar(radius: 24, backgroundImage: NetworkImage('https://i.pravatar.cc/150?u=$name')),
+          CircleAvatar(
+            radius: 24, 
+            backgroundColor: colorScheme.onSurface.withValues(alpha: 0.1),
+            backgroundImage: NetworkImage('https://i.pravatar.cc/150?u=$name')
+          ),
           const SizedBox(width: 16),
           Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-            Text(name, style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 16)),
+            Text(name, style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w900)),
             const SizedBox(height: 4),
-            Text(message, style: const TextStyle(color: Colors.white38, fontSize: 13), maxLines: 1),
+            Text(message, style: theme.textTheme.bodyMedium, maxLines: 1),
           ])),
           Column(crossAxisAlignment: CrossAxisAlignment.end, children: [
             if (active) Row(children: [
-              const Text('Live', style: TextStyle(color: Colors.white38, fontSize: 10)), 
+              Text('LIVE', style: theme.textTheme.bodySmall?.copyWith(fontWeight: FontWeight.w900, letterSpacing: 1)), 
               const SizedBox(width: 4), 
               Switch.adaptive(
                 value: hasPermission, 
                 onChanged: onToggle, 
-                activeColor: const Color(0xFF5C79FF)
+                activeTrackColor: colorScheme.primary.withValues(alpha: 0.2),
+                activeColor: colorScheme.primary,
               )
             ]),
-            Text(time, style: const TextStyle(color: Colors.white38, fontSize: 10)),
+            Text(time, style: theme.textTheme.bodySmall),
           ])
         ],
       ),
@@ -400,9 +538,26 @@ class _NavBarItem extends StatelessWidget {
   const _NavBarItem({required this.icon, required this.label, this.isActive = false, required this.onTap});
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+    final color = isActive ? colorScheme.primary : colorScheme.onSurface.withValues(alpha: 0.4);
     return GestureDetector(
       onTap: onTap,
-      child: Column(mainAxisSize: MainAxisSize.min, children: [Icon(icon, color: isActive ? const Color(0xFF5C79FF) : Colors.white38), const SizedBox(height: 4), Text(label, style: TextStyle(color: isActive ? const Color(0xFF5C79FF) : Colors.white38, fontSize: 10, fontWeight: FontWeight.bold))]),
+      child: Column(
+        mainAxisSize: MainAxisSize.min, 
+        children: [
+          Icon(icon, color: color, size: 24), 
+          const SizedBox(height: 6), 
+          Text(
+            label, 
+            style: theme.textTheme.bodySmall?.copyWith(
+              color: color,
+              fontWeight: FontWeight.w900,
+              letterSpacing: 1.5
+            )
+          )
+        ]
+      ),
     );
   }
 }
@@ -413,6 +568,8 @@ class _SafetyStatusCard extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
     final seconds = journeyState.nextCheckCountdownSeconds ?? 0;
     final mins = seconds ~/ 60;
     final secs = seconds % 60;
@@ -420,12 +577,15 @@ class _SafetyStatusCard extends ConsumerWidget {
     
     final isVerificationWindow = journeyState.status == JourneyStatus.pinging;
 
-    return GlassCard(
+    return Container(
       padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
-      opacity: isVerificationWindow ? 0.15 : 0.05,
-      border: Border.all(
-        color: isVerificationWindow ? Colors.orangeAccent : const Color(0xFF5C79FF).withValues(alpha: 0.3),
-        width: 1.5,
+      decoration: BoxDecoration(
+        color: colorScheme.surface,
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(
+          color: isVerificationWindow ? Colors.orangeAccent : theme.dividerColor,
+          width: 1,
+        ),
       ),
       child: Column(
         children: [
@@ -433,7 +593,7 @@ class _SafetyStatusCard extends ConsumerWidget {
             children: [
               Icon(
                 isVerificationWindow ? Icons.security_rounded : Icons.timer_outlined, 
-                color: isVerificationWindow ? Colors.orangeAccent : const Color(0xFF5C79FF)
+                color: isVerificationWindow ? Colors.orangeAccent : colorScheme.onSurface
               ),
               const SizedBox(width: 12),
               Expanded(
@@ -441,12 +601,12 @@ class _SafetyStatusCard extends ConsumerWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      isVerificationWindow ? "VERIFICATION REQUIRED" : "Safety Checkpoint",
-                      style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 14),
+                      isVerificationWindow ? "SAFETY CHECK" : "SECURITY CHECKPOINT",
+                      style: theme.textTheme.bodySmall?.copyWith(fontWeight: FontWeight.w900, letterSpacing: 1),
                     ),
                     Text(
-                      isVerificationWindow ? "Confirm your safety now" : "Next automated check in $timeStr",
-                      style: TextStyle(color: Colors.white.withValues(alpha: 0.5), fontSize: 11),
+                      isVerificationWindow ? "Confirm your safety now" : "NEXT AUTOMATED PROMPT: $timeStr",
+                      style: theme.textTheme.bodySmall,
                     ),
                   ],
                 ),
@@ -455,15 +615,15 @@ class _SafetyStatusCard extends ConsumerWidget {
                 ElevatedButton(
                   onPressed: () => _showOtpDialog(context, ref),
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.orangeAccent,
-                    foregroundColor: Colors.black,
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                    backgroundColor: colorScheme.onSurface,
+                    foregroundColor: colorScheme.surface,
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
                     padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                   ),
-                  child: const Text("ENTER OTP", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12)),
+                  child: const Text("VERIFY NOW", style: TextStyle(fontWeight: FontWeight.w900, fontSize: 11)),
                 )
               else 
-                Text(timeStr, style: const TextStyle(color: Color(0xFF5C79FF), fontWeight: FontWeight.bold, fontSize: 18)),
+                Text(timeStr, style: theme.textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w900)),
             ],
           ),
           if (journeyState.lastOtpVerificationTime != null && 
@@ -475,11 +635,11 @@ class _SafetyStatusCard extends ConsumerWidget {
                 child: OutlinedButton(
                   onPressed: () => ref.read(journeyProvider.notifier).stopJourney(isCompleted: true),
                   style: OutlinedButton.styleFrom(
-                    foregroundColor: Colors.greenAccent,
-                    side: const BorderSide(color: Colors.greenAccent),
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                    foregroundColor: colorScheme.onSurface,
+                    side: BorderSide(color: colorScheme.onSurface, width: 1.5),
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
                   ),
-                  child: const Text("FINISH JOURNEY", style: TextStyle(fontWeight: FontWeight.bold)),
+                  child: const Text("FINISH JOURNEY", style: TextStyle(fontWeight: FontWeight.w900, fontSize: 11)),
                 ),
               ),
             ),
@@ -489,28 +649,27 @@ class _SafetyStatusCard extends ConsumerWidget {
   }
 
   void _showOtpDialog(BuildContext context, WidgetRef ref) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
     final TextEditingController otpController = TextEditingController();
     
     showDialog(
       context: context,
       barrierDismissible: false,
       builder: (context) => AlertDialog(
-        backgroundColor: const Color(0xFF111111),
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-        title: const Column(
+        title: Column(
           children: [
-            Icon(Icons.shield_moon_rounded, color: Color(0xFF5C79FF), size: 48),
-            SizedBox(height: 16),
-            Text("Enter Safety OTP", style: TextStyle(color: Colors.white)),
+            Icon(Icons.security, color: colorScheme.onSurface, size: 48),
+            const SizedBox(height: 16),
+            Text("SAFETY CHECK", style: theme.textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w900, letterSpacing: 1)),
           ],
         ),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
             const Text(
-              "Please verify your safety to continue. Failure to do so will trigger an SOS alert.",
+              "Please enter your safety code to continue. If not verified, an SOS alert will be sent to your contacts.",
               textAlign: TextAlign.center,
-              style: TextStyle(color: Colors.white70, fontSize: 13),
             ),
             const SizedBox(height: 24),
             TextField(
@@ -518,25 +677,24 @@ class _SafetyStatusCard extends ConsumerWidget {
               keyboardType: TextInputType.number,
               maxLength: 6,
               textAlign: TextAlign.center,
-              style: const TextStyle(color: Colors.white, fontSize: 24, letterSpacing: 8, fontWeight: FontWeight.bold),
+              style: theme.textTheme.displayLarge?.copyWith(fontSize: 32, letterSpacing: 8, fontWeight: FontWeight.w900),
               decoration: InputDecoration(
                 counterText: "",
                 filled: true,
-                fillColor: Colors.black26,
-                border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide.none),
+                fillColor: colorScheme.onSurface.withValues(alpha: 0.05),
               ),
             ),
-            const SizedBox(height: 8),
+            const SizedBox(height: 12),
             Text(
-              "Tries left: ${ref.watch(journeyProvider).otpTriesLeft}",
-              style: const TextStyle(color: Colors.orangeAccent, fontSize: 12, fontWeight: FontWeight.bold),
+              "ATTEMPTS LEFT: ${ref.watch(journeyProvider).otpTriesLeft}",
+              style: const TextStyle(color: Colors.orangeAccent, fontSize: 11, fontWeight: FontWeight.w900, letterSpacing: 1),
             ),
           ],
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text("CANCEL", style: TextStyle(color: Colors.white38)),
+            child: Text("CANCEL", style: TextStyle(color: colorScheme.onSurface.withValues(alpha: 0.5), fontWeight: FontWeight.w900)),
           ),
           ElevatedButton(
             onPressed: () async {
@@ -544,7 +702,7 @@ class _SafetyStatusCard extends ConsumerWidget {
               if (ok) {
                 Navigator.pop(context);
                 ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text("Safety Verified. Secure journey continue.")),
+                  const SnackBar(content: Text("Safety verified.")),
                 );
               } else {
                 otpController.clear();
@@ -553,8 +711,8 @@ class _SafetyStatusCard extends ConsumerWidget {
                 }
               }
             },
-            style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFF5C79FF)),
-            child: const Text("VERIFY"),
+            style: ElevatedButton.styleFrom(backgroundColor: colorScheme.onSurface, foregroundColor: colorScheme.surface),
+            child: const Text("CONFIRM"),
           ),
         ],
       ),

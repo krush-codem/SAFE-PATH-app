@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../providers/auth_provider.dart';
 import '../routing/app_router.dart';
+import '../theme/app_theme.dart';
 
 class SignUpScreen extends ConsumerStatefulWidget {
   final Map<String, dynamic>? initialData;
@@ -156,26 +157,11 @@ class _SignUpScreenState extends ConsumerState<SignUpScreen>
           }
 
           return AlertDialog(
-            backgroundColor: const Color(0xFF131C30),
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(16),
-              side: BorderSide(
-                color: const Color(0xFF4A90D9).withValues(alpha: 0.3),
-                width: 1.5,
-              ),
-            ),
-            title: const Row(
+            title: Row(
               children: [
-                Icon(Icons.mark_email_unread_rounded, color: Colors.blueAccent, size: 28),
-                SizedBox(width: 12),
-                Text(
-                  'Verify Your Email',
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontWeight: FontWeight.bold,
-                    fontSize: 20,
-                  ),
-                ),
+                Icon(Icons.mark_email_unread_rounded, color: Theme.of(context).colorScheme.primary, size: 28),
+                const SizedBox(width: 12),
+                const Text('Verify Your Email'),
               ],
             ),
             content: SingleChildScrollView(
@@ -184,15 +170,15 @@ class _SignUpScreenState extends ConsumerState<SignUpScreen>
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   if (!otpSent) ...[
-                    const Text(
+                    Text(
                       'To receive your 6-digit verification code, click "SENT-OTP" below:',
-                      style: TextStyle(color: Colors.white70, fontSize: 13),
+                      style: Theme.of(context).textTheme.bodyMedium,
                     ),
                     const SizedBox(height: 6),
                     Text(
                       email,
-                      style: const TextStyle(
-                        color: Colors.blueAccent,
+                      style: TextStyle(
+                        color: Theme.of(context).colorScheme.primary,
                         fontWeight: FontWeight.bold,
                         fontSize: 14,
                       ),
@@ -228,13 +214,6 @@ class _SignUpScreenState extends ConsumerState<SignUpScreen>
                                     });
                                   }
                                 },
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: const Color(0xFF4A90D9),
-                            foregroundColor: Colors.white,
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(8),
-                            ),
-                          ),
                           child: dialogLoading
                               ? const SizedBox(
                                   width: 20,
@@ -256,15 +235,15 @@ class _SignUpScreenState extends ConsumerState<SignUpScreen>
                       ),
                     ),
                   ] else ...[
-                    const Text(
+                    Text(
                       'An OTP verification transmission has been sent to:',
-                      style: TextStyle(color: Colors.white70, fontSize: 13),
+                      style: Theme.of(context).textTheme.bodyMedium,
                     ),
                     const SizedBox(height: 6),
                     Text(
                       email,
-                      style: const TextStyle(
-                        color: Colors.blueAccent,
+                      style: TextStyle(
+                        color: Theme.of(context).colorScheme.primary,
                         fontWeight: FontWeight.bold,
                         fontSize: 14,
                       ),
@@ -273,11 +252,9 @@ class _SignUpScreenState extends ConsumerState<SignUpScreen>
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        const Text(
+                        Text(
                           'ENTER 6-DIGIT SECURITY CODE',
-                          style: TextStyle(
-                            color: Colors.white38,
-                            fontSize: 10,
+                          style: Theme.of(context).textTheme.bodySmall?.copyWith(
                             fontWeight: FontWeight.bold,
                             letterSpacing: 1.5,
                           ),
@@ -286,7 +263,7 @@ class _SignUpScreenState extends ConsumerState<SignUpScreen>
                           'Attempts: $attempts/3',
                           style: TextStyle(
                             color: attempts >= 2
-                                ? Colors.redAccent
+                                ? Theme.of(context).colorScheme.error
                                 : Colors.amberAccent,
                             fontSize: 10,
                             fontWeight: FontWeight.bold,
@@ -295,48 +272,32 @@ class _SignUpScreenState extends ConsumerState<SignUpScreen>
                       ],
                     ),
                     const SizedBox(height: 8),
-                    Container(
-                      decoration: BoxDecoration(
-                        color: const Color(0xFF0D1527),
-                        borderRadius: BorderRadius.circular(8),
-                        border: Border.all(
-                          color: dialogError != null 
-                              ? Colors.redAccent.withValues(alpha: 0.5) 
-                              : Colors.white.withValues(alpha: 0.08),
-                        ),
+                    TextField(
+                      controller: otpCtrl,
+                      keyboardType: TextInputType.number,
+                      textAlign: TextAlign.center,
+                      maxLength: 6,
+                      style: Theme.of(context).textTheme.displaySmall?.copyWith(
+                        letterSpacing: 8,
                       ),
-                      child: TextField(
-                        controller: otpCtrl,
-                        keyboardType: TextInputType.number,
-                        textAlign: TextAlign.center,
-                        maxLength: 6,
-                        style: const TextStyle(
-                          color: Colors.white,
+                      buildCounter: (context, {required currentLength, required isFocused, maxLength}) => null,
+                      decoration: InputDecoration(
+                        hintText: '000000',
+                        hintStyle: TextStyle(
+                          color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.15),
                           fontSize: 20,
                           fontWeight: FontWeight.bold,
                           letterSpacing: 8,
                         ),
-                        buildCounter: (context, {required currentLength, required isFocused, maxLength}) => null,
-                        decoration: InputDecoration(
-                          hintText: '000000',
-                          hintStyle: TextStyle(
-                            color: Colors.white.withValues(alpha: 0.15),
-                            fontSize: 20,
-                            fontWeight: FontWeight.bold,
-                            letterSpacing: 8,
-                          ),
-                          border: InputBorder.none,
-                          contentPadding: const EdgeInsets.symmetric(vertical: 12),
-                        ),
-                        onSubmitted: (_) => dialogLoading ? null : verifyCode(),
                       ),
+                      onSubmitted: (_) => dialogLoading ? null : verifyCode(),
                     ),
                   ],
                   if (dialogError != null) ...[
                     const SizedBox(height: 10),
                     Text(
                       dialogError!,
-                      style: const TextStyle(color: Colors.redAccent, fontSize: 12),
+                      style: TextStyle(color: Theme.of(context).colorScheme.error, fontSize: 12),
                     ),
                   ],
                 ],
@@ -356,38 +317,30 @@ class _SignUpScreenState extends ConsumerState<SignUpScreen>
                     Navigator.pop(context);
                   }
                 },
-                child: const Text(
-                  'Cancel',
-                  style: TextStyle(
-                    color: Colors.white70,
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
+                child: const Text('Cancel'),
               ),
               if (otpSent)
-                ElevatedButton(
-                  onPressed: dialogLoading || attempts >= 3 ? null : verifyCode,
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.white.withValues(alpha: 0.9),
-                    foregroundColor: const Color(0xFF0D1527),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(8),
+                SizedBox(
+                  height: 44,
+                  child: ElevatedButton(
+                    onPressed: dialogLoading || attempts >= 3 ? null : verifyCode,
+                    style: ElevatedButton.styleFrom(
+                      minimumSize: const Size(140, 44),
                     ),
-                    padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-                  ),
-                  child: dialogLoading
-                      ? const SizedBox(
-                          width: 18,
-                          height: 18,
-                          child: CircularProgressIndicator(
-                            color: Color(0xFF0D1527),
-                            strokeWidth: 2,
+                    child: dialogLoading
+                        ? const SizedBox(
+                            width: 18,
+                            height: 18,
+                            child: CircularProgressIndicator(
+                              color: Colors.white,
+                              strokeWidth: 2,
+                            ),
+                          )
+                        : const Text(
+                            'VERIFY',
+                            style: TextStyle(fontWeight: FontWeight.bold),
                           ),
-                        )
-                      : const Text(
-                          'VERIFY & CONTINUE',
-                          style: TextStyle(fontWeight: FontWeight.bold),
-                        ),
+                  ),
                 ),
             ],
           );
@@ -507,12 +460,11 @@ class _SignUpScreenState extends ConsumerState<SignUpScreen>
   }
 
   void _showSnack(String msg, {bool isError = true}) {
+    final theme = Theme.of(context);
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
-        content: Text(msg, style: const TextStyle(color: Colors.white)),
-        backgroundColor: isError ? const Color(0xFF8B0000) : Colors.green.withValues(alpha: 0.8),
-        behavior: SnackBarBehavior.floating,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+        content: Text(msg),
+        backgroundColor: isError ? theme.colorScheme.error : AppColors.successEmerald,
       ),
     );
   }
@@ -531,9 +483,10 @@ class _SignUpScreenState extends ConsumerState<SignUpScreen>
   @override
   Widget build(BuildContext context) {
     final isLoading = ref.watch(authNotifierProvider).isLoading;
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
 
     return Scaffold(
-      backgroundColor: const Color(0xFF0D1527),
       body: SafeArea(
         child: LayoutBuilder(
           builder: (context, constraints) {
@@ -549,15 +502,13 @@ class _SignUpScreenState extends ConsumerState<SignUpScreen>
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  const Row(
+                  Row(
                     children: [
-                      Icon(Icons.shield, color: Colors.white, size: 20),
-                      SizedBox(width: 8),
+                      Icon(Icons.shield, color: colorScheme.primary, size: 20),
+                      const SizedBox(width: 8),
                       Text(
                         'Safe Path',
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 16,
+                        style: theme.textTheme.headlineMedium?.copyWith(
                           fontWeight: FontWeight.w700,
                         ),
                       ),
@@ -567,15 +518,15 @@ class _SignUpScreenState extends ConsumerState<SignUpScreen>
                     width: 36,
                     height: 36,
                     decoration: BoxDecoration(
-                      color: const Color(0xFF4A90D9).withValues(alpha: 0.3),
+                      color: colorScheme.surface,
                       shape: BoxShape.circle,
                       border: Border.all(
-                        color: const Color(0xFF4A90D9).withValues(alpha: 0.5),
+                        color: theme.dividerColor,
                         width: 1.5,
                       ),
                     ),
-                    child: const Icon(Icons.person,
-                        color: Colors.white54, size: 20),
+                    child: Icon(Icons.person,
+                        color: colorScheme.onSurface.withValues(alpha: 0.5), size: 20),
                   ),
                 ],
               ),
@@ -593,22 +544,14 @@ class _SignUpScreenState extends ConsumerState<SignUpScreen>
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         const SizedBox(height: 4),
-                        const Text(
+                        Text(
                           'Create Identity Card',
-                          style: TextStyle(
-                            color: Colors.white,
-                            fontSize: 26,
-                            fontWeight: FontWeight.w800,
-                          ),
+                          style: theme.textTheme.displayMedium,
                         ),
-                        const SizedBox(height: 6),
+                        const SizedBox(height: 8),
                         Text(
                           'Initialize your secure profile on the Safe Path network.',
-                          style: TextStyle(
-                            color: Colors.white.withValues(alpha: 0.5),
-                            fontSize: 13,
-                            height: 1.4,
-                          ),
+                          style: theme.textTheme.bodyMedium,
                         ),
                         const SizedBox(height: 28),
 
@@ -637,9 +580,7 @@ class _SignUpScreenState extends ConsumerState<SignUpScreen>
                         const SizedBox(height: 6),
                         Text(
                           'Requirement: 12+ characters',
-                          style: TextStyle(
-                            color: Colors.white.withValues(alpha: 0.35),
-                            fontSize: 11,
+                          style: theme.textTheme.bodySmall?.copyWith(
                             fontStyle: FontStyle.italic,
                           ),
                         ),
@@ -647,56 +588,46 @@ class _SignUpScreenState extends ConsumerState<SignUpScreen>
                         const SizedBox(height: 28),
 
                         // Initialize Identity button
-                        GestureDetector(
-                          onTap: isLoading ? null : _handleSignUp,
-                          child: Container(
-                            padding: const EdgeInsets.symmetric(vertical: 15),
-                            decoration: BoxDecoration(
-                              color: Colors.white.withValues(alpha: 0.88),
-                              borderRadius: BorderRadius.circular(8),
-                            ),
-                            child: Row(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                if (isLoading)
-                                  const SizedBox(
-                                    width: 18,
-                                    height: 18,
-                                    child: CircularProgressIndicator(
-                                      color: Color(0xFF0D1527),
-                                      strokeWidth: 2,
-                                    ),
-                                  )
-                                else ...[
-                                  const Text(
-                                    'INITIALIZE IDENTITY',
-                                    style: TextStyle(
-                                      color: Color(0xFF0D1527),
-                                      fontSize: 14,
-                                      fontWeight: FontWeight.w800,
-                                      letterSpacing: 1.5,
-                                    ),
+                        ElevatedButton(
+                          onPressed: isLoading ? null : _handleSignUp,
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              if (isLoading)
+                                const SizedBox(
+                                  width: 18,
+                                  height: 18,
+                                  child: CircularProgressIndicator(
+                                    color: Colors.white,
+                                    strokeWidth: 2,
                                   ),
-                                  const SizedBox(width: 8),
-                                  const Icon(Icons.arrow_forward,
-                                      color: Color(0xFF0D1527), size: 18),
-                                ],
+                                )
+                              else ...[
+                                const Text(
+                                  'INITIALIZE IDENTITY',
+                                  style: TextStyle(
+                                    fontWeight: FontWeight.w800,
+                                    letterSpacing: 1.5,
+                                  ),
+                                ),
+                                const SizedBox(width: 8),
+                                const Icon(Icons.arrow_forward, size: 18),
                               ],
-                            ),
+                            ],
                           ),
                         ),
 
                         const SizedBox(height: 20),
 
                         // OR divider
-                        const Row(
+                        Row(
                           children: [
-                            Expanded(child: Divider(color: Colors.white10)),
+                            Expanded(child: Divider(color: theme.dividerColor)),
                             Padding(
-                              padding: EdgeInsets.symmetric(horizontal: 16),
-                              child: Text('OR', style: TextStyle(color: Colors.white24, fontSize: 10, fontWeight: FontWeight.bold)),
+                              padding: const EdgeInsets.symmetric(horizontal: 16),
+                              child: Text('OR', style: theme.textTheme.bodySmall?.copyWith(fontWeight: FontWeight.bold)),
                             ),
-                            Expanded(child: Divider(color: Colors.white10)),
+                            Expanded(child: Divider(color: theme.dividerColor)),
                           ],
                         ),
 
@@ -712,20 +643,16 @@ class _SignUpScreenState extends ConsumerState<SignUpScreen>
                           child: RichText(
                             text: TextSpan(
                               text: 'Already have an identity? ',
-                              style: TextStyle(
-                                color: Colors.white.withValues(alpha: 0.45),
-                                fontSize: 13,
-                              ),
+                              style: theme.textTheme.bodyMedium,
                               children: [
                                 WidgetSpan(
                                   child: GestureDetector(
                                     onTap: () =>
                                         context.go(AppRoutes.login),
-                                    child: const Text(
+                                    child: Text(
                                       'Authenticate here.',
-                                      style: TextStyle(
-                                        color: Colors.white,
-                                        fontSize: 13,
+                                      style: theme.textTheme.bodyMedium?.copyWith(
+                                        color: colorScheme.primary,
                                         fontWeight: FontWeight.w700,
                                         decoration: TextDecoration.underline,
                                       ),
@@ -763,96 +690,61 @@ class _SignUpScreenState extends ConsumerState<SignUpScreen>
     required String hint,
     TextInputType? keyboardType,
   }) {
-    return Container(
-      decoration: BoxDecoration(
-        color: const Color(0xFF111D35),
-        borderRadius: BorderRadius.circular(8),
-        border:
-            Border.all(color: Colors.white.withValues(alpha: 0.08)),
-      ),
-      child: TextField(
-        controller: controller,
-        keyboardType: keyboardType,
-        style: const TextStyle(color: Colors.white, fontSize: 14),
-        decoration: InputDecoration(
-          hintText: hint,
-          hintStyle: TextStyle(
-              color: Colors.white.withValues(alpha: 0.3), fontSize: 14),
-          border: InputBorder.none,
-          contentPadding:
-              const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-        ),
+    return TextField(
+      controller: controller,
+      keyboardType: keyboardType,
+      decoration: InputDecoration(
+        hintText: hint,
       ),
     );
   }
 
   Widget _buildPasswordField() {
-    return Container(
-      decoration: BoxDecoration(
-        color: const Color(0xFF111D35),
-        borderRadius: BorderRadius.circular(8),
-        border:
-            Border.all(color: Colors.white.withValues(alpha: 0.08)),
-      ),
-      child: TextField(
-        controller: _passCtrl,
-        obscureText: _obscurePass,
-        style: const TextStyle(color: Colors.white, fontSize: 14),
-        decoration: InputDecoration(
-          hintText: '• • • • • • • • • • •',
-          hintStyle:
-              TextStyle(color: Colors.white.withValues(alpha: 0.3)),
-          suffixIcon: GestureDetector(
-            onTap: () => setState(() => _obscurePass = !_obscurePass),
-            child: Icon(
-              _obscurePass
-                  ? Icons.visibility_off_outlined
-                  : Icons.visibility_outlined,
-              color: Colors.white.withValues(alpha: 0.35),
-              size: 18,
-            ),
+    return TextField(
+      controller: _passCtrl,
+      obscureText: _obscurePass,
+      decoration: InputDecoration(
+        hintText: '• • • • • • • • • • •',
+        suffixIcon: GestureDetector(
+          onTap: () => setState(() => _obscurePass = !_obscurePass),
+          child: Icon(
+            _obscurePass
+                ? Icons.visibility_off_outlined
+                : Icons.visibility_outlined,
+            size: 18,
           ),
-          border: InputBorder.none,
-          contentPadding:
-              const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
         ),
       ),
     );
   }
 
   Widget _buildGoogleButton(bool isLoading) {
-    return GestureDetector(
-      onTap: isLoading ? null : _handleGoogleSignUp,
-      child: Container(
-        padding: const EdgeInsets.symmetric(vertical: 15),
-        decoration: BoxDecoration(
-          color: const Color(0xFF1A2540),
-          borderRadius: BorderRadius.circular(8),
-          border: Border.all(color: Colors.white.withValues(alpha: 0.1)),
+    final theme = Theme.of(context);
+    return OutlinedButton(
+      onPressed: isLoading ? null : _handleGoogleSignUp,
+      style: OutlinedButton.styleFrom(
+        minimumSize: const Size.fromHeight(56),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(12),
         ),
-        child: const Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Text(
-              'G',
-              style: TextStyle(
-                color: Colors.white,
-                fontSize: 18,
-                fontWeight: FontWeight.w900,
-              ),
+        side: BorderSide(color: theme.dividerColor),
+      ),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Text(
+            'G',
+            style: theme.textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w900),
+          ),
+          const SizedBox(width: 12),
+          const Text(
+            'SIGN UP WITH GOOGLE',
+            style: TextStyle(
+              fontWeight: FontWeight.w700,
+              letterSpacing: 1,
             ),
-            SizedBox(width: 12),
-            Text(
-              'SIGN UP WITH GOOGLE',
-              style: TextStyle(
-                color: Colors.white,
-                fontSize: 13,
-                fontWeight: FontWeight.w700,
-                letterSpacing: 1,
-              ),
-            ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }
@@ -860,11 +752,12 @@ class _SignUpScreenState extends ConsumerState<SignUpScreen>
   // Phone field has been deprecated in SignUpScreen in favor of CompleteProfileScreen
 
   Widget _buildBottomNav() {
+    final theme = Theme.of(context);
     return Container(
       decoration: BoxDecoration(
-        color: const Color(0xFF0A1020),
+        color: theme.colorScheme.surface,
         border: Border(
-          top: BorderSide(color: Colors.white.withValues(alpha: 0.07)),
+          top: BorderSide(color: theme.dividerColor),
         ),
       ),
       padding: const EdgeInsets.symmetric(vertical: 12),
@@ -880,7 +773,9 @@ class _SignUpScreenState extends ConsumerState<SignUpScreen>
   }
 
   Widget _navItem(int index, IconData icon, String label) {
+    final theme = Theme.of(context);
     final isSelected = _selectedTab == index;
+    final color = isSelected ? theme.colorScheme.primary : theme.colorScheme.onSurface.withValues(alpha: 0.3);
     return GestureDetector(
       onTap: () => setState(() => _selectedTab = index),
       child: Column(
@@ -888,18 +783,14 @@ class _SignUpScreenState extends ConsumerState<SignUpScreen>
         children: [
           Icon(
             icon,
-            color: isSelected
-                ? Colors.white
-                : Colors.white.withValues(alpha: 0.3),
+            color: color,
             size: 22,
           ),
           const SizedBox(height: 4),
           Text(
             label,
             style: TextStyle(
-              color: isSelected
-                  ? Colors.white
-                  : Colors.white.withValues(alpha: 0.3),
+              color: color,
               fontSize: 9,
               letterSpacing: 1,
               fontWeight: isSelected ? FontWeight.w700 : FontWeight.w400,
@@ -919,9 +810,7 @@ class _FieldLabel extends StatelessWidget {
   Widget build(BuildContext context) {
     return Text(
       text,
-      style: TextStyle(
-        color: Colors.white.withValues(alpha: 0.5),
-        fontSize: 10,
+      style: Theme.of(context).textTheme.bodySmall?.copyWith(
         letterSpacing: 2,
         fontWeight: FontWeight.w600,
       ),

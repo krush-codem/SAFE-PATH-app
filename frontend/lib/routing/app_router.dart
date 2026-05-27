@@ -229,6 +229,17 @@ final routerProvider = Provider<GoRouter>((ref) {
             builder: (context, state) => const HomeDashboard(),
           ),
           GoRoute(
+            path: AppRoutes.locationPicker,
+            builder: (context, state) {
+              final isOrigin = state.uri.queryParameters['isOrigin'] == 'true';
+              return LocationPickerScreen(isOrigin: isOrigin);
+            },
+          ),
+          GoRoute(
+            path: AppRoutes.safeCircleChat,
+            builder: (context, state) => const SafeCircleChatScreen(),
+          ),
+          GoRoute(
             path: AppRoutes.physical,
             builder: (context, state) => const PhysicalSafetyScreen(),
           ),
@@ -280,14 +291,7 @@ final routerProvider = Provider<GoRouter>((ref) {
           ),
         ],
       ),
-      // ── Journey Flow ──────────────────────────────────────
-      GoRoute(
-        path: AppRoutes.locationPicker,
-        builder: (context, state) {
-          final isOrigin = state.uri.queryParameters['isOrigin'] == 'true';
-          return LocationPickerScreen(isOrigin: isOrigin);
-        },
-      ),
+      // ── Journey Flow (Post-Setup) ──────────────────────────
       GoRoute(
         path: AppRoutes.timerSetup,
         builder: (context, state) => const TimerSetupScreen(),
@@ -299,10 +303,6 @@ final routerProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: AppRoutes.activeJourney,
         builder: (context, state) => const ActiveJourneyScreen(),
-      ),
-      GoRoute(
-        path: AppRoutes.safeCircleChat,
-        builder: (context, state) => const SafeCircleChatScreen(),
       ),
     ],
   );

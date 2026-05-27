@@ -20,20 +20,20 @@ class _ManageGuardiansScreenState extends ConsumerState<ManageGuardiansScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     final guardiansAsync = ref.watch(guardianNotifierProvider);
 
     return Scaffold(
-      backgroundColor: Colors.black,
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back_ios_new, color: Colors.white, size: 20),
+          icon: Icon(Icons.arrow_back_ios_new, color: theme.colorScheme.onSurface, size: 20),
           onPressed: () => context.pop(),
         ),
-        title: const Text(
+        title: Text(
           'Security Circle',
-          style: TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold),
+          style: TextStyle(color: theme.colorScheme.onSurface, fontSize: 18, fontWeight: FontWeight.bold),
         ),
       ),
       body: SafeArea(
@@ -45,24 +45,24 @@ class _ManageGuardiansScreenState extends ConsumerState<ManageGuardiansScreen> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Text('NETWORK STRENGTH', style: TextStyle(color: Color(0xFF5C79FF), fontSize: 10, letterSpacing: 2, fontWeight: FontWeight.bold)),
+                    Text('NETWORK STRENGTH', style: TextStyle(color: theme.primaryColor, fontSize: 10, letterSpacing: 2, fontWeight: FontWeight.bold)),
                     const SizedBox(height: 8),
-                    const Text('Manage Guardians', style: TextStyle(color: Colors.white, fontSize: 28, fontWeight: FontWeight.w800)),
+                    Text('Manage Guardians', style: TextStyle(color: theme.colorScheme.onSurface, fontSize: 28, fontWeight: FontWeight.w800)),
                     const SizedBox(height: 12),
                     
                     guardiansAsync.when(
-                      data: (guardians) => _buildSecurityHUD(guardians.length),
+                      data: (guardians) => _buildSecurityHUD(context, guardians.length),
                       loading: () => const SkeletonBox(height: 80),
                       error: (_, __) => const SizedBox.shrink(),
                     ),
 
                     const SizedBox(height: 32),
                     
-                    const Text('ACTIVE CONTACTS', style: TextStyle(color: Colors.white54, fontSize: 11, letterSpacing: 1.5, fontWeight: FontWeight.bold)),
+                    Text('ACTIVE CONTACTS', style: TextStyle(color: theme.colorScheme.onSurface.withValues(alpha: 0.54), fontSize: 11, letterSpacing: 1.5, fontWeight: FontWeight.bold)),
                     const SizedBox(height: 16),
                     
                     guardiansAsync.when(
-                      data: (guardians) => _buildGuardiansList(guardians),
+                      data: (guardians) => _buildGuardiansList(context, guardians),
                       loading: () => Column(
                         children: List.generate(3, (i) => const Padding(
                           padding: EdgeInsets.only(bottom: 12),
@@ -70,7 +70,7 @@ class _ManageGuardiansScreenState extends ConsumerState<ManageGuardiansScreen> {
                         )),
                       ),
                       error: (err, _) => Center(
-                        child: Text('Error loading guardians: $err', style: const TextStyle(color: Colors.white38)),
+                        child: Text('Error loading guardians: $err', style: TextStyle(color: theme.colorScheme.onSurface.withValues(alpha: 0.38))),
                       ),
                     ),
                   ],
@@ -83,9 +83,10 @@ class _ManageGuardiansScreenState extends ConsumerState<ManageGuardiansScreen> {
     );
   }
 
-  Widget _buildSecurityHUD(int count) {
+  Widget _buildSecurityHUD(BuildContext context, int count) {
+    final theme = Theme.of(context);
     final double progress = (count / 7).clamp(0.0, 1.0);
-    final Color color = count < 2 ? Colors.orangeAccent : count < 4 ? const Color(0xFF5C79FF) : const Color(0xFF4CAF50);
+    final Color color = count < 2 ? Colors.orangeAccent : count < 4 ? theme.primaryColor : const Color(0xFF4CAF50);
     
     return GlassCard(
       padding: const EdgeInsets.all(20),
@@ -102,14 +103,14 @@ class _ManageGuardiansScreenState extends ConsumerState<ManageGuardiansScreen> {
                 const SizedBox(height: 4),
                 Text(
                   '$count of 7 slots filled',
-                  style: const TextStyle(color: Colors.white38, fontSize: 12),
+                  style: TextStyle(color: theme.colorScheme.onSurface.withValues(alpha: 0.38), fontSize: 12),
                 ),
                 const SizedBox(height: 12),
                 ClipRRect(
                   borderRadius: BorderRadius.circular(10),
                   child: LinearProgressIndicator(
                     value: progress,
-                    backgroundColor: Colors.white.withValues(alpha: 0.05),
+                    backgroundColor: theme.colorScheme.onSurface.withValues(alpha: 0.05),
                     valueColor: AlwaysStoppedAnimation<Color>(color),
                     minHeight: 6,
                   ),
@@ -118,26 +119,27 @@ class _ManageGuardiansScreenState extends ConsumerState<ManageGuardiansScreen> {
             ),
           ),
           const SizedBox(width: 24),
-          const Icon(Icons.shield_outlined, color: Colors.white24, size: 48),
+          Icon(Icons.shield_outlined, color: theme.colorScheme.onSurface.withValues(alpha: 0.24), size: 48),
         ],
       ),
     );
   }
 
-  Widget _buildGuardiansList(List<Guardian> guardians) {
+  Widget _buildGuardiansList(BuildContext context, List<Guardian> guardians) {
     return Column(
       children: [
         if (guardians.isEmpty)
-          _buildEmptyState()
+          _buildEmptyState(context)
         else
-          ...guardians.map((g) => _buildGuardianCard(g)),
+          ...guardians.map((g) => _buildGuardianCard(context, g)),
         const SizedBox(height: 20),
-        if (guardians.length < 7) _buildAddButton(),
+        if (guardians.length < 7) _buildAddButton(context),
       ],
     );
   }
 
-  Widget _buildGuardianCard(Guardian guardian) {
+  Widget _buildGuardianCard(BuildContext context, Guardian guardian) {
+    final theme = Theme.of(context);
     return Padding(
       padding: const EdgeInsets.only(bottom: 12),
       child: GlassCard(
@@ -150,15 +152,15 @@ class _ManageGuardiansScreenState extends ConsumerState<ManageGuardiansScreen> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(guardian.fullName, style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 16)),
+                  Text(guardian.fullName, style: TextStyle(color: theme.colorScheme.onSurface, fontWeight: FontWeight.bold, fontSize: 16)),
                   const SizedBox(height: 2),
-                  Text(guardian.phone, style: const TextStyle(color: Colors.white38, fontSize: 12)),
+                  Text(guardian.phone, style: TextStyle(color: theme.colorScheme.onSurface.withValues(alpha: 0.38), fontSize: 12)),
                 ],
               ),
             ),
             Row(
               children: [
-                _buildCircularBtn(Icons.edit_outlined, const Color(0xFF5C79FF).withValues(alpha: 0.1), const Color(0xFF5C79FF), () => _showEditDialog(guardian)),
+                _buildCircularBtn(Icons.edit_outlined, theme.primaryColor.withValues(alpha: 0.1), theme.primaryColor, () => _showEditDialog(guardian)),
                 const SizedBox(width: 8),
                 _buildCircularBtn(Icons.delete_outline, Colors.redAccent.withValues(alpha: 0.1), Colors.redAccent, () => _showDeleteConfirm(guardian)),
               ],
@@ -180,28 +182,30 @@ class _ManageGuardiansScreenState extends ConsumerState<ManageGuardiansScreen> {
     );
   }
 
-  Widget _buildEmptyState() {
+  Widget _buildEmptyState(BuildContext context) {
+    final theme = Theme.of(context);
     return Container(
       padding: const EdgeInsets.all(32),
       width: double.infinity,
-      decoration: BoxDecoration(color: Colors.white.withValues(alpha: 0.03), borderRadius: BorderRadius.circular(20), border: Border.all(color: Colors.white10)),
+      decoration: BoxDecoration(color: theme.colorScheme.onSurface.withValues(alpha: 0.03), borderRadius: BorderRadius.circular(20), border: Border.all(color: theme.dividerColor.withValues(alpha: 0.1))),
       child: Column(
         children: [
-          const Icon(Icons.people_alt_outlined, color: Colors.white24, size: 48),
+          Icon(Icons.people_alt_outlined, color: theme.colorScheme.onSurface.withValues(alpha: 0.24), size: 48),
           const SizedBox(height: 16),
-          const Text('No Guardians Found', style: TextStyle(color: Colors.white70, fontWeight: FontWeight.bold)),
+          Text('No Guardians Found', style: TextStyle(color: theme.colorScheme.onSurface.withValues(alpha: 0.7), fontWeight: FontWeight.bold)),
           const SizedBox(height: 4),
-          const Text('Your SOS alerts need a destination.', style: TextStyle(color: Colors.white38, fontSize: 12)),
+          Text('Your SOS alerts need a destination.', style: TextStyle(color: theme.colorScheme.onSurface.withValues(alpha: 0.38), fontSize: 12)),
         ],
       ),
     );
   }
 
-  Widget _buildAddButton() {
+  Widget _buildAddButton(BuildContext context) {
+    final theme = Theme.of(context);
     return GestureDetector(
       onTap: _showAddDialog,
       child: DottedBorder(
-        color: const Color(0xFF5C79FF).withValues(alpha: 0.3),
+        color: theme.primaryColor.withValues(alpha: 0.3),
         strokeWidth: 1.5,
         dashPattern: const [6, 4],
         borderType: BorderType.RRect,
@@ -209,12 +213,12 @@ class _ManageGuardiansScreenState extends ConsumerState<ManageGuardiansScreen> {
         child: Container(
           width: double.infinity,
           padding: const EdgeInsets.symmetric(vertical: 20),
-          child: const Row(
+          child: Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Icon(Icons.add_circle_outline, color: Color(0xFF5C79FF), size: 20),
-              SizedBox(width: 12),
-              Text('ADD NEW GUARDIAN', style: TextStyle(color: Color(0xFF5C79FF), fontWeight: FontWeight.bold, letterSpacing: 1)),
+              Icon(Icons.add_circle_outline, color: theme.primaryColor, size: 20),
+              const SizedBox(width: 12),
+              Text('ADD NEW GUARDIAN', style: TextStyle(color: theme.primaryColor, fontWeight: FontWeight.bold, letterSpacing: 1)),
             ],
           ),
         ),
@@ -231,13 +235,14 @@ class _ManageGuardiansScreenState extends ConsumerState<ManageGuardiansScreen> {
   }
 
   void _showGuardianDialog(Guardian? guardian) {
+    final theme = Theme.of(context);
     final nameCtrl = TextEditingController(text: guardian?.fullName);
     final phoneCtrl = TextEditingController(text: guardian?.phone);
     String? fullPhone = guardian?.phone;
 
     showModalBottomSheet(
       context: context,
-      backgroundColor: const Color(0xFF111111),
+      backgroundColor: theme.colorScheme.surface,
       isScrollControlled: true,
       shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(24))),
       builder: (context) => StatefulBuilder(
@@ -247,18 +252,18 @@ class _ManageGuardiansScreenState extends ConsumerState<ManageGuardiansScreen> {
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(guardian == null ? 'ADD GUARDIAN' : 'EDIT GUARDIAN', style: const TextStyle(color: Color(0xFF5C79FF), fontSize: 10, letterSpacing: 2, fontWeight: FontWeight.bold)),
+              Text(guardian == null ? 'ADD GUARDIAN' : 'EDIT GUARDIAN', style: TextStyle(color: theme.primaryColor, fontSize: 10, letterSpacing: 2, fontWeight: FontWeight.bold)),
               const SizedBox(height: 8),
-              const Text('Trusted Contact Info', style: TextStyle(color: Colors.white, fontSize: 20, fontWeight: FontWeight.bold)),
+              Text('Trusted Contact Info', style: TextStyle(color: theme.colorScheme.onSurface, fontSize: 20, fontWeight: FontWeight.bold)),
               const SizedBox(height: 24),
-              _buildModalField(nameCtrl, 'Full Name', Icons.person_outline),
+              _buildModalField(context, nameCtrl, 'Full Name', Icons.person_outline),
               const SizedBox(height: 16),
-              _buildModalPhoneField(phoneCtrl, (val) => fullPhone = val),
+              _buildModalPhoneField(context, phoneCtrl, (val) => fullPhone = val),
               const SizedBox(height: 32),
               SizedBox(
                 width: double.infinity,
                 child: ElevatedButton(
-                  style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFF5C79FF), padding: const EdgeInsets.symmetric(vertical: 16), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12))),
+                  style: ElevatedButton.styleFrom(backgroundColor: theme.primaryColor, foregroundColor: Colors.white, padding: const EdgeInsets.symmetric(vertical: 16), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12))),
                   onPressed: () async {
                     if (nameCtrl.text.isEmpty || fullPhone == null) return;
                     Navigator.pop(context);
@@ -285,41 +290,44 @@ class _ManageGuardiansScreenState extends ConsumerState<ManageGuardiansScreen> {
     );
   }
 
-  Widget _buildModalField(TextEditingController ctrl, String hint, IconData icon) {
+  Widget _buildModalField(BuildContext context, TextEditingController ctrl, String hint, IconData icon) {
+    final theme = Theme.of(context);
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16),
-      decoration: BoxDecoration(color: Colors.white.withValues(alpha: 0.05), borderRadius: BorderRadius.circular(12), border: Border.all(color: Colors.white10)),
+      decoration: BoxDecoration(color: theme.colorScheme.onSurface.withValues(alpha: 0.05), borderRadius: BorderRadius.circular(12), border: Border.all(color: theme.dividerColor.withValues(alpha: 0.1))),
       child: TextField(
         controller: ctrl,
-        style: const TextStyle(color: Colors.white),
-        decoration: InputDecoration(icon: Icon(icon, color: Colors.white38, size: 20), hintText: hint, hintStyle: const TextStyle(color: Colors.white24), border: InputBorder.none),
+        style: TextStyle(color: theme.colorScheme.onSurface),
+        decoration: InputDecoration(icon: Icon(icon, color: theme.colorScheme.onSurface.withValues(alpha: 0.38), size: 20), hintText: hint, hintStyle: TextStyle(color: theme.colorScheme.onSurface.withValues(alpha: 0.24)), border: InputBorder.none),
       ),
     );
   }
 
-  Widget _buildModalPhoneField(TextEditingController ctrl, ValueChanged<String?> onChange) {
+  Widget _buildModalPhoneField(BuildContext context, TextEditingController ctrl, ValueChanged<String?> onChange) {
+    final theme = Theme.of(context);
     return Container(
-      decoration: BoxDecoration(color: Colors.white.withValues(alpha: 0.05), borderRadius: BorderRadius.circular(12), border: Border.all(color: Colors.white10)),
+      decoration: BoxDecoration(color: theme.colorScheme.onSurface.withValues(alpha: 0.05), borderRadius: BorderRadius.circular(12), border: Border.all(color: theme.dividerColor.withValues(alpha: 0.1))),
       child: IntlPhoneField(
         controller: ctrl,
         initialCountryCode: 'IN',
-        dropdownTextStyle: const TextStyle(color: Colors.white),
-        style: const TextStyle(color: Colors.white),
+        dropdownTextStyle: TextStyle(color: theme.colorScheme.onSurface),
+        style: TextStyle(color: theme.colorScheme.onSurface),
         onChanged: (p) => onChange(p.completeNumber),
-        decoration: const InputDecoration(hintText: 'Phone Number', hintStyle: TextStyle(color: Colors.white24), border: InputBorder.none, contentPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 12)),
+        decoration: InputDecoration(hintText: 'Phone Number', hintStyle: TextStyle(color: theme.colorScheme.onSurface.withValues(alpha: 0.24)), border: InputBorder.none, contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12)),
       ),
     );
   }
 
   void _showDeleteConfirm(Guardian g) {
+    final theme = Theme.of(context);
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
-        backgroundColor: const Color(0xFF1E2633),
-        title: const Text('Remove Guardian?', style: TextStyle(color: Colors.white)),
-        content: Text('Are you sure you want to remove ${g.fullName} from your security circle?', style: const TextStyle(color: Colors.white70)),
+        backgroundColor: theme.colorScheme.surface,
+        title: Text('Remove Guardian?', style: TextStyle(color: theme.colorScheme.onSurface)),
+        content: Text('Are you sure you want to remove ${g.fullName} from your security circle?', style: TextStyle(color: theme.colorScheme.onSurface.withValues(alpha: 0.7))),
         actions: [
-          TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('CANCEL', style: TextStyle(color: Colors.white38))),
+          TextButton(onPressed: () => Navigator.pop(ctx), child: Text('CANCEL', style: TextStyle(color: theme.colorScheme.onSurface.withValues(alpha: 0.38)))),
           TextButton(onPressed: () async {
             Navigator.pop(ctx);
             await ref.read(guardianNotifierProvider.notifier).removeGuardian(g.id);

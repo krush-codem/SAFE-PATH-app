@@ -56,3 +56,8 @@ class SecurityScanResponse(BaseModel):
     harmless: int
     total_engines: int
     link: Optional[str] = None
+
+class ChatMessagePayload(BaseModel):
+    receiver_id: str
+    content: str
+    sender_id: Optional[str] = None # Added by backend after auth

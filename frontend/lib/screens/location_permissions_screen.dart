@@ -18,14 +18,14 @@ class _LocationPermissionsScreenState extends ConsumerState<LocationPermissionsS
 
   @override
   Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
     final textColor = AppTheme.getTextColor(context);
     final mutedTextColor = AppTheme.getTextColor(context, muted: true);
     final surfaceColor = AppTheme.getSurfaceColor(context);
-    final backgroundColor = AppTheme.getBackgroundColor(context);
+    final primaryColor = theme.colorScheme.primary;
 
     return Scaffold(
-      backgroundColor: backgroundColor,
       body: SafeArea(
         child: SingleChildScrollView(
           child: Column(
@@ -56,11 +56,7 @@ class _LocationPermissionsScreenState extends ConsumerState<LocationPermissionsS
                     Expanded(
                       child: Text(
                         'Location Permissions',
-                        style: TextStyle(
-                          fontSize: 20,
-                          fontWeight: FontWeight.w700,
-                          color: textColor,
-                        ),
+                        style: theme.textTheme.displaySmall,
                       ),
                     ),
                   ],
@@ -73,10 +69,10 @@ class _LocationPermissionsScreenState extends ConsumerState<LocationPermissionsS
                 child: Container(
                   padding: const EdgeInsets.all(20),
                   decoration: BoxDecoration(
-                    color: const Color(0xFF4CAF50).withValues(alpha: 0.1),
+                    color: Colors.green.withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(16),
                     border: Border.all(
-                      color: const Color(0xFF4CAF50).withValues(alpha: 0.3),
+                      color: Colors.green.withValues(alpha: 0.3),
                     ),
                   ),
                   child: Row(
@@ -85,7 +81,7 @@ class _LocationPermissionsScreenState extends ConsumerState<LocationPermissionsS
                         width: 56,
                         height: 56,
                         decoration: const BoxDecoration(
-                          color: Color(0xFF4CAF50),
+                          color: Colors.green,
                           shape: BoxShape.circle,
                         ),
                         child: const Icon(
@@ -101,20 +97,12 @@ class _LocationPermissionsScreenState extends ConsumerState<LocationPermissionsS
                           children: [
                             Text(
                               'Always Allow',
-                              style: TextStyle(
-                                fontSize: 18,
-                                fontWeight: FontWeight.w700,
-                                color: textColor,
-                              ),
+                              style: theme.textTheme.titleMedium,
                             ),
                             const SizedBox(height: 4),
                             Text(
                               'SafePath can access your location at all times for safety features',
-                              style: TextStyle(
-                                fontSize: 13,
-                                color: mutedTextColor,
-                                height: 1.4,
-                              ),
+                              style: theme.textTheme.bodyMedium,
                             ),
                           ],
                         ),
@@ -131,11 +119,7 @@ class _LocationPermissionsScreenState extends ConsumerState<LocationPermissionsS
                 padding: const EdgeInsets.symmetric(horizontal: 20),
                 child: Text(
                   'Permission Settings',
-                  style: TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.w700,
-                    color: textColor,
-                  ),
+                  style: theme.textTheme.titleLarge,
                 ),
               ),
               const SizedBox(height: 12),
@@ -157,9 +141,10 @@ class _LocationPermissionsScreenState extends ConsumerState<LocationPermissionsS
                         onChanged: (value) => setState(() => _preciseLocation = value),
                         textColor: textColor,
                         mutedTextColor: mutedTextColor,
+                        iconColor: primaryColor,
                       ),
                       Divider(
-                        color: isDark ? const Color(0xFF2D3A5C) : const Color(0xFFE8ECF4),
+                        color: theme.dividerColor,
                         height: 1,
                         indent: 70,
                       ),
@@ -171,9 +156,10 @@ class _LocationPermissionsScreenState extends ConsumerState<LocationPermissionsS
                         onChanged: (value) => setState(() => _backgroundLocation = value),
                         textColor: textColor,
                         mutedTextColor: mutedTextColor,
+                        iconColor: primaryColor,
                       ),
                       Divider(
-                        color: isDark ? const Color(0xFF2D3A5C) : const Color(0xFFE8ECF4),
+                        color: theme.dividerColor,
                         height: 1,
                         indent: 70,
                       ),
@@ -185,6 +171,7 @@ class _LocationPermissionsScreenState extends ConsumerState<LocationPermissionsS
                         onChanged: (value) => setState(() => _locationAlerts = value),
                         textColor: textColor,
                         mutedTextColor: mutedTextColor,
+                        iconColor: primaryColor,
                       ),
                     ],
                   ),
@@ -198,11 +185,7 @@ class _LocationPermissionsScreenState extends ConsumerState<LocationPermissionsS
                 padding: const EdgeInsets.symmetric(horizontal: 20),
                 child: Text(
                   'How We Use Location',
-                  style: TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.w700,
-                    color: textColor,
-                  ),
+                  style: theme.textTheme.titleLarge,
                 ),
               ),
               const SizedBox(height: 12),
@@ -258,9 +241,6 @@ class _LocationPermissionsScreenState extends ConsumerState<LocationPermissionsS
                     },
                     icon: const Icon(Icons.settings),
                     label: const Text('Open System Settings'),
-                    style: ElevatedButton.styleFrom(
-                      padding: const EdgeInsets.symmetric(vertical: 16),
-                    ),
                   ),
                 ),
               ),
@@ -281,6 +261,7 @@ class _LocationPermissionsScreenState extends ConsumerState<LocationPermissionsS
     required ValueChanged<bool> onChanged,
     required Color textColor,
     required Color mutedTextColor,
+    required Color iconColor,
   }) {
     return Padding(
       padding: const EdgeInsets.all(16),
@@ -290,10 +271,10 @@ class _LocationPermissionsScreenState extends ConsumerState<LocationPermissionsS
             width: 44,
             height: 44,
             decoration: BoxDecoration(
-              color: const Color(0xFF4A90E2).withValues(alpha: 0.15),
+              color: iconColor.withValues(alpha: 0.15),
               borderRadius: BorderRadius.circular(10),
             ),
-            child: Icon(icon, color: const Color(0xFF4A90E2), size: 22),
+            child: Icon(icon, color: iconColor, size: 22),
           ),
           const SizedBox(width: 16),
           Expanded(
@@ -322,7 +303,7 @@ class _LocationPermissionsScreenState extends ConsumerState<LocationPermissionsS
           Switch(
             value: value,
             onChanged: onChanged,
-            activeColor: const Color(0xFF4CAF50),
+            activeColor: Colors.green,
           ),
         ],
       ),
@@ -342,10 +323,10 @@ class _LocationPermissionsScreenState extends ConsumerState<LocationPermissionsS
           width: 40,
           height: 40,
           decoration: BoxDecoration(
-            color: const Color(0xFF4CAF50).withValues(alpha: 0.15),
+            color: Colors.green.withValues(alpha: 0.15),
             borderRadius: BorderRadius.circular(10),
           ),
-          child: Icon(icon, color: const Color(0xFF4CAF50), size: 20),
+          child: Icon(icon, color: Colors.green, size: 20),
         ),
         const SizedBox(width: 16),
         Expanded(

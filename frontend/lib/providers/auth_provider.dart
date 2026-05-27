@@ -1,4 +1,5 @@
 import 'dart:typed_data';
+import 'dart:async';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../repositories/auth_repository.dart';
@@ -50,12 +51,67 @@ final isRegistrationCompleteProvider = Provider<bool>((ref) {
 
 // ─── Guardians provider ────────────────────────────────────────────────────
 /// Fetches and caches the user's guardian (SOS contact) list.
+/// Auto-refreshes every 60 seconds to update online status.
 final guardiansProvider = FutureProvider<List<Guardian>>((ref) async {
   ref.watch(authStateProvider);
+  
+  // Auto-refresh timer
+  final timer = Timer(const Duration(seconds: 60), () {
+    ref.invalidateSelf();
+  });
+  ref.onDispose(() => timer.cancel());
+
   final repo = ref.watch(authRepositoryProvider);
   if (!repo.isLoggedIn) return [];
   return repo.fetchGuardians();
 });
+
+// ─── Heartbeat Notifier ─────────────────────────────────────────────────────
+/// Sends periodic heartbeats to the backend when the user is logged in.
+class HeartbeatNotifier extends Notifier<void> {
+  Timer? _timer;
+
+  @override
+  void build() {
+    // Re-run whenever authentication status changes
+    final isLoggedIn = ref.watch(isAuthenticatedProvider);
+    
+    if (isLoggedIn) {
+      _startHeartbeat();
+    } else {
+      _stopHeartbeat();
+    }
+
+    ref.onDispose(() {
+      _stopHeartbeat();
+    });
+  }
+
+  void _startHeartbeat() {
+    _timer?.cancel();
+    // Immediate heartbeat
+    _sendHeartbeat();
+    // Periodic heartbeat every 2 minutes
+    _timer = Timer.periodic(const Duration(minutes: 2), (timer) {
+      _sendHeartbeat();
+    });
+  }
+
+  void _stopHeartbeat() {
+    _timer?.cancel();
+    _timer = null;
+  }
+
+  Future<void> _sendHeartbeat() async {
+    try {
+      await ref.read(authRepositoryProvider).sendHeartbeat();
+    } catch (e) {
+      // Fail silently for heartbeats
+    }
+  }
+}
+
+final heartbeatProvider = NotifierProvider<HeartbeatNotifier, void>(HeartbeatNotifier.new);
 
 // ─── Auth notifier ─────────────────────────────────────────────────────────
 /// Wraps sign-in / sign-up / sign-out with loading state.

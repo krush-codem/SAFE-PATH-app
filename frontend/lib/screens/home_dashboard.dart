@@ -3,40 +3,25 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../providers/journey_provider.dart';
 import '../providers/auth_provider.dart';
+import '../widgets/dynamic_ui.dart';
+import '../theme/app_theme.dart';
+import '../routing/app_router.dart';
 
 class HomeDashboard extends ConsumerWidget {
   const HomeDashboard({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
     final journeyState = ref.watch(journeyProvider);
     final guardiansAsync = ref.watch(guardiansProvider);
+    final profile = ref.watch(profileProvider).value;
     final bool isJourneyActive = journeyState.status == JourneyStatus.active;
 
     return Scaffold(
-      backgroundColor: const Color(0xFF0F1724),
       body: Stack(
         children: [
-          // Background Gradient Decor
-          Positioned(
-            top: 0,
-            left: 0,
-            right: 0,
-            height: 400,
-            child: Container(
-              decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  begin: Alignment.topCenter,
-                  end: Alignment.bottomCenter,
-                  colors: [
-                    Colors.blueAccent.withOpacity(0.1),
-                    const Color(0xFF0F1724),
-                  ],
-                ),
-              ),
-            ),
-          ),
-
           SafeArea(
             child: SingleChildScrollView(
               child: Column(
@@ -56,34 +41,30 @@ class HomeDashboard extends ConsumerWidget {
                             Container(
                               padding: const EdgeInsets.all(8),
                               decoration: BoxDecoration(
-                                color: Colors.blueAccent.withOpacity(0.2),
+                                color: colorScheme.primary.withValues(alpha: 0.1),
                                 borderRadius: BorderRadius.circular(8),
                               ),
-                              child: const Icon(
+                              child: Icon(
                                 Icons.shield,
-                                color: Colors.blueAccent,
+                                color: colorScheme.primary,
                                 size: 20,
                               ),
                             ),
                             const SizedBox(width: 12),
-                            const Text(
+                            Text(
                               'Safe Path',
-                              style: TextStyle(
-                                color: Colors.white,
-                                fontSize: 20,
+                              style: theme.textTheme.titleLarge?.copyWith(
                                 fontWeight: FontWeight.bold,
                               ),
                             ),
                           ],
                         ),
-                        const CircleAvatar(
-                          radius: 18,
-                          backgroundColor: Colors.blueAccent,
-                          child: Icon(
-                            Icons.person,
-                            color: Colors.white,
-                            size: 20,
-                          ),
+                        UserAvatar(
+                          url: profile?.avatarUrl,
+                          name: profile?.fullName,
+                          size: 36,
+                          showStatus: true,
+                          isOnline: true,
                         ),
                       ],
                     ),
@@ -97,8 +78,9 @@ class HomeDashboard extends ConsumerWidget {
                     ),
                     padding: const EdgeInsets.all(20),
                     decoration: BoxDecoration(
-                      color: const Color(0xFF1E2633),
+                      color: colorScheme.surface,
                       borderRadius: BorderRadius.circular(24),
+                      border: Border.all(color: theme.dividerColor, width: 1),
                     ),
                     child: Column(
                       children: [
@@ -112,9 +94,9 @@ class HomeDashboard extends ConsumerWidget {
                                   '/location_picker?isOrigin=true',
                                 ),
                         ),
-                        const Padding(
-                          padding: EdgeInsets.symmetric(vertical: 4),
-                          child: Divider(color: Colors.white12, indent: 40),
+                        Padding(
+                          padding: const EdgeInsets.symmetric(vertical: 4),
+                          child: Divider(color: theme.dividerColor, indent: 40),
                         ),
                         _LocationField(
                           label: 'TO',
@@ -137,13 +119,13 @@ class HomeDashboard extends ConsumerWidget {
                                   ? 'LIVE TRACKING ACTIVE'
                                   : 'SYSTEM READY',
                               color: isJourneyActive
-                                  ? Colors.blueAccent
-                                  : Colors.greenAccent,
+                                  ? colorScheme.primary
+                                  : AppColors.successEmerald,
                             ),
                             _StatusChip(
                               icon: Icons.wifi,
                               label: 'SIGNAL: STRONG',
-                              color: Colors.white60,
+                              color: colorScheme.onSurface.withValues(alpha: 0.5),
                             ),
                           ],
                         ),
@@ -161,11 +143,9 @@ class HomeDashboard extends ConsumerWidget {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          const Text(
+                          Text(
                             'LIVE UPDATES',
-                            style: TextStyle(
-                              color: Colors.white38,
-                              fontSize: 10,
+                            style: theme.textTheme.bodySmall?.copyWith(
                               letterSpacing: 1.5,
                               fontWeight: FontWeight.bold,
                             ),
@@ -185,17 +165,18 @@ class HomeDashboard extends ConsumerWidget {
                                 return ListView(
                                   scrollDirection: Axis.horizontal,
                                   children: [
-                                    const _StoryItem(
+                                    _StoryItem(
                                       label: 'Me',
                                       icon: Icons.person,
-                                      color: Colors.blueAccent,
+                                      color: colorScheme.primary,
                                       isMe: true,
                                     ),
                                     ...permittedGuardians.map(
                                       (g) => _StoryItem(
                                         label: g.fullName.split(' ')[0],
                                         icon: Icons.verified_user,
-                                        color: Colors.greenAccent,
+                                        color: g.isOnline ? AppColors.successEmerald : colorScheme.onSurface.withValues(alpha: 0.2),
+                                        isOnline: g.isOnline,
                                       ),
                                     ),
                                     if (permittedGuardians.isEmpty)
@@ -207,10 +188,10 @@ class HomeDashboard extends ConsumerWidget {
                                     _StoryItem(
                                       label: 'Update',
                                       icon: Icons.add,
-                                      color: Colors.white24,
+                                      color: colorScheme.onSurface.withValues(alpha: 0.2),
                                       isAdd: true,
                                       onTap: () =>
-                                          context.push('/safe_circle_chat'),
+                                          context.go(AppRoutes.safeCircleChat),
                                     ),
                                   ],
                                 );
@@ -253,38 +234,27 @@ class HomeDashboard extends ConsumerWidget {
                                     vertical: 20,
                                   ),
                                   decoration: BoxDecoration(
-                                    color: const Color(0xFF131A26),
+                                    color: colorScheme.surface,
                                     borderRadius: BorderRadius.circular(20),
                                     border: Border.all(
-                                      color: Colors.blueAccent.withOpacity(0.3),
+                                      color: colorScheme.onSurface,
                                       width: 2,
                                     ),
-                                    boxShadow: [
-                                      BoxShadow(
-                                        color: Colors.blueAccent.withOpacity(
-                                          0.2,
-                                        ),
-                                        blurRadius: 20,
-                                        spreadRadius: 5,
-                                      ),
-                                    ],
                                   ),
-                                  child: const Row(
+                                  child: Row(
                                     mainAxisSize: MainAxisSize.min,
                                     children: [
                                       Icon(
                                         Icons.play_circle_fill,
-                                        color: Colors.blueAccent,
+                                        color: colorScheme.onSurface,
                                         size: 32,
                                       ),
-                                      SizedBox(width: 12),
+                                      const SizedBox(width: 12),
                                       Text(
                                         'LET\'S START',
-                                        style: TextStyle(
-                                          color: Colors.white,
-                                          fontSize: 18,
-                                          fontWeight: FontWeight.bold,
-                                          letterSpacing: 1.5,
+                                        style: theme.textTheme.titleMedium?.copyWith(
+                                          fontWeight: FontWeight.w900,
+                                          letterSpacing: 2,
                                         ),
                                       ),
                                     ],
@@ -301,21 +271,12 @@ class HomeDashboard extends ConsumerWidget {
                                   vertical: 20,
                                 ),
                                 decoration: BoxDecoration(
-                                  color: const Color(0xFF2D1200),
+                                  color: colorScheme.surface,
                                   borderRadius: BorderRadius.circular(20),
                                   border: Border.all(
-                                    color: Colors.orangeAccent.withOpacity(0.5),
+                                    color: Colors.orangeAccent,
                                     width: 2,
                                   ),
-                                  boxShadow: [
-                                    BoxShadow(
-                                      color: Colors.orangeAccent.withOpacity(
-                                        0.2,
-                                      ),
-                                      blurRadius: 20,
-                                      spreadRadius: 5,
-                                    ),
-                                  ],
                                 ),
                                 child: Row(
                                   mainAxisSize: MainAxisSize.min,
@@ -331,21 +292,19 @@ class HomeDashboard extends ConsumerWidget {
                                           CrossAxisAlignment.start,
                                       mainAxisSize: MainAxisSize.min,
                                       children: [
-                                        const Text(
+                                        Text(
                                           'OTP REQUIRED',
-                                          style: TextStyle(
-                                            color: Colors.white,
-                                            fontSize: 18,
-                                            fontWeight: FontWeight.bold,
-                                            letterSpacing: 1.5,
+                                          style: theme.textTheme.titleMedium?.copyWith(
+                                            fontWeight: FontWeight.w900,
+                                            letterSpacing: 2,
                                           ),
                                         ),
                                         Text(
                                           '${(journeyState.timeRemainingSeconds ?? 0) ~/ 60}m ${(journeyState.timeRemainingSeconds ?? 0) % 60}s REMAINING',
                                           style: const TextStyle(
                                             color: Colors.orangeAccent,
-                                            fontSize: 10,
-                                            fontWeight: FontWeight.bold,
+                                            fontSize: 11,
+                                            fontWeight: FontWeight.w800,
                                           ),
                                         ),
                                       ],
@@ -355,10 +314,9 @@ class HomeDashboard extends ConsumerWidget {
                               ),
                             )
                           else
-                            // Show Animated Map Indicator or Progress if journey started
-                            const Icon(
+                            Icon(
                               Icons.near_me,
-                              color: Colors.blueAccent,
+                              color: colorScheme.primary,
                               size: 48,
                             ),
                         ],
@@ -375,8 +333,9 @@ class HomeDashboard extends ConsumerWidget {
                         Container(
                           padding: const EdgeInsets.all(20),
                           decoration: BoxDecoration(
-                            color: const Color(0xFF1E2633),
+                            color: colorScheme.surface,
                             borderRadius: BorderRadius.circular(24),
+                            border: Border.all(color: theme.dividerColor, width: 1),
                           ),
                           child: Column(
                             children: [
@@ -388,22 +347,16 @@ class HomeDashboard extends ConsumerWidget {
                                     crossAxisAlignment:
                                         CrossAxisAlignment.start,
                                     children: [
-                                      const Text(
+                                      Text(
                                         'CURRENT TIME',
-                                        style: TextStyle(
-                                          color: Colors.white38,
-                                          fontSize: 10,
+                                        style: theme.textTheme.bodySmall?.copyWith(
                                           letterSpacing: 1,
                                         ),
                                       ),
                                       const SizedBox(height: 4),
                                       Text(
                                         journeyState.currentTime,
-                                        style: Theme.of(context)
-                                            .textTheme
-                                            .headlineSmall
-                                            ?.copyWith(
-                                              color: Colors.white,
+                                        style: theme.textTheme.headlineSmall?.copyWith(
                                               fontWeight: FontWeight.bold,
                                             ),
                                       ),
@@ -418,15 +371,14 @@ class HomeDashboard extends ConsumerWidget {
                                         vertical: 6,
                                       ),
                                       decoration: BoxDecoration(
-                                        color: Colors.blueAccent.withOpacity(
-                                          0.1,
-                                        ),
+                                        color: colorScheme.primary.withValues(alpha: 0.1),
                                         borderRadius: BorderRadius.circular(12),
+                                        border: Border.all(color: colorScheme.primary.withValues(alpha: 0.3)),
                                       ),
                                       child: Text(
                                         '${(journeyState.nextCheckCountdownSeconds! / 60).floor()}m ${journeyState.nextCheckCountdownSeconds! % 60}s LEFT',
-                                        style: const TextStyle(
-                                          color: Colors.blueAccent,
+                                        style: TextStyle(
+                                          color: colorScheme.primary,
                                           fontWeight: FontWeight.bold,
                                           fontSize: 10,
                                         ),
@@ -439,9 +391,9 @@ class HomeDashboard extends ConsumerWidget {
                               const SizedBox(height: 12),
                               Row(
                                 children: [
-                                  const Icon(
+                                  Icon(
                                     Icons.verified_user,
-                                    color: Colors.blueAccent,
+                                    color: colorScheme.primary,
                                     size: 14,
                                   ),
                                   const SizedBox(width: 8),
@@ -449,10 +401,7 @@ class HomeDashboard extends ConsumerWidget {
                                     isJourneyActive
                                         ? 'Safe Path: Optimized for High Lighting'
                                         : 'Select Destination to Begin',
-                                    style: TextStyle(
-                                      color: Colors.white.withOpacity(0.6),
-                                      fontSize: 12,
-                                    ),
+                                    style: theme.textTheme.bodySmall,
                                   ),
                                 ],
                               ),
@@ -462,12 +411,8 @@ class HomeDashboard extends ConsumerWidget {
                                   Expanded(
                                     child: ElevatedButton.icon(
                                       style: ElevatedButton.styleFrom(
-                                        backgroundColor: const Color(
-                                          0xFFB3D7FF,
-                                        ),
-                                        foregroundColor: const Color(
-                                          0xFF001B3A,
-                                        ),
+                                        backgroundColor: colorScheme.onSurface,
+                                        foregroundColor: colorScheme.surface,
                                         padding: const EdgeInsets.symmetric(
                                           vertical: 16,
                                         ),
@@ -478,7 +423,7 @@ class HomeDashboard extends ConsumerWidget {
                                         ),
                                       ),
                                       onPressed: () {
-                                        context.push('/safe_circle_chat');
+                                        context.go(AppRoutes.safeCircleChat);
                                       },
                                       icon: const Icon(
                                         Icons.chat_bubble,
@@ -487,7 +432,7 @@ class HomeDashboard extends ConsumerWidget {
                                       label: const Text(
                                         'SAFE CHAT',
                                         style: TextStyle(
-                                          fontWeight: FontWeight.bold,
+                                          fontWeight: FontWeight.w900,
                                           fontSize: 11,
                                         ),
                                       ),
@@ -501,18 +446,18 @@ class HomeDashboard extends ConsumerWidget {
                                         padding: const EdgeInsets.only(left: 8),
                                         child: ElevatedButton.icon(
                                           style: ElevatedButton.styleFrom(
-                                            backgroundColor: Colors.redAccent
-                                                .withOpacity(0.2),
-                                            foregroundColor: Colors.redAccent,
+                                            backgroundColor: colorScheme.error
+                                                .withValues(alpha: 0.1),
+                                            foregroundColor: colorScheme.error,
                                             padding: const EdgeInsets.symmetric(
                                               vertical: 16,
                                             ),
                                             shape: RoundedRectangleBorder(
                                               borderRadius:
                                                   BorderRadius.circular(16),
-                                              side: const BorderSide(
-                                                color: Colors.redAccent,
-                                                width: 1,
+                                              side: BorderSide(
+                                                color: colorScheme.error,
+                                                width: 1.5,
                                               ),
                                             ),
                                           ),
@@ -528,7 +473,7 @@ class HomeDashboard extends ConsumerWidget {
                                           label: const Text(
                                             'CANCEL',
                                             style: TextStyle(
-                                              fontWeight: FontWeight.bold,
+                                              fontWeight: FontWeight.w900,
                                               fontSize: 11,
                                             ),
                                           ),
@@ -547,8 +492,9 @@ class HomeDashboard extends ConsumerWidget {
                         Container(
                           padding: const EdgeInsets.all(16),
                           decoration: BoxDecoration(
-                            color: const Color(0xFF2D1200),
+                            color: colorScheme.surface,
                             borderRadius: BorderRadius.circular(24),
+                            border: Border.all(color: const Color(0xFFFFB38E).withValues(alpha: 0.3), width: 1),
                           ),
                           child: Row(
                             children: [
@@ -562,7 +508,7 @@ class HomeDashboard extends ConsumerWidget {
                                   'SOS',
                                   style: TextStyle(
                                     fontWeight: FontWeight.w900,
-                                    color: Color(0xFF2D1200),
+                                    color: Colors.black,
                                     fontSize: 12,
                                   ),
                                 ),
@@ -576,7 +522,7 @@ class HomeDashboard extends ConsumerWidget {
                                       'MANUAL SOS',
                                       style: TextStyle(
                                         color: Color(0xFFFFB38E),
-                                        fontWeight: FontWeight.bold,
+                                        fontWeight: FontWeight.w900,
                                         fontSize: 16,
                                       ),
                                     ),
@@ -585,7 +531,7 @@ class HomeDashboard extends ConsumerWidget {
                                       style: TextStyle(
                                         color: Color(0xFFFFB38E),
                                         fontSize: 10,
-                                        letterSpacing: 1,
+                                        letterSpacing: 1.5,
                                       ),
                                     ),
                                   ],
@@ -594,7 +540,7 @@ class HomeDashboard extends ConsumerWidget {
                               ElevatedButton(
                                 style: ElevatedButton.styleFrom(
                                   backgroundColor: const Color(0xFFFFB38E),
-                                  foregroundColor: const Color(0xFF2D1200),
+                                  foregroundColor: Colors.black,
                                   padding: const EdgeInsets.symmetric(
                                     horizontal: 24,
                                     vertical: 12,
@@ -608,7 +554,7 @@ class HomeDashboard extends ConsumerWidget {
                                 },
                                 child: const Text(
                                   'TRIGGER',
-                                  style: TextStyle(fontWeight: FontWeight.bold),
+                                  style: TextStyle(fontWeight: FontWeight.w900),
                                 ),
                               ),
                             ],
@@ -628,23 +574,22 @@ class HomeDashboard extends ConsumerWidget {
   }
 
   void _showSosWarningDialog(BuildContext context, WidgetRef ref) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
-        backgroundColor: const Color(0xFF1E2633),
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-        title: const Row(
+        title: Row(
           children: [
-            Icon(
+            const Icon(
               Icons.warning_amber_rounded,
               color: Color(0xFFFFB38E),
               size: 28,
             ),
-            SizedBox(width: 12),
+            const SizedBox(width: 12),
             Text(
               'Confirm SOS',
-              style: TextStyle(
-                color: Colors.white,
+              style: theme.textTheme.titleLarge?.copyWith(
                 fontWeight: FontWeight.bold,
               ),
             ),
@@ -652,20 +597,20 @@ class HomeDashboard extends ConsumerWidget {
         ),
         content: const Text(
           'Warning: Misuse of the SOS trigger is prohibited. This will immediately send your current location and an alert message to all SOS members in your Safe Circle and via SMS.',
-          style: TextStyle(color: Colors.white70, fontSize: 14),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx),
-            child: const Text(
+            child: Text(
               'CANCEL',
-              style: TextStyle(color: Colors.white38),
+              style: TextStyle(color: colorScheme.onSurface.withValues(alpha: 0.5)),
             ),
           ),
           ElevatedButton(
             style: ElevatedButton.styleFrom(
               backgroundColor: const Color(0xFFFFB38E),
-              foregroundColor: const Color(0xFF2D1200),
+              foregroundColor: Colors.black,
+              minimumSize: const Size(100, 40),
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(8),
               ),
@@ -674,15 +619,15 @@ class HomeDashboard extends ConsumerWidget {
               ref.read(journeyProvider.notifier).triggerSOS();
               Navigator.pop(ctx);
               ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(
-                  content: Text('SOS TRIGGERED: Alerts sent to contacts.'),
-                  backgroundColor: Colors.redAccent,
+                SnackBar(
+                  content: const Text('SOS TRIGGERED: Alerts sent to contacts.'),
+                  backgroundColor: colorScheme.error,
                 ),
               );
             },
             child: const Text(
               'PROCEED',
-              style: TextStyle(fontWeight: FontWeight.bold),
+              style: TextStyle(fontWeight: FontWeight.w900),
             ),
           ),
         ],
@@ -708,11 +653,12 @@ class _LocationField extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return InkWell(
       onTap: onTap,
       child: Row(
         children: [
-          Icon(icon, color: Colors.white38, size: 20),
+          Icon(icon, color: theme.colorScheme.onSurface.withValues(alpha: 0.5), size: 20),
           const SizedBox(width: 16),
           Expanded(
             child: Column(
@@ -720,18 +666,14 @@ class _LocationField extends StatelessWidget {
               children: [
                 Text(
                   label,
-                  style: const TextStyle(
-                    color: Colors.white38,
-                    fontSize: 10,
+                  style: theme.textTheme.bodySmall?.copyWith(
                     letterSpacing: 1,
                   ),
                 ),
                 const SizedBox(height: 2),
                 Text(
                   value,
-                  style: const TextStyle(
-                    color: Colors.white,
-                    fontSize: 16,
+                  style: theme.textTheme.bodyLarge?.copyWith(
                     fontWeight: FontWeight.w600,
                   ),
                 ),
@@ -739,7 +681,7 @@ class _LocationField extends StatelessWidget {
             ),
           ),
           if (isDestination && onTap != null)
-            const Icon(Icons.edit, color: Colors.white38, size: 16),
+            Icon(Icons.edit, color: theme.colorScheme.onSurface.withValues(alpha: 0.5), size: 16),
         ],
       ),
     );
@@ -766,7 +708,7 @@ class _StatusChip extends StatelessWidget {
         Text(
           label,
           style: TextStyle(
-            color: color.withOpacity(0.8),
+            color: color.withValues(alpha: 0.8),
             fontSize: 10,
             fontWeight: FontWeight.bold,
           ),
@@ -782,6 +724,7 @@ class _StoryItem extends StatelessWidget {
   final Color color;
   final bool isMe;
   final bool isAdd;
+  final bool isOnline;
   final VoidCallback? onTap;
 
   const _StoryItem({
@@ -790,6 +733,7 @@ class _StoryItem extends StatelessWidget {
     required this.color,
     this.isMe = false,
     this.isAdd = false,
+    this.isOnline = false,
     this.onTap,
   });
 
@@ -801,15 +745,33 @@ class _StoryItem extends StatelessWidget {
         onTap: onTap,
         child: Column(
           children: [
-            Container(
-              width: 56,
-              height: 56,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                border: Border.all(color: color, width: 2),
-                color: color.withOpacity(0.1),
-              ),
-              child: Icon(icon, color: color, size: 24),
+            Stack(
+              children: [
+                Container(
+                  width: 56,
+                  height: 56,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    border: Border.all(color: color, width: 2),
+                    color: color.withValues(alpha: 0.1),
+                  ),
+                  child: Icon(icon, color: color, size: 24),
+                ),
+                if (isOnline)
+                  Positioned(
+                    right: 2,
+                    bottom: 2,
+                    child: Container(
+                      width: 14,
+                      height: 14,
+                      decoration: BoxDecoration(
+                        color: Colors.greenAccent,
+                        shape: BoxShape.circle,
+                        border: Border.all(color: const Color(0xFF0F1724), width: 2),
+                      ),
+                    ),
+                  ),
+              ],
             ),
             const SizedBox(height: 6),
             Text(

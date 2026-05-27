@@ -3,7 +3,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from app.config import supabase, SYSTEM_USER_EMAIL
 from app.internal import state
-from app.routers import sos, journey, user, security, alerts
+from app.routers import sos, journey, user, security, alerts, chat
 
 app = FastAPI(
     title="SafePath Secure Backend",
@@ -48,6 +48,7 @@ app.include_router(journey.router)
 app.include_router(user.router)
 app.include_router(security.router)
 app.include_router(alerts.router)
+app.include_router(chat.router)
 
 @app.get("/")
 def read_root():

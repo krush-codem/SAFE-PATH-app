@@ -10,6 +10,9 @@ import '../models/chat_message.dart';
 import '../models/guardian.dart';
 import '../providers/chat_provider.dart';
 import '../widgets/live_map_tab.dart';
+import '../widgets/dynamic_ui.dart';
+
+import '../theme/app_theme.dart';
 
 class SafeCircleChatScreen extends ConsumerStatefulWidget {
   const SafeCircleChatScreen({super.key});
@@ -25,10 +28,11 @@ class _SafeCircleChatScreenState extends ConsumerState<SafeCircleChatScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
     final guardiansAsync = ref.watch(guardiansProvider);
 
     return Scaffold(
-      backgroundColor: const Color(0xFF0F1724),
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
@@ -36,32 +40,26 @@ class _SafeCircleChatScreenState extends ConsumerState<SafeCircleChatScreen> {
           _currentIndex == 0 
             ? (_selectedGuardian == null ? 'Safe Circle Chat' : _selectedGuardian!.fullName)
             : 'Live Map', 
-          style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold)
+          style: theme.textTheme.titleLarge,
         ),
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Colors.white),
-          onPressed: () {
-            if (_currentIndex == 0 && _selectedGuardian != null) {
-              setState(() => _selectedGuardian = null);
-            } else {
-              context.pop();
-            }
-          },
-        ),
+        leading: _selectedGuardian != null 
+          ? IconButton(
+              icon: Icon(Icons.arrow_back, color: colorScheme.onSurface),
+              onPressed: () => setState(() => _selectedGuardian = null),
+            )
+          : null,
         actions: [
           if (_currentIndex == 0)
             IconButton(
-              icon: const Icon(Icons.info_outline, color: Colors.blueAccent),
+              icon: Icon(Icons.info_outline, color: colorScheme.primary),
               onPressed: () {
                  showDialog(
                    context: context,
                    builder: (ctx) => AlertDialog(
-                     backgroundColor: const Color(0xFF1E2633),
-                     title: const Text('Security Alerts', style: TextStyle(color: Colors.white)),
+                     title: const Text('Security Alerts'),
                      content: const Text(
                        'The SYSTEM channel provides official OTPs and security updates. '
                        'Guardian chats allow you to communicate with your trust circle during journeys.',
-                       style: TextStyle(color: Colors.white70),
                      ),
                      actions: [
                        TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('GOT IT')),
@@ -69,7 +67,24 @@ class _SafeCircleChatScreenState extends ConsumerState<SafeCircleChatScreen> {
                    ),
                  );
               },
-            )
+            ),
+          // Sub-tab switcher in AppBar instead of bottom nav to avoid conflict with MainLayout
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 8.0),
+            child: SegmentedButton<int>(
+              segments: const [
+                ButtonSegment(value: 0, icon: Icon(Icons.chat_bubble_outline, size: 18), label: Text('CHAT', style: TextStyle(fontSize: 10))),
+                ButtonSegment(value: 1, icon: Icon(Icons.map_outlined, size: 18), label: Text('MAP', style: TextStyle(fontSize: 10))),
+              ],
+              selected: {_currentIndex},
+              onSelectionChanged: (val) => setState(() => _currentIndex = val.first),
+              showSelectedIcon: false,
+              style: SegmentedButton.styleFrom(
+                visualDensity: VisualDensity.compact,
+                padding: EdgeInsets.zero,
+              ),
+            ),
+          ),
         ],
       ),
       body: IndexedStack(
@@ -80,58 +95,51 @@ class _SafeCircleChatScreenState extends ConsumerState<SafeCircleChatScreen> {
             data: (guardians) {
               if (_selectedGuardian == null) {
                 return ListView.builder(
-                  padding: const EdgeInsets.all(24),
+                  padding: const EdgeInsets.all(20),
                   itemCount: guardians.length + 1,
                   itemBuilder: (context, index) {
                     if (index == 0) {
                       // SYSTEM CHAT ITEM
                       return Padding(
                         padding: const EdgeInsets.only(bottom: 12.0),
-                        child: InkWell(
-                          onTap: () {
-                            setState(() => _selectedGuardian = Guardian(
-                              id: 'system',
-                              userId: 'system',
-                              fullName: 'SYSTEM Alert',
-                              phone: 'Official Channel',
-                              createdAt: DateTime.now(),
-                              isAppUser: true,
-                            ));
-                          },
-                          borderRadius: BorderRadius.circular(16),
-                          child: Container(
-                            padding: const EdgeInsets.all(16),
-                            decoration: BoxDecoration(
-                              gradient: LinearGradient(
-                                colors: [Colors.blueAccent.withAlpha(25), Colors.transparent],
-                                begin: Alignment.topLeft,
-                                end: Alignment.bottomRight,
+                        child: Card(
+                          child: InkWell(
+                            onTap: () {
+                              setState(() => _selectedGuardian = Guardian(
+                                id: 'system',
+                                userId: 'system',
+                                fullName: 'SYSTEM Alert',
+                                phone: 'Official Channel',
+                                createdAt: DateTime.now(),
+                                isAppUser: true,
+                              ));
+                            },
+                            borderRadius: BorderRadius.circular(16),
+                            child: Padding(
+                              padding: const EdgeInsets.all(16),
+                              child: Row(
+                                children: [
+                                  Container(
+                                    padding: const EdgeInsets.all(10),
+                                    decoration: BoxDecoration(
+                                      color: colorScheme.primary.withValues(alpha: 0.1),
+                                      shape: BoxShape.circle,
+                                    ),
+                                    child: Icon(Icons.shield_outlined, color: colorScheme.primary),
+                                  ),
+                                  const SizedBox(width: 16),
+                                  Expanded(
+                                    child: Column(
+                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      children: [
+                                        Text('SYSTEM Alert', style: theme.textTheme.titleMedium),
+                                        Text('Official OTP & Security Updates', style: theme.textTheme.bodySmall?.copyWith(color: colorScheme.primary)),
+                                      ],
+                                    ),
+                                  ),
+                                  Icon(Icons.chevron_right, color: colorScheme.onSurface.withValues(alpha: 0.24)),
+                                ],
                               ),
-                              borderRadius: BorderRadius.circular(16),
-                              border: Border.all(color: Colors.blueAccent.withAlpha(50)),
-                            ),
-                            child: Row(
-                              children: [
-                                Container(
-                                  padding: const EdgeInsets.all(8),
-                                  decoration: BoxDecoration(
-                                    color: Colors.blueAccent.withAlpha(25),
-                                    shape: BoxShape.circle,
-                                  ),
-                                  child: const Icon(Icons.shield_outlined, color: Colors.blueAccent),
-                                ),
-                                const SizedBox(width: 16),
-                                const Expanded(
-                                  child: Column(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
-                                    children: [
-                                      Text('SYSTEM Alert', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
-                                      Text('Official OTP & Security Updates', style: TextStyle(color: Colors.blueAccent, fontSize: 10, fontWeight: FontWeight.bold)),
-                                    ],
-                                  ),
-                                ),
-                                const Icon(Icons.chevron_right, color: Colors.white24),
-                              ],
                             ),
                           ),
                         ),
@@ -141,49 +149,47 @@ class _SafeCircleChatScreenState extends ConsumerState<SafeCircleChatScreen> {
                     final g = guardians[index - 1];
                     return Padding(
                       padding: const EdgeInsets.only(bottom: 12.0),
-                      child: InkWell(
-                        onTap: () => setState(() => _selectedGuardian = g),
-                        borderRadius: BorderRadius.circular(16),
-                        child: Container(
-                          padding: const EdgeInsets.all(16),
-                          decoration: BoxDecoration(
-                            color: const Color(0xFF1E2633),
-                            borderRadius: BorderRadius.circular(16),
-                            border: Border.all(color: Colors.white12),
-                          ),
-                          child: Row(
-                            children: [
-                              CircleAvatar(
-                                backgroundColor: g.isAppUser ? Colors.transparent : Colors.blueAccent.withAlpha(50),
-                                backgroundImage: g.avatarUrl != null ? NetworkImage(g.avatarUrl!) : null,
-                                child: g.avatarUrl == null 
-                                    ? Text(g.fullName[0].toUpperCase(), style: const TextStyle(color: Colors.blueAccent))
-                                    : null,
-                              ),
-                              const SizedBox(width: 16),
-                              Expanded(
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Text(g.fullName, style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
-                                    Text(g.phone, style: const TextStyle(color: Colors.white38, fontSize: 12)),
-                                  ],
+                      child: Card(
+                        child: InkWell(
+                          onTap: () => setState(() => _selectedGuardian = g),
+                          borderRadius: BorderRadius.circular(16),
+                          child: Padding(
+                            padding: const EdgeInsets.all(16),
+                            child: Row(
+                              children: [
+                                UserAvatar(
+                                  url: g.avatarUrl,
+                                  name: g.fullName,
+                                  size: 40,
                                 ),
-                              ),
-                               const Icon(Icons.chevron_right, color: Colors.white24),
-                               const SizedBox(width: 8),
-                               // Permission Toggle (only for real guardians)
-                               Column(
-                                 children: [
-                                   CupertinoSwitch(
-                                     value: ref.watch(journeyProvider).locationPermissionIds.contains(g.id),
-                                     activeColor: Colors.blueAccent,
-                                     onChanged: (_) => ref.read(journeyProvider.notifier).toggleLocationPermission(g.id),
-                                   ),
-                                   const Text('LIVE ON', style: TextStyle(color: Colors.white24, fontSize: 8)),
-                                 ],
-                               ),
-                             ],
+                                const SizedBox(width: 16),
+                                Expanded(
+                                  child: Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      Text(g.fullName, style: theme.textTheme.titleMedium),
+                                      Text(g.phone, style: theme.textTheme.bodySmall),
+                                    ],
+                                  ),
+                                ),
+                                 Icon(Icons.chevron_right, color: colorScheme.onSurface.withValues(alpha: 0.24)),
+                                 const SizedBox(width: 8),
+                                 // Permission Toggle (only for real guardians)
+                                 Column(
+                                   children: [
+                                     Transform.scale(
+                                       scale: 0.7,
+                                       child: CupertinoSwitch(
+                                         value: ref.watch(journeyProvider).locationPermissionIds.contains(g.id),
+                                         activeColor: colorScheme.primary,
+                                         onChanged: (_) => ref.read(journeyProvider.notifier).toggleLocationPermission(g.id),
+                                       ),
+                                     ),
+                                     Text('LIVE ON', style: theme.textTheme.labelSmall?.copyWith(fontSize: 8)),
+                                   ],
+                                 ),
+                               ],
+                             ),
                            ),
                          ),
                        ),
@@ -198,23 +204,11 @@ class _SafeCircleChatScreenState extends ConsumerState<SafeCircleChatScreen> {
               );
             },
             loading: () => const Center(child: CircularProgressIndicator()),
-            error: (e, __) => Center(child: Text('Error: $e', style: const TextStyle(color: Colors.red))),
+            error: (e, __) => Center(child: Text('Error: $e', style: TextStyle(color: colorScheme.error))),
           ),
           
           // Tab 1: Map
           const LiveMapTab(),
-        ],
-      ),
-      bottomNavigationBar: BottomNavigationBar(
-        currentIndex: _currentIndex,
-        onTap: (idx) => setState(() => _currentIndex = idx),
-        backgroundColor: const Color(0xFF1E2633),
-        selectedItemColor: Colors.blueAccent,
-        unselectedItemColor: Colors.white24,
-        type: BottomNavigationBarType.fixed,
-        items: const [
-          BottomNavigationBarItem(icon: Icon(Icons.chat_bubble_outline), label: 'Chat'),
-          BottomNavigationBarItem(icon: Icon(Icons.map_outlined), label: 'Live Map'),
         ],
       ),
     );
@@ -279,6 +273,8 @@ class _ChatViewState extends ConsumerState<_ChatView> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
     final messagesAsync = ref.watch(allMessagesProvider(widget.guardian.id));
 
     return Column(
@@ -294,14 +290,14 @@ class _ChatViewState extends ConsumerState<_ChatView> {
                       Icon(
                         widget.guardian.id == 'system' ? Icons.shield_outlined : Icons.chat_bubble_outline,
                         size: 48,
-                        color: Colors.white10,
+                        color: theme.colorScheme.onSurface.withValues(alpha: 0.1),
                       ),
                       const SizedBox(height: 16),
                       Text(
                         widget.guardian.id == 'system' 
                           ? 'Waiting for security updates...' 
                           : 'Start a conversation with ${widget.guardian.fullName}',
-                        style: const TextStyle(color: Colors.white24),
+                        style: TextStyle(color: theme.colorScheme.onSurface.withValues(alpha: 0.24)),
                       ),
                     ],
                   ),
@@ -328,21 +324,21 @@ class _ChatViewState extends ConsumerState<_ChatView> {
         if (widget.guardian.id != 'system') ...[
           Container(
             padding: const EdgeInsets.all(16),
-            decoration: const BoxDecoration(
-              color: Color(0xFF1E2633),
-              border: Border(top: BorderSide(color: Colors.white10)),
+            decoration: BoxDecoration(
+              color: theme.colorScheme.surface,
+              border: Border(top: BorderSide(color: theme.dividerColor.withValues(alpha: 0.12))),
             ),
             child: Row(
               children: [
                 Expanded(
                   child: TextField(
                     controller: _messageController,
-                    style: const TextStyle(color: Colors.white),
+                    style: TextStyle(color: theme.colorScheme.onSurface),
                     decoration: InputDecoration(
                       hintText: 'Type a message...',
-                      hintStyle: const TextStyle(color: Colors.white24),
+                      hintStyle: TextStyle(color: theme.colorScheme.onSurface.withValues(alpha: 0.24)),
                       filled: true,
-                      fillColor: const Color(0xFF0F1724),
+                      fillColor: theme.scaffoldBackgroundColor,
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(24),
                         borderSide: BorderSide.none,
@@ -353,7 +349,7 @@ class _ChatViewState extends ConsumerState<_ChatView> {
                 ),
                 const SizedBox(width: 8),
                 IconButton(
-                  icon: const Icon(Icons.send, color: Colors.blueAccent),
+                  icon: Icon(Icons.send, color: colorScheme.primary),
                   onPressed: _sendMessage,
                 ),
               ],
@@ -389,6 +385,8 @@ class _MessageBubble extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
     final timeString = _getTimeRemaining();
     if (timeString == '00:00') return const SizedBox.shrink();
 
@@ -406,43 +404,45 @@ class _MessageBubble extends StatelessWidget {
             constraints: BoxConstraints(maxWidth: MediaQuery.of(context).size.width * 0.75),
             decoration: BoxDecoration(
               color: message.senderId == 'system' 
-                ? Colors.blueAccent.withValues(alpha: 0.15)
-                : (isMe ? Colors.blueAccent.withValues(alpha: 0.8) : const Color(0xFF1E2633)),
+                ? colorScheme.primary.withValues(alpha: 0.15)
+                : (isMe ? colorScheme.primary.withValues(alpha: 0.8) : theme.colorScheme.surface),
               borderRadius: BorderRadius.only(
                 topLeft: const Radius.circular(16),
                 topRight: const Radius.circular(16),
                 bottomLeft: isMe ? const Radius.circular(16) : Radius.zero,
                 bottomRight: isMe ? Radius.zero : const Radius.circular(16),
               ),
-              border: message.senderId == 'system' ? Border.all(color: Colors.blueAccent.withValues(alpha: 0.3)) : null,
+              border: message.senderId == 'system' 
+                ? Border.all(color: colorScheme.primary.withValues(alpha: 0.3)) 
+                : (isMe ? null : Border.all(color: theme.dividerColor.withValues(alpha: 0.12))),
             ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 if (message.senderId == 'system')
-                  const Padding(
-                    padding: EdgeInsets.only(bottom: 4.0),
+                  Padding(
+                    padding: const EdgeInsets.only(bottom: 4.0),
                     child: Row(
                       children: [
-                        Icon(Icons.verified_user, color: Colors.blueAccent, size: 10),
-                        SizedBox(width: 4),
-                        Text('SYSTEM SECURE', style: TextStyle(color: Colors.blueAccent, fontSize: 8, fontWeight: FontWeight.bold)),
+                        Icon(Icons.verified_user, color: colorScheme.primary, size: 10),
+                        const SizedBox(width: 4),
+                        Text('SYSTEM SECURE', style: TextStyle(color: colorScheme.primary, fontSize: 8, fontWeight: FontWeight.bold)),
                       ],
                     ),
                   ),
-                Text(message.content, style: const TextStyle(color: Colors.white, fontSize: 13)),
+                Text(message.content, style: TextStyle(color: isMe ? Colors.white : theme.colorScheme.onSurface, fontSize: 13)),
                 const SizedBox(height: 6),
                 Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     Text(
                       DateFormat('HH:mm').format(message.createdAt.toLocal()),
-                      style: const TextStyle(color: Colors.white38, fontSize: 8),
+                      style: TextStyle(color: (isMe ? Colors.white70 : theme.colorScheme.onSurface.withValues(alpha: 0.38)), fontSize: 8),
                     ),
                     const SizedBox(width: 8),
-                    const Icon(Icons.timer_outlined, size: 10, color: Colors.white38),
+                    Icon(Icons.timer_outlined, size: 10, color: (isMe ? Colors.white70 : theme.colorScheme.onSurface.withValues(alpha: 0.38))),
                     const SizedBox(width: 4),
-                    Text(currentTimer, style: const TextStyle(color: Colors.blueAccent, fontSize: 8, fontWeight: FontWeight.bold)),
+                    Text(currentTimer, style: TextStyle(color: colorScheme.primary, fontSize: 8, fontWeight: FontWeight.bold)),
                   ],
                 ),
               ],

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../providers/journey_provider.dart';
+import '../theme/app_theme.dart';
 
 class SafetyCheckScreen extends ConsumerStatefulWidget {
   const SafetyCheckScreen({super.key});
@@ -54,24 +55,24 @@ class _SafetyCheckScreenState extends ConsumerState<SafetyCheckScreen> {
   }
 
   void _showResultPopup(String message, {required bool isSuccess}) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
     showDialog(
       context: context,
       barrierDismissible: false,
       builder: (ctx) => AlertDialog(
-        backgroundColor: const Color(0xFF131A26),
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
             Icon(
               isSuccess ? Icons.check_circle_outline : Icons.error_outline,
-              color: isSuccess ? Colors.greenAccent : Colors.redAccent,
+              color: isSuccess ? AppColors.successEmerald : colorScheme.error,
               size: 48,
             ),
             const SizedBox(height: 16),
             Text(
               message,
-              style: const TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold),
+              style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
               textAlign: TextAlign.center,
             ),
           ],
@@ -85,7 +86,7 @@ class _SafetyCheckScreenState extends ConsumerState<SafetyCheckScreen> {
                    context.pop();
                 }
               },
-              child: const Text('OK', style: TextStyle(color: Colors.blueAccent, fontWeight: FontWeight.bold)),
+              child: Text('OK', style: TextStyle(color: colorScheme.primary, fontWeight: FontWeight.bold)),
             ),
           ),
         ],
@@ -103,11 +104,12 @@ class _SafetyCheckScreenState extends ConsumerState<SafetyCheckScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
     final journeyState = ref.watch(journeyProvider);
     final secondsRemaining = journeyState.timeRemainingSeconds ?? 300;
 
     return Scaffold(
-      backgroundColor: const Color(0xFF2D4039), // Dark greenish background from Image 4
       body: SafeArea(
         child: Column(
           children: [
@@ -119,30 +121,31 @@ class _SafetyCheckScreenState extends ConsumerState<SafetyCheckScreen> {
                 Container(
                   padding: const EdgeInsets.all(12),
                   decoration: BoxDecoration(
-                    color: Colors.blueAccent.withValues(alpha: 0.2),
+                    color: colorScheme.primary.withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(12),
                   ),
-                  child: const Icon(Icons.shield, color: Colors.blueAccent, size: 28),
+                  child: Icon(Icons.shield, color: colorScheme.primary, size: 28),
                 ),
                 const SizedBox(width: 12),
-                const Text(
+                Text(
                   'Safe Path',
-                  style: TextStyle(color: Colors.white, fontSize: 20, fontWeight: FontWeight.bold),
+                  style: theme.textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
                 ),
               ],
             ),
             const SizedBox(height: 48),
             
-            // White Card Content
+            // Surface Card Content
             Expanded(
               child: Container(
                 width: double.infinity,
-                decoration: const BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.only(
+                decoration: BoxDecoration(
+                  color: colorScheme.surface,
+                  borderRadius: const BorderRadius.only(
                     topLeft: Radius.circular(32),
                     topRight: Radius.circular(32),
                   ),
+                  border: Border.all(color: theme.dividerColor, width: 1),
                 ),
                 child: SingleChildScrollView(
                   child: Column(
@@ -152,10 +155,8 @@ class _SafetyCheckScreenState extends ConsumerState<SafetyCheckScreen> {
                         journeyState.isArrivalOtp 
                           ? 'Safety Check: Arrival\nConfirmation'
                           : 'Safety Check: Are You\nOkay?',
-                        style: const TextStyle(
-                          fontSize: 28,
+                        style: theme.textTheme.displaySmall?.copyWith(
                           fontWeight: FontWeight.w900,
-                          color: Color(0xFF131A26),
                         ),
                         textAlign: TextAlign.center,
                       ),
@@ -166,7 +167,7 @@ class _SafetyCheckScreenState extends ConsumerState<SafetyCheckScreen> {
                           journeyState.isArrivalOtp
                             ? 'You have arrived at your destination. For safety, please enter the arrival OTP sent to your SYSTEM-CHAT.'
                             : 'We noticed an unusual deviation from your planned stay. Please verify your safety.',
-                          style: const TextStyle(color: Colors.black54, fontSize: 14),
+                          style: theme.textTheme.bodyMedium,
                           textAlign: TextAlign.center,
                         ),
                       ),
@@ -182,23 +183,21 @@ class _SafetyCheckScreenState extends ConsumerState<SafetyCheckScreen> {
                             child: CircularProgressIndicator(
                               value: secondsRemaining / 300,
                               strokeWidth: 8,
-                              color: Colors.orange,
-                              backgroundColor: Colors.grey[200],
+                              color: colorScheme.primary,
+                              backgroundColor: colorScheme.onSurface.withValues(alpha: 0.1),
                             ),
                           ),
                           Text(
                             '$secondsRemaining',
-                            style: const TextStyle(
-                              fontSize: 32,
+                            style: theme.textTheme.displaySmall?.copyWith(
                               fontWeight: FontWeight.bold,
-                              color: Color(0xFF131A26),
                             ),
                           ),
-                          const Positioned(
+                          Positioned(
                             bottom: 25,
                             child: Text(
                               'SEC',
-                              style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: Colors.black38),
+                              style: theme.textTheme.bodySmall?.copyWith(fontWeight: FontWeight.bold),
                             ),
                           )
                         ],
@@ -215,7 +214,7 @@ class _SafetyCheckScreenState extends ConsumerState<SafetyCheckScreen> {
                             height: 12,
                             decoration: BoxDecoration(
                               shape: BoxShape.circle,
-                              color: index < _pin.length ? const Color(0xFF131A26) : Colors.grey[200],
+                              color: index < _pin.length ? colorScheme.onSurface : colorScheme.onSurface.withValues(alpha: 0.1),
                             ),
                           );
                         }),
@@ -223,35 +222,34 @@ class _SafetyCheckScreenState extends ConsumerState<SafetyCheckScreen> {
                       
                       const SizedBox(height: 12),
                       if (journeyState.isArrivalOtp)
-                         const Text(
+                         Text(
                            'ARRIVAL VERIFICATION MODE',
-                           style: TextStyle(color: Colors.blueAccent, fontWeight: FontWeight.bold, fontSize: 10),
+                           style: theme.textTheme.bodySmall?.copyWith(color: colorScheme.primary, fontWeight: FontWeight.bold),
                          )
                       else 
                          Text(
                            '${journeyState.otpTriesLeft} TRIES REMAINING',
-                           style: TextStyle(
-                             color: journeyState.otpTriesLeft == 1 ? Colors.redAccent : Colors.orange,
+                           style: theme.textTheme.bodySmall?.copyWith(
+                             color: journeyState.otpTriesLeft == 1 ? colorScheme.error : Colors.orange,
                              fontWeight: FontWeight.bold, 
-                             fontSize: 10
                            ),
                          ),
                       
-                      const SizedBox(height: 32), // Replaced Spacer with fixed size since it's in a scrollview
+                      const SizedBox(height: 32), 
                       
                       // Keypad
                       Container(
                         padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 16),
                         child: Column(
                           children: [
-                            _buildKeypadRow(['1', '2', '3']),
-                            _buildKeypadRow(['4', '5', '6']),
-                            _buildKeypadRow(['7', '8', '9']),
+                            _buildKeypadRow(['1', '2', '3'], context),
+                            _buildKeypadRow(['4', '5', '6'], context),
+                            _buildKeypadRow(['7', '8', '9'], context),
                             Row(
                               children: [
-                                Expanded(child: _buildKeypadButton(Icons.backspace_outlined, onPressed: _onBackspace)),
-                                Expanded(child: _buildKeypadButton('0', onPressed: () => _onKeyTap('0'))),
-                                Expanded(child: _buildKeypadButton(Icons.check_circle, color: Colors.orange, onPressed: () {})),
+                                Expanded(child: _buildKeypadButton(Icons.backspace_outlined, context, onPressed: _onBackspace)),
+                                Expanded(child: _buildKeypadButton('0', context, onPressed: () => _onKeyTap('0'))),
+                                Expanded(child: _buildKeypadButton(Icons.check_circle, context, color: colorScheme.primary, onPressed: () {})),
                               ],
                             ),
                           ],
@@ -262,9 +260,9 @@ class _SafetyCheckScreenState extends ConsumerState<SafetyCheckScreen> {
                       Container(
                         width: double.infinity,
                         padding: const EdgeInsets.all(12),
-                        decoration: const BoxDecoration(
-                          color: Color(0xFF2D1200), // Dark brown/orange
-                          borderRadius: BorderRadius.only(
+                        decoration: BoxDecoration(
+                          color: colorScheme.onSurface.withValues(alpha: 0.05),
+                          borderRadius: const BorderRadius.only(
                             bottomLeft: Radius.circular(32),
                             bottomRight: Radius.circular(32),
                           ),
@@ -275,7 +273,7 @@ class _SafetyCheckScreenState extends ConsumerState<SafetyCheckScreen> {
                               journeyState.isArrivalOtp 
                                 ? 'CONFIRM ARRIVAL TO END TRACKING' 
                                 : 'FAILING TO ENTER OTP WILL TRIGGER A SILENT EMERGENCY',
-                              style: const TextStyle(color: Colors.orange, fontSize: 10, fontWeight: FontWeight.bold, letterSpacing: 1),
+                              style: theme.textTheme.bodySmall?.copyWith(color: colorScheme.error, fontWeight: FontWeight.bold, letterSpacing: 1),
                               textAlign: TextAlign.center,
                             ),
                             if (!journeyState.isArrivalOtp)
@@ -284,9 +282,9 @@ class _SafetyCheckScreenState extends ConsumerState<SafetyCheckScreen> {
                                   ref.read(journeyProvider.notifier).stopJourney();
                                   _showArrivalAlert();
                                 },
-                                child: const Text(
+                                child: Text(
                                   'SIMULATE ARRIVAL (TEST)', 
-                                  style: TextStyle(color: Colors.white24, fontSize: 8),
+                                  style: theme.textTheme.bodySmall?.copyWith(fontSize: 8),
                                 ),
                               ),
                           ],
@@ -304,43 +302,44 @@ class _SafetyCheckScreenState extends ConsumerState<SafetyCheckScreen> {
   }
 
   void _showArrivalAlert() {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
-        backgroundColor: const Color(0xFF131A26),
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-        title: const Text('Arrived!', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+        title: Text('Arrived!', style: theme.textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold)),
         content: const Text(
           'As you have arrived in your JOURNEY, just for the safety we are sending another OTP please check it',
-          style: TextStyle(color: Colors.white70),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx),
-            child: const Text('CHECK OTP', style: TextStyle(color: Colors.blueAccent, fontWeight: FontWeight.bold)),
+            child: Text('CHECK OTP', style: TextStyle(color: colorScheme.primary, fontWeight: FontWeight.bold)),
           ),
         ],
       ),
     );
   }
 
-  Widget _buildKeypadRow(List<String> keys) {
+  Widget _buildKeypadRow(List<String> keys, BuildContext context) {
     return Row(
       children: keys.map((key) => Expanded(
-        child: _buildKeypadButton(key, onPressed: () => _onKeyTap(key)),
+        child: _buildKeypadButton(key, context, onPressed: () => _onKeyTap(key)),
       )).toList(),
     );
   }
 
-  Widget _buildKeypadButton(dynamic content, {VoidCallback? onPressed, Color? color}) {
+  Widget _buildKeypadButton(dynamic content, BuildContext context, {VoidCallback? onPressed, Color? color}) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
     return InkWell(
       onTap: onPressed,
       child: Container(
         height: 64,
         alignment: Alignment.center,
         child: content is String 
-          ? Text(content, style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: Color(0xFF131A26)))
-          : Icon(content as IconData, color: color ?? const Color(0xFF131A26)),
+          ? Text(content, style: theme.textTheme.displaySmall?.copyWith(fontWeight: FontWeight.bold))
+          : Icon(content as IconData, color: color ?? colorScheme.onSurface),
       ),
     );
   }

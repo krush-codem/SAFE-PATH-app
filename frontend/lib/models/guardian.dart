@@ -9,6 +9,8 @@ class Guardian {
   final String? avatarUrl;
   final bool isAppUser;
   final String? profileId;
+  final bool isOnline;
+  final DateTime? lastActive;
 
   const Guardian({
     required this.id,
@@ -21,6 +23,8 @@ class Guardian {
     this.avatarUrl,
     this.isAppUser = false,
     this.profileId,
+    this.isOnline = false,
+    this.lastActive,
   });
 
   factory Guardian.fromJson(Map<String, dynamic> json) {
@@ -33,8 +37,10 @@ class Guardian {
       isActive: (json['is_active'] as bool?) ?? true,
       createdAt: DateTime.parse(json['created_at'] as String),
       avatarUrl: json['avatar_url'] as String?,
-      isAppUser: (json['is_app_user'] as bool?) ?? false,
-      profileId: json['profile_id'] as String?,
+      isAppUser: (json['is_app_user'] as bool?) ?? (json['guardian_user_id'] != null),
+      profileId: (json['profile_id'] as String?) ?? (json['guardian_user_id'] as String?),
+      isOnline: (json['is_online'] as bool?) ?? false,
+      lastActive: json['last_active'] != null ? DateTime.parse(json['last_active'] as String) : null,
     );
   }
 

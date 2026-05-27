@@ -61,7 +61,7 @@ class _PhysicalSafetyScreenState extends State<PhysicalSafetyScreen> {
           blur: 10,
           fallbackColor: theme.colorScheme.surface.withValues(alpha: 0.9),
           child: Dialog(
-            backgroundColor: kIsWeb ? Colors.transparent : theme.colorScheme.surface.withValues(alpha: 0.9),
+            backgroundColor: kIsWeb ? Colors.transparent : theme.colorScheme.surface,
             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
             child: Padding(
               padding: const EdgeInsets.all(24.0),
@@ -72,27 +72,27 @@ class _PhysicalSafetyScreenState extends State<PhysicalSafetyScreen> {
                   const SizedBox(height: 16),
                   Text(
                     _currentSegment == _totalSegments ? 'Final Destination Reached' : 'Checkpoint $_currentSegment Reached',
-                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: theme.textTheme.displayLarge?.color),
+                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: theme.colorScheme.onSurface),
                   ),
                   const SizedBox(height: 8),
                   Text(
                     'Enter the OTP sent via SMS to verify your safety.', 
                     textAlign: TextAlign.center, 
-                    style: TextStyle(color: theme.textTheme.bodyMedium?.color),
+                    style: TextStyle(color: theme.colorScheme.onSurface.withValues(alpha: 0.7)),
                   ),
                   const SizedBox(height: 24),
                   TextField(
                     controller: otpCtrl,
                     keyboardType: TextInputType.number,
-                    style: TextStyle(color: theme.textTheme.bodyLarge?.color, letterSpacing: 8, fontSize: 24, fontWeight: FontWeight.bold),
+                    style: TextStyle(color: theme.colorScheme.onSurface, letterSpacing: 8, fontSize: 24, fontWeight: FontWeight.bold),
                     textAlign: TextAlign.center,
                     maxLength: 4,
                     decoration: InputDecoration(
                       hintText: '----',
-                      hintStyle: TextStyle(color: theme.dividerColor.withValues(alpha: 0.5)),
+                      hintStyle: TextStyle(color: theme.colorScheme.onSurface.withValues(alpha: 0.24)),
                       counterText: '',
                       filled: true,
-                      fillColor: theme.dividerColor.withValues(alpha: 0.05),
+                      fillColor: theme.colorScheme.onSurface.withValues(alpha: 0.05),
                       border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide.none),
                     ),
                   ),
@@ -149,6 +149,8 @@ class _PhysicalSafetyScreenState extends State<PhysicalSafetyScreen> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Physical Safety Tracker', style: TextStyle(fontWeight: FontWeight.bold)),
+        backgroundColor: Colors.transparent,
+        elevation: 0,
       ),
       body: Padding(
         padding: const EdgeInsets.all(24.0),
@@ -170,12 +172,12 @@ class _PhysicalSafetyScreenState extends State<PhysicalSafetyScreen> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text('CURRENT LOCATION', style: TextStyle(color: theme.textTheme.bodyMedium?.color?.withValues(alpha: 0.5), fontSize: 10, letterSpacing: 1.5, fontWeight: FontWeight.bold)),
+                      Text('CURRENT LOCATION', style: TextStyle(color: theme.colorScheme.onSurface.withValues(alpha: 0.5), fontSize: 10, letterSpacing: 1.5, fontWeight: FontWeight.bold)),
                       const SizedBox(height: 8),
                       _buildTextField(Icons.my_location, 'E.g. Safehouse A', _startCtrl, !_isTracking),
                       
                       const SizedBox(height: 16),
-                      Text('DESTINATION', style: TextStyle(color: theme.textTheme.bodyMedium?.color?.withValues(alpha: 0.5), fontSize: 10, letterSpacing: 1.5, fontWeight: FontWeight.bold)),
+                      Text('DESTINATION', style: TextStyle(color: theme.colorScheme.onSurface.withValues(alpha: 0.5), fontSize: 10, letterSpacing: 1.5, fontWeight: FontWeight.bold)),
                       const SizedBox(height: 8),
                       _buildTextField(Icons.location_on, 'E.g. Extraction Point B', _destCtrl, !_isTracking),
                       
@@ -203,7 +205,7 @@ class _PhysicalSafetyScreenState extends State<PhysicalSafetyScreen> {
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: [
                                 Text('Tracking in Progress...', style: TextStyle(color: theme.primaryColor, fontWeight: FontWeight.bold)),
-                                Text('${(_progress * 100).toInt()}%', style: TextStyle(color: theme.textTheme.bodyLarge?.color)),
+                                Text('${(_progress * 100).toInt()}%', style: TextStyle(color: theme.colorScheme.onSurface)),
                               ],
                             ),
                             const SizedBox(height: 12),
@@ -217,7 +219,7 @@ class _PhysicalSafetyScreenState extends State<PhysicalSafetyScreen> {
                               ),
                             ),
                             const SizedBox(height: 12),
-                            Text('Segment $_currentSegment of $_totalSegments', style: TextStyle(color: theme.textTheme.bodyMedium?.color, fontSize: 12)),
+                            Text('Segment $_currentSegment of $_totalSegments', style: TextStyle(color: theme.colorScheme.onSurface.withValues(alpha: 0.5), fontSize: 12)),
                           ],
                         ),
                     ],
@@ -237,17 +239,17 @@ class _PhysicalSafetyScreenState extends State<PhysicalSafetyScreen> {
     final theme = Theme.of(context);
     return Container(
       decoration: BoxDecoration(
-        color: theme.dividerColor.withValues(alpha: enabled ? 0.05 : 0.02),
+        color: theme.colorScheme.onSurface.withValues(alpha: enabled ? 0.05 : 0.02),
         borderRadius: BorderRadius.circular(12),
       ),
       child: TextField(
         controller: ctrl,
         enabled: enabled,
-        style: TextStyle(color: enabled ? theme.textTheme.bodyLarge?.color : theme.textTheme.bodyMedium?.color),
+        style: TextStyle(color: enabled ? theme.colorScheme.onSurface : theme.colorScheme.onSurface.withValues(alpha: 0.5)),
         decoration: InputDecoration(
           hintText: hint,
-          hintStyle: TextStyle(color: theme.dividerColor.withValues(alpha: 0.3)),
-          prefixIcon: Icon(icon, color: theme.dividerColor.withValues(alpha: 0.4)),
+          hintStyle: TextStyle(color: theme.colorScheme.onSurface.withValues(alpha: 0.3)),
+          prefixIcon: Icon(icon, color: theme.colorScheme.onSurface.withValues(alpha: 0.4)),
           border: InputBorder.none,
           contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
         ),

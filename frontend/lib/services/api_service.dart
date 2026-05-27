@@ -40,6 +40,18 @@ class ApiService {
     await post("/user/delete", {"user_id": userId});
   }
 
+  static Future<void> sendHeartbeat() async {
+    try {
+      final response = await http.post(
+        Uri.parse("$baseUrl/user/heartbeat"),
+        headers: _getHeaders(),
+      ).timeout(const Duration(seconds: 5));
+      if (response.statusCode >= 300) debugPrint("Heartbeat failed: ${response.statusCode}");
+    } catch (e) {
+      debugPrint("Heartbeat error: $e");
+    }
+  }
+
   // --- Profile methods ---
   static Future<Map<String, dynamic>?> getProfile(String userId) async {
     try {

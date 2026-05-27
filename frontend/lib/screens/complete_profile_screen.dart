@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../providers/auth_provider.dart';
 import '../routing/app_router.dart';
+import '../theme/app_theme.dart';
 
 class CompleteProfileScreen extends ConsumerStatefulWidget {
   const CompleteProfileScreen({super.key});
@@ -81,6 +82,8 @@ class _CompleteProfileScreenState extends ConsumerState<CompleteProfileScreen>
   }
 
   void _showVerificationDialog(String phone) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
     final otpCtrl = TextEditingController();
     bool dialogLoading = false;
     String? dialogError;
@@ -168,25 +171,13 @@ class _CompleteProfileScreenState extends ConsumerState<CompleteProfileScreen>
           }
 
           return AlertDialog(
-            backgroundColor: const Color(0xFF131C30),
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(16),
-              side: BorderSide(
-                color: const Color(0xFF4A90D9).withValues(alpha: 0.3),
-                width: 1.5,
-              ),
-            ),
-            title: const Row(
+            title: Row(
               children: [
-                Icon(Icons.sms_failed_rounded, color: Colors.blueAccent, size: 28),
-                SizedBox(width: 12),
+                Icon(Icons.sms_failed_rounded, color: colorScheme.primary, size: 28),
+                const SizedBox(width: 12),
                 Text(
                   'SMS Verification',
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontWeight: FontWeight.bold,
-                    fontSize: 20,
-                  ),
+                  style: theme.textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
                 ),
               ],
             ),
@@ -196,13 +187,13 @@ class _CompleteProfileScreenState extends ConsumerState<CompleteProfileScreen>
               children: [
                 Text(
                   'A secure 6-digit code has been sent to:',
-                  style: TextStyle(color: Colors.white.withValues(alpha: 0.6), fontSize: 13),
+                  style: theme.textTheme.bodySmall,
                 ),
                 const SizedBox(height: 6),
                 Text(
                   phone,
-                  style: const TextStyle(
-                    color: Colors.blueAccent,
+                  style: TextStyle(
+                    color: colorScheme.primary,
                     fontWeight: FontWeight.bold,
                     fontSize: 14,
                   ),
@@ -211,20 +202,17 @@ class _CompleteProfileScreenState extends ConsumerState<CompleteProfileScreen>
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    const Text(
+                    Text(
                       'ENTER SECURITY CODE',
-                      style: TextStyle(
-                        color: Colors.white38,
-                        fontSize: 10,
+                      style: theme.textTheme.bodySmall?.copyWith(
                         fontWeight: FontWeight.bold,
                         letterSpacing: 1.5,
                       ),
                     ),
                     Text(
                       'Attempts: $attempts/3',
-                      style: TextStyle(
-                        color: attempts >= 2 ? Colors.redAccent : Colors.amberAccent,
-                        fontSize: 10,
+                      style: theme.textTheme.bodySmall?.copyWith(
+                        color: attempts >= 2 ? colorScheme.error : Colors.amberAccent,
                         fontWeight: FontWeight.bold,
                       ),
                     ),
@@ -233,12 +221,12 @@ class _CompleteProfileScreenState extends ConsumerState<CompleteProfileScreen>
                 const SizedBox(height: 8),
                 Container(
                   decoration: BoxDecoration(
-                    color: const Color(0xFF0D1527),
+                    color: colorScheme.onSurface.withValues(alpha: 0.05),
                     borderRadius: BorderRadius.circular(8),
                     border: Border.all(
                       color: dialogError != null 
-                          ? Colors.redAccent.withValues(alpha: 0.5) 
-                          : Colors.white.withValues(alpha: 0.08),
+                          ? colorScheme.error.withValues(alpha: 0.5) 
+                          : theme.dividerColor,
                     ),
                   ),
                   child: TextField(
@@ -247,8 +235,7 @@ class _CompleteProfileScreenState extends ConsumerState<CompleteProfileScreen>
                     textAlign: TextAlign.center,
                     maxLength: 6,
                     autofocus: true,
-                    style: const TextStyle(
-                      color: Colors.white,
+                    style: theme.textTheme.displayLarge?.copyWith(
                       fontSize: 20,
                       fontWeight: FontWeight.bold,
                       letterSpacing: 8,
@@ -257,7 +244,7 @@ class _CompleteProfileScreenState extends ConsumerState<CompleteProfileScreen>
                     decoration: InputDecoration(
                       hintText: '000000',
                       hintStyle: TextStyle(
-                        color: Colors.white.withValues(alpha: 0.15),
+                        color: colorScheme.onSurface.withValues(alpha: 0.15),
                         fontSize: 20,
                         fontWeight: FontWeight.bold,
                         letterSpacing: 8,
@@ -272,7 +259,7 @@ class _CompleteProfileScreenState extends ConsumerState<CompleteProfileScreen>
                   const SizedBox(height: 10),
                   Text(
                     dialogError!,
-                    style: const TextStyle(color: Colors.redAccent, fontSize: 12),
+                    style: TextStyle(color: colorScheme.error, fontSize: 12),
                   ),
                 ],
               ],
@@ -280,24 +267,24 @@ class _CompleteProfileScreenState extends ConsumerState<CompleteProfileScreen>
             actions: [
               TextButton(
                 onPressed: dialogLoading ? null : () => Navigator.pop(context),
-                child: const Text(
+                child: Text(
                   'Cancel',
-                  style: TextStyle(color: Colors.white70, fontWeight: FontWeight.w600),
+                  style: TextStyle(color: colorScheme.onSurface.withValues(alpha: 0.7), fontWeight: FontWeight.w600),
                 ),
               ),
               ElevatedButton(
                 onPressed: dialogLoading || attempts >= 3 ? null : verifyCode,
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.white.withValues(alpha: 0.9),
-                  foregroundColor: const Color(0xFF0D1527),
+                  backgroundColor: colorScheme.onSurface,
+                  foregroundColor: colorScheme.surface,
                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
                   padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
                 ),
                 child: dialogLoading
-                    ? const SizedBox(
+                    ? SizedBox(
                         width: 18,
                         height: 18,
-                        child: CircularProgressIndicator(color: Color(0xFF0D1527), strokeWidth: 2),
+                        child: CircularProgressIndicator(color: colorScheme.surface, strokeWidth: 2),
                       )
                     : const Text('VERIFY & CONTINUE', style: TextStyle(fontWeight: FontWeight.bold)),
               ),
@@ -309,23 +296,24 @@ class _CompleteProfileScreenState extends ConsumerState<CompleteProfileScreen>
   }
 
   void _showSnack(String msg, {bool isError = true}) {
+    final colorScheme = Theme.of(context).colorScheme;
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
-        content: Text(msg, style: const TextStyle(color: Colors.white)),
-        backgroundColor: isError ? const Color(0xFF8B0000) : Colors.green.withValues(alpha: 0.8),
+        content: Text(msg),
+        backgroundColor: isError ? colorScheme.error : AppColors.successEmerald,
         behavior: SnackBarBehavior.floating,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
       ),
     );
   }
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
     final isLoading = ref.watch(authNotifierProvider).isLoading;
     final currentUser = ref.watch(currentUserProvider);
 
     return Scaffold(
-      backgroundColor: const Color(0xFF0D1527),
       body: SafeArea(
         child: LayoutBuilder(
           builder: (context, constraints) {
@@ -343,37 +331,29 @@ class _CompleteProfileScreenState extends ConsumerState<CompleteProfileScreen>
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             const SizedBox(height: 20),
-                            const Row(
+                            Row(
                               children: [
-                                Icon(Icons.shield, color: Colors.blueAccent, size: 28),
-                                SizedBox(width: 8),
+                                Icon(Icons.shield, color: colorScheme.primary, size: 28),
+                                const SizedBox(width: 8),
                                 Text(
                                   'Safe Path',
-                                  style: TextStyle(
-                                    color: Colors.white,
-                                    fontSize: 20,
+                                  style: theme.textTheme.titleLarge?.copyWith(
                                     fontWeight: FontWeight.w700,
                                   ),
                                 ),
                               ],
                             ),
                             const SizedBox(height: 40),
-                            const Text(
+                            Text(
                               'Complete Security Profile',
-                              style: TextStyle(
-                                color: Colors.white,
-                                fontSize: 26,
+                              style: theme.textTheme.displaySmall?.copyWith(
                                 fontWeight: FontWeight.w800,
                               ),
                             ),
                             const SizedBox(height: 10),
                             Text(
                               'Safe Path requires your identity details to authenticate you and activate real-time SOS security transmissions.',
-                              style: TextStyle(
-                                color: Colors.white.withValues(alpha: 0.6),
-                                fontSize: 13,
-                                height: 1.4,
-                              ),
+                              style: theme.textTheme.bodyMedium,
                             ),
                             const SizedBox(height: 36),
 
@@ -381,6 +361,7 @@ class _CompleteProfileScreenState extends ConsumerState<CompleteProfileScreen>
                             const SizedBox(height: 8),
                             _buildReadOnlyField(
                               text: currentUser?.email ?? 'Unavailable',
+                              context: context,
                             ),
 
                             const SizedBox(height: 24),
@@ -390,13 +371,14 @@ class _CompleteProfileScreenState extends ConsumerState<CompleteProfileScreen>
                             _buildTextField(
                               controller: _nameCtrl,
                               hint: 'Johnathan Doe',
+                              context: context,
                             ),
 
                             const SizedBox(height: 24),
 
                             _FieldLabel('PHONE NUMBER (SMS VERIFICATION)'),
                             const SizedBox(height: 8),
-                            _buildPhoneField(),
+                            _buildPhoneField(context),
 
                             const SizedBox(height: 36),
 
@@ -406,41 +388,34 @@ class _CompleteProfileScreenState extends ConsumerState<CompleteProfileScreen>
                               child: Container(
                                 padding: const EdgeInsets.symmetric(vertical: 15),
                                 decoration: BoxDecoration(
-                                  color: Colors.white.withValues(alpha: 0.88),
+                                  color: colorScheme.onSurface,
                                   borderRadius: BorderRadius.circular(8),
-                                  boxShadow: [
-                                    BoxShadow(
-                                      color: Colors.white.withValues(alpha: 0.1),
-                                      blurRadius: 10,
-                                      offset: const Offset(0, 4),
-                                    )
-                                  ]
                                 ),
                                 child: Row(
                                   mainAxisAlignment: MainAxisAlignment.center,
                                   children: [
                                     if (isLoading)
-                                      const SizedBox(
+                                      SizedBox(
                                         width: 18,
                                         height: 18,
                                         child: CircularProgressIndicator(
-                                          color: Color(0xFF0D1527),
+                                          color: colorScheme.surface,
                                           strokeWidth: 2,
                                         ),
                                       )
                                     else ...[
-                                      const Text(
+                                      Text(
                                         'REQUEST SMS OTP',
                                         style: TextStyle(
-                                          color: Color(0xFF0D1527),
+                                          color: colorScheme.surface,
                                           fontSize: 14,
                                           fontWeight: FontWeight.w800,
                                           letterSpacing: 1.5,
                                         ),
                                       ),
                                       const SizedBox(width: 8),
-                                      const Icon(Icons.send_rounded,
-                                          color: Color(0xFF0D1527), size: 16),
+                                      Icon(Icons.send_rounded,
+                                          color: colorScheme.surface, size: 16),
                                     ],
                                   ],
                                 ),
@@ -459,9 +434,7 @@ class _CompleteProfileScreenState extends ConsumerState<CompleteProfileScreen>
                                 },
                                 child: Text(
                                   'Use different account (Sign Out)',
-                                  style: TextStyle(
-                                    color: Colors.white.withValues(alpha: 0.4),
-                                    fontSize: 12,
+                                  style: theme.textTheme.bodySmall?.copyWith(
                                     decoration: TextDecoration.underline,
                                   ),
                                 ),
@@ -485,20 +458,22 @@ class _CompleteProfileScreenState extends ConsumerState<CompleteProfileScreen>
   Widget _buildTextField({
     required TextEditingController controller,
     required String hint,
+    required BuildContext context,
   }) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
     return Container(
       decoration: BoxDecoration(
-        color: const Color(0xFF111D35),
+        color: colorScheme.surface,
         borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: Colors.white.withValues(alpha: 0.08)),
+        border: Border.all(color: theme.dividerColor),
       ),
       child: TextField(
         controller: controller,
-        style: const TextStyle(color: Colors.white, fontSize: 14),
+        style: theme.textTheme.bodyLarge,
         decoration: InputDecoration(
           hintText: hint,
-          hintStyle: TextStyle(
-              color: Colors.white.withValues(alpha: 0.3), fontSize: 14),
+          hintStyle: theme.textTheme.bodyMedium,
           border: InputBorder.none,
           contentPadding:
               const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
@@ -507,12 +482,14 @@ class _CompleteProfileScreenState extends ConsumerState<CompleteProfileScreen>
     );
   }
 
-  Widget _buildReadOnlyField({required String text}) {
+  Widget _buildReadOnlyField({required String text, required BuildContext context}) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
     return Container(
       decoration: BoxDecoration(
-        color: const Color(0xFF111D35).withValues(alpha: 0.5),
+        color: colorScheme.surface.withValues(alpha: 0.5),
         borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: Colors.white.withValues(alpha: 0.05)),
+        border: Border.all(color: theme.dividerColor.withValues(alpha: 0.5)),
       ),
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
@@ -522,16 +499,15 @@ class _CompleteProfileScreenState extends ConsumerState<CompleteProfileScreen>
             Expanded(
               child: Text(
                 text,
-                style: TextStyle(
-                  color: Colors.white.withValues(alpha: 0.6),
-                  fontSize: 14,
+                style: theme.textTheme.bodyLarge?.copyWith(
+                  color: colorScheme.onSurface.withValues(alpha: 0.6),
                 ),
                 overflow: TextOverflow.ellipsis,
               ),
             ),
             Icon(
               Icons.lock_outline_rounded,
-              color: Colors.white.withValues(alpha: 0.4),
+              color: colorScheme.onSurface.withValues(alpha: 0.4),
               size: 16,
             ),
           ],
@@ -540,21 +516,22 @@ class _CompleteProfileScreenState extends ConsumerState<CompleteProfileScreen>
     );
   }
 
-  Widget _buildPhoneField() {
+  Widget _buildPhoneField(BuildContext context) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
     return Container(
       decoration: BoxDecoration(
-        color: const Color(0xFF111D35),
+        color: colorScheme.surface,
         borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: Colors.white.withValues(alpha: 0.08)),
+        border: Border.all(color: theme.dividerColor),
       ),
       child: IntlPhoneField(
         initialCountryCode: 'IN',
-        style: const TextStyle(color: Colors.white, fontSize: 14),
-        dropdownTextStyle: const TextStyle(color: Colors.white),
+        style: theme.textTheme.bodyLarge,
+        dropdownTextStyle: theme.textTheme.bodyLarge,
         decoration: InputDecoration(
           hintText: 'Phone Number',
-          hintStyle: TextStyle(
-              color: Colors.white.withValues(alpha: 0.3), fontSize: 14),
+          hintStyle: theme.textTheme.bodyMedium,
           border: InputBorder.none,
           contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
         ),

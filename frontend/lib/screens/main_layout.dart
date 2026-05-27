@@ -13,19 +13,18 @@ class MainLayout extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     final currentPath = GoRouterState.of(context).uri.toString();
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-    final backgroundColor = AppTheme.getBackgroundColor(context);
+    final isDark = theme.brightness == Brightness.dark;
     final surfaceColor = AppTheme.getSurfaceColor(context);
     
     return Scaffold(
-      backgroundColor: backgroundColor,
       body: child,
       extendBody: !kIsWeb, // Disable extendBody on web to avoid transparency issues
       bottomNavigationBar: Container(
         decoration: BoxDecoration(
           color: surfaceColor, // Completely opaque on Web
-          border: Border(top: BorderSide(color: Colors.white.withValues(alpha: 0.1))),
+          border: Border(top: BorderSide(color: theme.dividerColor)),
           borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
         ),
         child: kIsWeb 

@@ -7,7 +7,7 @@ from app.dependencies import verify_user_id
 router = APIRouter(prefix="/api/v1/sos", tags=["SOS"])
 
 @router.post("/trigger")
-async def trigger_sos(payload: SosTrigger, background_tasks: BackgroundTasks, _ = Depends(verify_user_id)):
+def trigger_sos(payload: SosTrigger, background_tasks: BackgroundTasks, _ = Depends(verify_user_id)):
     user_id = payload.user_id
     if user_id in active_sos_tasks:
         return {"message": "SOS already active"}
@@ -18,7 +18,7 @@ async def trigger_sos(payload: SosTrigger, background_tasks: BackgroundTasks, _ 
     return {"success": True, "message": "SOS alert triggered and broadcasting."}
 
 @router.post("/stop")
-async def stop_sos(payload: UserRequest, _ = Depends(verify_user_id)):
+def stop_sos(payload: UserRequest, _ = Depends(verify_user_id)):
     user_id = payload.user_id
     try:
         if user_id in active_sos_tasks:
@@ -26,4 +26,4 @@ async def stop_sos(payload: UserRequest, _ = Depends(verify_user_id)):
             return {"success": True, "message": "SOS deactivated."}
         return {"message": "No active SOS found for user."}
     except Exception as e:
-        raise HTTPException(status_code=500, detail="Internal server error while stopping SOS")
+        raise HTTPException(status_code=500, detail="Internal server error")

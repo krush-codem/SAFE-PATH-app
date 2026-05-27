@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../theme/app_theme.dart';
 import '../providers/journey_provider.dart';
 import '../providers/repository_providers.dart';
+import '../routing/app_router.dart';
 
 class LocationPickerScreen extends ConsumerStatefulWidget {
   final bool isOrigin;
@@ -58,32 +59,29 @@ class _LocationPickerScreenState extends ConsumerState<LocationPickerScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
     final journeyState = ref.watch(journeyProvider);
     final String currentOrigin = journeyState.origin ?? 'Current Location';
     final String currentDest = journeyState.destination ?? 'Where to?';
 
     return Scaffold(
-      backgroundColor: const Color(0xFF0F1724),
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Colors.white),
-          onPressed: () => context.pop(),
-        ),
-        title: const Text('Plan your trip', style: TextStyle(fontWeight: FontWeight.bold, color: Colors.white)),
+        title: Text('Plan your trip', style: theme.textTheme.titleLarge),
         centerTitle: true,
       ),
       body: SafeArea(
         child: Padding(
-          padding: const EdgeInsets.all(16.0),
+          padding: const EdgeInsets.all(20.0),
           child: Column(
             children: [
-              const Row(
+              Row(
                 children: [
-                   _RoundChip(icon: Icons.access_time, label: 'Pick-up now'),
-                   SizedBox(width: 12),
-                   _RoundChip(icon: Icons.person, label: 'For me'),
+                   _RoundChip(icon: Icons.access_time, label: 'Pick-up now', color: colorScheme.primary),
+                   const SizedBox(width: 12),
+                   _RoundChip(icon: Icons.person, label: 'For me', color: colorScheme.onSurface.withValues(alpha: 0.5)),
                 ],
               ),
               const SizedBox(height: 24),
@@ -92,57 +90,60 @@ class _LocationPickerScreenState extends ConsumerState<LocationPickerScreen> {
               Row(
                 children: [
                    Expanded(
-                    child: Container(
-                      decoration: BoxDecoration(
-                        color: const Color(0xFF1E2633),
-                        borderRadius: BorderRadius.circular(16),
-                        border: Border.all(
-                          color: Colors.white.withValues(alpha: 0.05), 
-                          width: 1
+                    child: Card(
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                        child: Column(
+                          children: [
+                            _buildSearchField(
+                              context,
+                              isActive: _isOriginSelected, 
+                              label: 'Starting point', 
+                              value: currentOrigin, 
+                              icon: Icons.my_location,
+                              color: colorScheme.onSurface,
+                              onTap: () {
+                                if (!_isOriginSelected) {
+                                  setState(() {
+                                    _isOriginSelected = true;
+                                    _searchController.clear();
+                                  });
+                                }
+                              }
+                            ),
+                            const Divider(),
+                            _buildSearchField(
+                              context,
+                              isActive: !_isOriginSelected, 
+                              label: 'Where to?', 
+                              value: currentDest, 
+                              icon: Icons.stop_circle_outlined,
+                              color: AppColors.primaryBlue,
+                              onTap: () {
+                                if (_isOriginSelected) {
+                                  setState(() {
+                                    _isOriginSelected = false;
+                                    _searchController.clear();
+                                  });
+                                }
+                              }
+                            ),
+                          ],
                         ),
-                      ),
-                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                      child: Column(
-                        children: [
-                          _buildSearchField(
-                            isActive: _isOriginSelected, 
-                            label: 'Starting point', 
-                            value: currentOrigin, 
-                            icon: Icons.my_location,
-                            color: Colors.white,
-                            onTap: () {
-                              if (!_isOriginSelected) {
-                                setState(() {
-                                  _isOriginSelected = true;
-                                  _searchController.clear();
-                                });
-                              }
-                            }
-                          ),
-                          const Divider(height: 1, color: Colors.white12),
-                          _buildSearchField(
-                            isActive: !_isOriginSelected, 
-                            label: 'Where to?', 
-                            value: currentDest, 
-                            icon: Icons.stop_circle_outlined,
-                            color: Colors.blueAccent,
-                            onTap: () {
-                              if (_isOriginSelected) {
-                                setState(() {
-                                  _isOriginSelected = false;
-                                  _searchController.clear();
-                                });
-                              }
-                            }
-                          ),
-                        ],
                       ),
                     ),
                   ),
                   const SizedBox(width: 16),
-                  const CircleAvatar(
-                    backgroundColor: Color(0xFF1E2633), 
-                    child: Icon(Icons.add, color: Colors.white)
+                  Container(
+                    decoration: BoxDecoration(
+                      color: colorScheme.surface,
+                      shape: BoxShape.circle,
+                      border: Border.all(color: theme.dividerColor),
+                    ),
+                    child: IconButton(
+                      icon: const Icon(Icons.add),
+                      onPressed: () {},
+                    ),
                   ),
                 ],
               ),
@@ -152,17 +153,17 @@ class _LocationPickerScreenState extends ConsumerState<LocationPickerScreen> {
               // List of dynamic places
               Expanded(
                 child: _isLoading 
-                ? const Center(child: CircularProgressIndicator(color: Colors.blueAccent))
+                ? Center(child: CircularProgressIndicator(color: colorScheme.primary))
                 : _filteredPlaces.isEmpty && _searchController.text.isNotEmpty
-                ? _buildEmptyState()
+                ? _buildEmptyState(context)
                 : ListView.builder(
                   itemCount: _filteredPlaces.length,
                   itemBuilder: (context, index) {
                     final place = _filteredPlaces[index];
                     return ListTile(
-                      leading: const Icon(Icons.location_on_outlined, color: Colors.white38),
-                      title: Text(place['title'], style: const TextStyle(fontWeight: FontWeight.bold, color: Colors.white)),
-                      subtitle: Text(place['subtitle'], style: const TextStyle(color: Colors.white38, fontSize: 12)),
+                      leading: Icon(Icons.location_on_outlined, color: colorScheme.onSurface.withValues(alpha: 0.38)),
+                      title: Text(place['title'], style: const TextStyle(fontWeight: FontWeight.bold)),
+                      subtitle: Text(place['subtitle'], style: theme.textTheme.bodySmall),
                       onTap: () {
                          final notifier = ref.read(journeyProvider.notifier);
                          if (_isOriginSelected) {
@@ -172,7 +173,7 @@ class _LocationPickerScreenState extends ConsumerState<LocationPickerScreen> {
                          }
                          
                          if (ref.read(journeyProvider).origin != null && ref.read(journeyProvider).destination != null) {
-                            context.pop();
+                            context.go(AppRoutes.home);
                          }
                       },
                     );
@@ -180,10 +181,10 @@ class _LocationPickerScreenState extends ConsumerState<LocationPickerScreen> {
                 ),
               ),
               
-              const Divider(color: Colors.white12),
+              const Divider(),
               ListTile(
-                leading: const Icon(Icons.map_outlined, color: Colors.blueAccent),
-                title: const Text('Set location on map', style: TextStyle(color: Colors.blueAccent, fontWeight: FontWeight.bold)),
+                leading: Icon(Icons.map_outlined, color: colorScheme.primary),
+                title: Text('Set location on map', style: TextStyle(color: colorScheme.primary, fontWeight: FontWeight.bold)),
                 onTap: () {
                    ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Map selection coming soon...')));
                 },
@@ -195,22 +196,23 @@ class _LocationPickerScreenState extends ConsumerState<LocationPickerScreen> {
     );
   }
 
-  Widget _buildEmptyState() {
-    return const Center(
+  Widget _buildEmptyState(BuildContext context) {
+    final theme = Theme.of(context);
+    return Center(
       child: Padding(
-        padding: EdgeInsets.only(top: 40.0),
+        padding: const EdgeInsets.only(top: 40.0),
         child: Column(
           children: [
-            Icon(Icons.search_off, size: 48, color: Colors.white10),
+            Icon(Icons.search_off, size: 48, color: theme.colorScheme.onSurface.withValues(alpha: 0.1)),
             const SizedBox(height: 16),
-            const Text(
+            Text(
               'No results found',
-              style: TextStyle(color: Colors.white38, fontSize: 16, fontWeight: FontWeight.bold),
+              style: TextStyle(color: theme.colorScheme.onSurface.withValues(alpha: 0.38), fontSize: 16, fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 8),
-            const Text(
+            Text(
               'Try searching for "Bhubaneswar", "AIIMS", or "SUM"',
-              style: TextStyle(color: Colors.white12, fontSize: 13),
+              style: TextStyle(color: theme.colorScheme.onSurface.withValues(alpha: 0.12), fontSize: 13),
               textAlign: TextAlign.center,
             ),
           ],
@@ -219,7 +221,8 @@ class _LocationPickerScreenState extends ConsumerState<LocationPickerScreen> {
     );
   }
 
-  Widget _buildSearchField({
+  Widget _buildSearchField(
+    BuildContext context, {
     required bool isActive,
     required String label,
     required String value,
@@ -227,13 +230,14 @@ class _LocationPickerScreenState extends ConsumerState<LocationPickerScreen> {
     required Color color,
     required VoidCallback onTap,
   }) {
+    final theme = Theme.of(context);
     return InkWell(
       onTap: onTap,
       child: Padding(
         padding: const EdgeInsets.symmetric(vertical: 8.0),
         child: Row(
           children: [
-            Icon(icon, size: 16, color: isActive ? color : Colors.white38),
+            Icon(icon, size: 16, color: isActive ? color : theme.colorScheme.onSurface.withValues(alpha: 0.38)),
             const SizedBox(width: 16),
             Expanded(
               child: isActive 
@@ -242,16 +246,16 @@ class _LocationPickerScreenState extends ConsumerState<LocationPickerScreen> {
                     autofocus: true,
                     decoration: InputDecoration(
                       hintText: label, 
-                      hintStyle: const TextStyle(color: Colors.white24, fontSize: 14), 
+                      hintStyle: TextStyle(color: theme.colorScheme.onSurface.withValues(alpha: 0.24), fontSize: 14), 
                       border: InputBorder.none,
                       isDense: true,
                     ),
-                    style: const TextStyle(color: Colors.white, fontSize: 14),
+                    style: TextStyle(color: theme.colorScheme.onSurface, fontSize: 14),
                   )
                 : Text(
                     value, 
                     style: TextStyle(
-                      color: value == label ? Colors.white24 : Colors.white70, 
+                      color: value == label ? theme.colorScheme.onSurface.withValues(alpha: 0.24) : theme.colorScheme.onSurface.withValues(alpha: 0.7), 
                       fontSize: 14
                     ),
                     maxLines: 1,
@@ -268,22 +272,28 @@ class _LocationPickerScreenState extends ConsumerState<LocationPickerScreen> {
 class _RoundChip extends StatelessWidget {
   final IconData icon;
   final String label;
+  final Color? color;
 
-  const _RoundChip({required this.icon, required this.label});
+  const _RoundChip({required this.icon, required this.label, this.color});
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-      decoration: BoxDecoration(color: const Color(0xFF1E2633), borderRadius: BorderRadius.circular(20)),
+      decoration: BoxDecoration(
+        color: theme.colorScheme.surface, 
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: theme.dividerColor),
+      ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(icon, size: 16, color: Colors.white),
+          Icon(icon, size: 16, color: color ?? theme.colorScheme.onSurface),
           const SizedBox(width: 8),
-          Text(label, style: const TextStyle(fontWeight: FontWeight.w600, color: Colors.white)),
+          Text(label, style: TextStyle(fontWeight: FontWeight.w600, color: theme.colorScheme.onSurface)),
           const SizedBox(width: 4),
-          const Icon(Icons.keyboard_arrow_down, size: 16, color: Colors.white38),
+          Icon(Icons.keyboard_arrow_down, size: 16, color: theme.colorScheme.onSurface.withValues(alpha: 0.38)),
         ],
       ),
     );

@@ -69,31 +69,29 @@ class _WelcomeScreenState extends State<WelcomeScreen>
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+
     if (kIsWeb) {
       return Scaffold(
-        backgroundColor: Colors.black,
         body: Center(
           child: Padding(
             padding: const EdgeInsets.symmetric(horizontal: 24),
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                const Icon(Icons.security, color: Color(0xFF5C79FF), size: 100),
+                Icon(Icons.security, color: colorScheme.primary, size: 100),
                 const SizedBox(height: 48),
-                const Text(
+                Text(
                   'Secure Your Journey',
                   textAlign: TextAlign.center,
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 34,
-                    fontWeight: FontWeight.w800,
-                  ),
+                  style: theme.textTheme.displayLarge,
                 ),
                 const SizedBox(height: 16),
-                const Text(
+                Text(
                   'Real-time encryption and spatial awareness for every step you take.',
                   textAlign: TextAlign.center,
-                  style: TextStyle(color: Colors.white70, fontSize: 14),
+                  style: theme.textTheme.bodyMedium,
                 ),
                 const SizedBox(height: 64),
                 _SignUpButton(onTap: () => context.go('/signup')),
@@ -107,7 +105,6 @@ class _WelcomeScreenState extends State<WelcomeScreen>
     }
 
     return Scaffold(
-      backgroundColor: const Color(0xFF0D1527),
       body: SingleChildScrollView(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -121,15 +118,14 @@ class _WelcomeScreenState extends State<WelcomeScreen>
                   padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
                   child: Row(
                     children: [
-                      const Icon(Icons.shield, color: Colors.white, size: 20),
+                      Icon(Icons.shield, color: colorScheme.onSurface, size: 20),
                       const SizedBox(width: 8),
-                      const Text(
+                      Text(
                         'VIGILANT',
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 14,
+                        style: theme.textTheme.bodySmall?.copyWith(
                           fontWeight: FontWeight.w700,
                           letterSpacing: 2.5,
+                          color: colorScheme.onSurface,
                         ),
                       ),
                     ],
@@ -150,10 +146,10 @@ class _WelcomeScreenState extends State<WelcomeScreen>
                   child: Container(
                     height: 240,
                     decoration: BoxDecoration(
-                      color: const Color(0xFF131D35),
-                      borderRadius: BorderRadius.circular(4),
+                      color: colorScheme.surface,
+                      borderRadius: BorderRadius.circular(16),
                       border: Border.all(
-                        color: Colors.white.withValues(alpha: 0.08),
+                        color: theme.dividerColor,
                         width: 1,
                       ),
                     ),
@@ -162,24 +158,24 @@ class _WelcomeScreenState extends State<WelcomeScreen>
                         Positioned(
                           top: 12,
                           left: 12,
-                          child: _cornerBracket(topLeft: true),
+                          child: _cornerBracket(topLeft: true, context: context),
                         ),
                         Positioned(
                           bottom: 12,
                           right: 12,
-                          child: _cornerBracket(topLeft: false),
+                          child: _cornerBracket(topLeft: false, context: context),
                         ),
                         Center(
                           child: Container(
                             width: 100,
                             height: 120,
                             decoration: BoxDecoration(
-                              color: Colors.white.withValues(alpha: 0.15),
-                              borderRadius: BorderRadius.circular(8),
+                              color: colorScheme.primary.withValues(alpha: 0.1),
+                              borderRadius: BorderRadius.circular(12),
                             ),
-                            child: const Icon(
+                            child: Icon(
                               Icons.shield,
-                              color: Colors.white54,
+                              color: colorScheme.primary.withValues(alpha: 0.5),
                               size: 70,
                             ),
                           ),
@@ -210,43 +206,34 @@ class _WelcomeScreenState extends State<WelcomeScreen>
                               horizontal: 14, vertical: 6),
                           decoration: BoxDecoration(
                             border: Border.all(
-                              color: Colors.white.withValues(alpha: 0.25),
+                              color: colorScheme.onSurface.withValues(alpha: 0.25),
                               width: 1,
                             ),
                             borderRadius: BorderRadius.circular(4),
                           ),
-                          child: const Text(
+                          child: Text(
                             'SYSTEM ACTIVE',
-                            style: TextStyle(
-                              color: Colors.white,
-                              fontSize: 11,
+                            style: theme.textTheme.bodySmall?.copyWith(
                               letterSpacing: 2,
                               fontWeight: FontWeight.w600,
+                              color: colorScheme.onSurface,
                             ),
                           ),
                         ),
                       ),
                       const SizedBox(height: 24),
-                      const Text(
+                      Text(
                         'Secure Your\nJourney',
                         textAlign: TextAlign.center,
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 34,
-                          fontWeight: FontWeight.w800,
+                        style: theme.textTheme.displayLarge?.copyWith(
                           height: 1.15,
-                          letterSpacing: -0.5,
                         ),
                       ),
                       const SizedBox(height: 16),
                       Text(
                         'Deploy the Invisible Bodyguard. Real-time encryption and spatial awareness for every step you take.',
                         textAlign: TextAlign.center,
-                        style: TextStyle(
-                          color: Colors.white.withValues(alpha: 0.65),
-                          fontSize: 14,
-                          height: 1.55,
-                        ),
+                        style: theme.textTheme.bodyLarge,
                       ),
                       const SizedBox(height: 48),
                       // SIGN UP button
@@ -265,21 +252,20 @@ class _WelcomeScreenState extends State<WelcomeScreen>
                         children: [
                           Text(
                             'TRUSTED BY ENTITIES IN',
-                            style: TextStyle(
-                              color: Colors.white.withValues(alpha: 0.35),
-                              fontSize: 10,
+                            style: theme.textTheme.bodySmall?.copyWith(
                               letterSpacing: 1.5,
+                              fontSize: 10,
                             ),
                           ),
                           const SizedBox(width: 8),
                           Icon(Icons.security,
-                              color: Colors.white.withValues(alpha: 0.35), size: 14),
+                              color: colorScheme.onSurface.withValues(alpha: 0.35), size: 14),
                           const SizedBox(width: 4),
                           Icon(Icons.shield_outlined,
-                              color: Colors.white.withValues(alpha: 0.35), size: 14),
+                              color: colorScheme.onSurface.withValues(alpha: 0.35), size: 14),
                           const SizedBox(width: 4),
                           Icon(Icons.lock_outline,
-                              color: Colors.white.withValues(alpha: 0.35), size: 14),
+                              color: colorScheme.onSurface.withValues(alpha: 0.35), size: 14),
                         ],
                       ),
                       const SizedBox(height: 40),
@@ -291,15 +277,14 @@ class _WelcomeScreenState extends State<WelcomeScreen>
 
             // Footer - at the very bottom
             Container(
-              color: const Color(0xFF0A1020),
+              color: colorScheme.surface,
               padding: const EdgeInsets.symmetric(vertical: 24, horizontal: 20),
               child: Column(
                 children: [
                   Text(
                     '© 2024 VIGILANT SECURITY. ALL RIGHTS RESERVED.',
                     textAlign: TextAlign.center,
-                    style: TextStyle(
-                      color: Colors.white.withValues(alpha: 0.3),
+                    style: theme.textTheme.bodySmall?.copyWith(
                       fontSize: 9,
                       letterSpacing: 1,
                     ),
@@ -308,9 +293,9 @@ class _WelcomeScreenState extends State<WelcomeScreen>
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                     children: [
-                      _footerLink('PRIVACY\nPOLICY'),
-                      _footerLink('TERMS OF\nSERVICE'),
-                      _footerLink('SUPPORT'),
+                      _footerLink('PRIVACY\nPOLICY', context),
+                      _footerLink('TERMS OF\nSERVICE', context),
+                      _footerLink('SUPPORT', context),
                     ],
                   ),
                   const SizedBox(height: 12), // Small bottom safe area
@@ -323,22 +308,21 @@ class _WelcomeScreenState extends State<WelcomeScreen>
     );
   }
 
-  Widget _cornerBracket({required bool topLeft}) {
+  Widget _cornerBracket({required bool topLeft, required BuildContext context}) {
     return SizedBox(
       width: 20,
       height: 20,
       child: CustomPaint(
-        painter: _BracketPainter(topLeft: topLeft),
+        painter: _BracketPainter(topLeft: topLeft, color: Theme.of(context).dividerColor),
       ),
     );
   }
 
-  Widget _footerLink(String text) {
+  Widget _footerLink(String text, BuildContext context) {
     return Text(
       text,
       textAlign: TextAlign.center,
-      style: TextStyle(
-        color: Colors.white.withValues(alpha: 0.3),
+      style: Theme.of(context).textTheme.bodySmall?.copyWith(
         fontSize: 9,
         letterSpacing: 0.5,
         height: 1.4,
@@ -349,12 +333,13 @@ class _WelcomeScreenState extends State<WelcomeScreen>
 
 class _BracketPainter extends CustomPainter {
   final bool topLeft;
-  _BracketPainter({required this.topLeft});
+  final Color color;
+  _BracketPainter({required this.topLeft, required this.color});
 
   @override
   void paint(Canvas canvas, Size size) {
     final paint = Paint()
-      ..color = Colors.white.withValues(alpha: 0.35)
+      ..color = color
       ..strokeWidth = 1.5
       ..style = PaintingStyle.stroke;
 
@@ -388,6 +373,7 @@ class _SignUpButtonState extends State<_SignUpButton> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return MouseRegion(
       onEnter: (_) => setState(() => _hovered = true),
       onExit: (_) => setState(() => _hovered = false),
@@ -398,9 +384,9 @@ class _SignUpButtonState extends State<_SignUpButton> {
           padding: const EdgeInsets.symmetric(vertical: 16),
           decoration: BoxDecoration(
             color: _hovered
-                ? Colors.white.withValues(alpha: 0.95)
-                : Colors.white.withValues(alpha: 0.88),
-            borderRadius: BorderRadius.circular(4),
+                ? theme.colorScheme.primary.withValues(alpha: 0.9)
+                : theme.colorScheme.primary,
+            borderRadius: BorderRadius.circular(12),
           ),
           child: Row(
             mainAxisAlignment: MainAxisAlignment.center,
@@ -408,7 +394,7 @@ class _SignUpButtonState extends State<_SignUpButton> {
               const Text(
                 'SIGN UP',
                 style: TextStyle(
-                  color: Color(0xFF0D1527),
+                  color: Colors.white,
                   fontSize: 14,
                   fontWeight: FontWeight.w700,
                   letterSpacing: 2,
@@ -417,7 +403,7 @@ class _SignUpButtonState extends State<_SignUpButton> {
               const SizedBox(width: 8),
               const Icon(
                 Icons.arrow_forward,
-                color: Color(0xFF0D1527),
+                color: Colors.white,
                 size: 18,
               ),
             ],
@@ -441,6 +427,7 @@ class _LoginButtonState extends State<_LoginButton> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return MouseRegion(
       onEnter: (_) => setState(() => _hovered = true),
       onExit: (_) => setState(() => _hovered = false),
@@ -451,15 +438,16 @@ class _LoginButtonState extends State<_LoginButton> {
           padding: const EdgeInsets.symmetric(vertical: 16),
           decoration: BoxDecoration(
             color: _hovered
-                ? const Color(0xFF1A2744)
-                : const Color(0xFF131D35),
-            borderRadius: BorderRadius.circular(4),
+                ? theme.colorScheme.surface.withValues(alpha: 0.1)
+                : Colors.transparent,
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(color: theme.dividerColor),
           ),
-          child: const Center(
+          child: Center(
             child: Text(
               'LOGIN',
               style: TextStyle(
-                color: Colors.white,
+                color: theme.colorScheme.onSurface,
                 fontSize: 14,
                 fontWeight: FontWeight.w700,
                 letterSpacing: 2,

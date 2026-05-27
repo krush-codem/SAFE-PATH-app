@@ -19,22 +19,22 @@ class _TimerSetupScreenState extends ConsumerState<TimerSetupScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return Scaffold(
-      backgroundColor: const Color(0xFF131A26),
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
         leading: Row(
           children: [
             const SizedBox(width: 16),
-            const Icon(Icons.security, color: Colors.blueAccent),
-            const SizedBox(width: 8),
-            Text('Sentinel Core', style: Theme.of(context).textTheme.titleMedium?.copyWith(color: Colors.white, fontWeight: FontWeight.bold)),
+            Icon(Icons.security, color: theme.colorScheme.onSurface),
+            const SizedBox(width: 12),
+            Text('PROTOCOL', style: TextStyle(color: theme.colorScheme.onSurface, fontWeight: FontWeight.w900, letterSpacing: 2, fontSize: 14)),
           ],
         ),
         leadingWidth: 200,
         actions: [
-          IconButton(icon: const Icon(Icons.close, color: Colors.white54), onPressed: () => context.pop())
+          IconButton(icon: Icon(Icons.close, color: theme.colorScheme.onSurface, size: 20), onPressed: () => context.pop())
         ],
       ),
       body: SafeArea(
@@ -43,10 +43,10 @@ class _TimerSetupScreenState extends ConsumerState<TimerSetupScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              const Text('Security Timer\nSetup', style: TextStyle(fontSize: 32, fontWeight: FontWeight.w900, color: Colors.white, height: 1.1), textAlign: TextAlign.center),
-              const SizedBox(height: 12),
-              const Text('Set your OTP duration for this journey.', style: TextStyle(fontSize: 14, color: Colors.white54), textAlign: TextAlign.center),
-              const SizedBox(height: 32),
+              Text('Security Timer\nSetup', style: TextStyle(fontSize: 36, fontWeight: FontWeight.w900, color: theme.colorScheme.onSurface, height: 1.1, letterSpacing: 1), textAlign: TextAlign.center),
+              const SizedBox(height: 16),
+              Text('SET IDENTITY CHALLENGE DURATION', style: TextStyle(fontSize: 11, color: theme.colorScheme.onSurface.withValues(alpha: 0.38), fontWeight: FontWeight.w900, letterSpacing: 2), textAlign: TextAlign.center),
+              const SizedBox(height: 40),
               
               _OptionCard(title: '15 Minutes', subtitle: 'QUICK JOURNEY', isSelected: !_isCustomActive && _selectedMinutes == 15, onTap: () => setState(() { _selectedMinutes = 15; _isCustomActive = false; })),
               const SizedBox(height: 12),
@@ -62,8 +62,16 @@ class _TimerSetupScreenState extends ConsumerState<TimerSetupScreen> {
                 ...[
                    const SizedBox(height: 4),
                    Container(
-                     padding: const EdgeInsets.all(24),
-                     decoration: const BoxDecoration(color: Color(0xFF1E2633), borderRadius: BorderRadius.vertical(bottom: Radius.circular(16))),
+                     padding: const EdgeInsets.all(28),
+                     decoration: BoxDecoration(
+                       color: theme.colorScheme.surface, 
+                       borderRadius: const BorderRadius.vertical(bottom: Radius.circular(20)),
+                       border: Border(
+                         left: BorderSide(color: theme.colorScheme.onSurface, width: 2),
+                         right: BorderSide(color: theme.colorScheme.onSurface, width: 2),
+                         bottom: BorderSide(color: theme.colorScheme.onSurface, width: 2),
+                       )
+                     ),
                      child: Column(
                        children: [
                          Row(
@@ -75,9 +83,9 @@ class _TimerSetupScreenState extends ConsumerState<TimerSetupScreen> {
                                onIncrement: () => setState(() { _customHours++; _selectedMinutes = (_customHours * 60) + _customMinutes; }),
                                onDecrement: () => setState(() { if (_customHours > 0) _customHours--; _selectedMinutes = (_customHours * 60) + _customMinutes; }),
                              ),
-                             const Padding(
-                               padding: EdgeInsets.symmetric(horizontal: 16),
-                               child: Text(':', style: TextStyle(color: Colors.white54, fontSize: 24, fontWeight: FontWeight.bold)),
+                             Padding(
+                               padding: const EdgeInsets.symmetric(horizontal: 24),
+                               child: Text(':', style: TextStyle(color: theme.colorScheme.onSurface, fontSize: 32, fontWeight: FontWeight.w900)),
                              ),
                              _CounterColumn(
                                label: 'MINUTES', 
@@ -87,42 +95,60 @@ class _TimerSetupScreenState extends ConsumerState<TimerSetupScreen> {
                              ),
                            ],
                          ),
-                         const SizedBox(height: 16),
+                         const SizedBox(height: 24),
                          Container(
-                           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
-                           decoration: BoxDecoration(color: Colors.blueAccent.withValues(alpha: 0.1), borderRadius: BorderRadius.circular(20)),
-                           child: Text('Total: $_selectedMinutes minutes', style: const TextStyle(color: Colors.blueAccent, fontSize: 12)),
+                           padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+                           decoration: BoxDecoration(color: theme.colorScheme.onSurface.withValues(alpha: 0.1), borderRadius: BorderRadius.circular(8)),
+                           child: Text('TOTAL INTERVAL: $_selectedMinutes MINUTES', style: const TextStyle(color: Colors.white, fontSize: 11, fontWeight: FontWeight.w900, letterSpacing: 1.5)),
                          )
                        ],
                      ),
                    )
                 ],
 
-              const SizedBox(height: 32),
+              const SizedBox(height: 40),
               Container(
-                padding: const EdgeInsets.all(16),
-                decoration: BoxDecoration(color: const Color(0xFF1E2633), borderRadius: BorderRadius.circular(12)),
+                padding: const EdgeInsets.all(20),
+                decoration: BoxDecoration(
+                  color: theme.colorScheme.surface, 
+                  borderRadius: BorderRadius.circular(16),
+                  border: Border.all(color: theme.dividerColor, width: 1.5)
+                ),
                 child: Row(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Icon(Icons.info, color: Colors.blueAccent, size: 20),
-                    const SizedBox(width: 12),
-                    Expanded(child: Text('Your safety circle will be prompted for an identity challenge if you stop moving for longer than this duration.', style: TextStyle(color: Colors.white.withValues(alpha: 0.7), fontSize: 12, height: 1.4))),
+                    Icon(Icons.info_outline, color: theme.colorScheme.onSurface.withValues(alpha: 0.6), size: 20),
+                    const SizedBox(width: 16),
+                    Expanded(child: Text('The system will prompt you for an identity challenge at every interval. Failure to verify triggers SOS broadcast.', style: TextStyle(color: theme.colorScheme.onSurface.withValues(alpha: 0.6), fontSize: 12, height: 1.5, fontWeight: FontWeight.w600))),
                   ],
                 ),
               ),
-              const SizedBox(height: 32),
-              ElevatedButton(
-                style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFF001B3A), foregroundColor: Colors.white, padding: const EdgeInsets.symmetric(vertical: 20), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16))),
-                onPressed: _selectedMinutes >= 15 ? () {
-                  final notifier = ref.read(journeyProvider.notifier);
-                  notifier.setTimerInterval(_selectedMinutes);
-                  notifier.startJourney();
-                  // REDIRECT TO HOME DASHBOARD (Image 1)
-                  context.go('/home');
-                } : null,
-                child: Row(mainAxisAlignment: MainAxisAlignment.center, children: [const Icon(Icons.bolt, color: Colors.white), const SizedBox(width: 8), Text(_selectedMinutes >= 15 ? 'Start Secure Journey' : 'Min 15m Required', style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold))]),
+              const SizedBox(height: 40),
+              SizedBox(
+                height: 64,
+                child: ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: theme.colorScheme.onSurface, 
+                    foregroundColor: theme.colorScheme.surface, 
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12))
+                  ),
+                  onPressed: _selectedMinutes >= 15 ? () {
+                    final notifier = ref.read(journeyProvider.notifier);
+                    notifier.setTimerInterval(_selectedMinutes);
+                    notifier.startJourney();
+                    context.go('/home');
+                  } : null,
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center, 
+                    children: [
+                      Icon(Icons.bolt_rounded, color: theme.colorScheme.surface), 
+                      const SizedBox(width: 12), 
+                      Text(_selectedMinutes >= 15 ? 'INITIALIZE JOURNEY' : 'MIN 15M REQUIRED', style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w900, letterSpacing: 1.5))
+                    ]
+                  ),
+                ),
               ),
+              const SizedBox(height: 40),
             ],
           ),
         ),
@@ -141,16 +167,31 @@ class _OptionCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return GestureDetector(
       onTap: onTap,
       child: Container(
-        padding: const EdgeInsets.all(20),
-        decoration: BoxDecoration(color: isSelected ? const Color(0xFF002447) : const Color(0xFF1E2633), borderRadius: BorderRadius.circular(12), border: Border.all(color: isSelected ? Colors.blueAccent : Colors.transparent)),
+        padding: const EdgeInsets.all(24),
+        decoration: BoxDecoration(
+          color: theme.colorScheme.surface, 
+          borderRadius: BorderRadius.circular(16), 
+          border: Border.all(color: isSelected ? theme.colorScheme.onSurface : theme.dividerColor, width: isSelected ? 2.5 : 1.5)
+        ),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            Column(crossAxisAlignment: CrossAxisAlignment.start, children: [Text(subtitle, style: const TextStyle(color: Colors.blueGrey, fontSize: 10, letterSpacing: 1.5, fontWeight: FontWeight.bold)), const SizedBox(height: 6), Text(title, style: const TextStyle(color: Colors.white, fontSize: 20, fontWeight: FontWeight.bold))]),
-            Icon(isSelected ? Icons.radio_button_checked : Icons.radio_button_unchecked, color: isSelected ? Colors.white : Colors.white30),
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start, 
+              children: [
+                Text(subtitle, style: TextStyle(color: isSelected ? theme.colorScheme.onSurface.withValues(alpha: 0.7) : theme.colorScheme.onSurface.withValues(alpha: 0.38), fontSize: 10, letterSpacing: 2, fontWeight: FontWeight.w900)), 
+                const SizedBox(height: 8), 
+                Text(title, style: TextStyle(color: theme.colorScheme.onSurface, fontSize: 20, fontWeight: FontWeight.w900, letterSpacing: 0.5))
+              ]
+            ),
+            if (isSelected) 
+              Icon(Icons.check_circle, color: theme.colorScheme.onSurface, size: 28)
+            else
+              Icon(Icons.radio_button_off, color: theme.colorScheme.onSurface.withValues(alpha: 0.12), size: 28),
           ],
         ),
       ),
@@ -168,15 +209,16 @@ class _CounterColumn extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return Column(
       children: [
-        IconButton(icon: const Icon(Icons.add, color: Colors.white54, size: 20), onPressed: onIncrement),
-        const SizedBox(height: 12),
-        Text(value, style: const TextStyle(color: Colors.white, fontSize: 28, fontWeight: FontWeight.bold)),
+        IconButton(icon: Icon(Icons.keyboard_arrow_up_rounded, color: theme.colorScheme.onSurface, size: 32), onPressed: onIncrement),
         const SizedBox(height: 4),
-        Text(label, style: const TextStyle(color: Colors.white54, fontSize: 10, letterSpacing: 1)),
-        const SizedBox(height: 12),
-        IconButton(icon: const Icon(Icons.remove, color: Colors.white54, size: 20), onPressed: onDecrement),
+        Text(value, style: TextStyle(color: theme.colorScheme.onSurface, fontSize: 40, fontWeight: FontWeight.w900)),
+        const SizedBox(height: 2),
+        Text(label, style: TextStyle(color: theme.colorScheme.onSurface.withValues(alpha: 0.38), fontSize: 10, letterSpacing: 2, fontWeight: FontWeight.w900)),
+        const SizedBox(height: 4),
+        IconButton(icon: Icon(Icons.keyboard_arrow_down_rounded, color: theme.colorScheme.onSurface, size: 32), onPressed: onDecrement),
       ],
     );
   }

@@ -239,6 +239,11 @@ class AuthRepository {
     await updateProfile({'lifeline_setup_complete': true});
   }
 
+  /// Sends a heartbeat to the backend to show the user is online.
+  Future<void> sendHeartbeat() async {
+    await ApiService.sendHeartbeat();
+  }
+
   // ─── Guardians / Lifeline ──────────────────────────────────
   /// Fetch all guardians for the current user.
   Future<List<Guardian>> fetchGuardians() async {

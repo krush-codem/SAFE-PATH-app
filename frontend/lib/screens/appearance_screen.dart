@@ -300,15 +300,19 @@ class _AppearanceScreenState extends ConsumerState<AppearanceScreen> {
     required bool isSelected,
     required VoidCallback onTap,
   }) {
+    final theme = Theme.of(context);
+    final cardColor = isLight ? AppColors.lightBackground : AppColors.surfaceDark;
+    final onCardColor = isLight ? AppColors.textHighLight : AppColors.textHighDark;
+    
     return GestureDetector(
       onTap: onTap,
       child: Container(
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
-          color: isLight ? const Color(0xFFF0F2F7) : const Color(0xFF1E2A4A),
+          color: cardColor,
           borderRadius: BorderRadius.circular(12),
           border: Border.all(
-            color: isSelected ? const Color(0xFF4A90E2) : Colors.transparent,
+            color: isSelected ? theme.colorScheme.primary : theme.dividerColor,
             width: 2,
           ),
         ),
@@ -318,10 +322,10 @@ class _AppearanceScreenState extends ConsumerState<AppearanceScreen> {
               width: 60,
               height: 60,
               decoration: BoxDecoration(
-                color: isLight ? Colors.white : const Color(0xFF0D1527),
+                color: isLight ? Colors.white : AppColors.darkBackground,
                 borderRadius: BorderRadius.circular(8),
                 border: Border.all(
-                  color: isLight ? const Color(0xFFE0E4ED) : const Color(0xFF2D3A5C),
+                  color: theme.dividerColor,
                 ),
               ),
               child: Column(
@@ -332,7 +336,7 @@ class _AppearanceScreenState extends ConsumerState<AppearanceScreen> {
                     width: 20,
                     height: 4,
                     decoration: BoxDecoration(
-                      color: isLight ? const Color(0xFFD1D5E0) : const Color(0xFF3D4A6C),
+                      color: theme.dividerColor,
                       borderRadius: BorderRadius.circular(2),
                     ),
                   ),
@@ -341,7 +345,7 @@ class _AppearanceScreenState extends ConsumerState<AppearanceScreen> {
                     width: 30,
                     height: 4,
                     decoration: BoxDecoration(
-                      color: isLight ? const Color(0xFFD1D5E0) : const Color(0xFF3D4A6C),
+                      color: theme.dividerColor,
                       borderRadius: BorderRadius.circular(2),
                     ),
                   ),
@@ -351,8 +355,8 @@ class _AppearanceScreenState extends ConsumerState<AppearanceScreen> {
                       margin: const EdgeInsets.all(6),
                       width: 20,
                       height: 20,
-                      decoration: const BoxDecoration(
-                        color: Color(0xFF4A90E2),
+                      decoration: BoxDecoration(
+                        color: theme.colorScheme.primary,
                         shape: BoxShape.circle,
                       ),
                       child: const Icon(
@@ -374,16 +378,16 @@ class _AppearanceScreenState extends ConsumerState<AppearanceScreen> {
                     style: TextStyle(
                       fontSize: 15,
                       fontWeight: FontWeight.w700,
-                      color: isLight ? const Color(0xFF0D1527) : Colors.white,
+                      color: onCardColor,
                     ),
                   ),
                   const SizedBox(height: 4),
                   Text(
                     subtitle,
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontSize: 11,
                       fontWeight: FontWeight.w500,
-                      color: Color(0xFF8B92A8),
+                      color: theme.colorScheme.onSurface.withValues(alpha: 0.5),
                       letterSpacing: 0.5,
                     ),
                   ),

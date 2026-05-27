@@ -344,7 +344,7 @@ class JourneyNotifier extends Notifier<JourneyState> {
        
        final response = await ref.read(supabaseClientProvider)
           .from('profiles')
-          .select('id, full_name, last_lat, last_lng')
+          .select('id, full_name, last_lat, last_lng, avatar_url')
           .neq('id', ref.read(currentUserProvider)?.id ?? '')
           .not('last_lat', 'is', null);
        
@@ -353,6 +353,7 @@ class JourneyNotifier extends Notifier<JourneyState> {
          'name': row['full_name'],
          'lat': row['last_lat'],
          'lng': row['last_lng'],
+         'avatar_url': row['avatar_url'],
        }).toList();
        
        state = state.copyWith(

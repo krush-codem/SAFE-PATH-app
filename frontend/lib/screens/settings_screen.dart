@@ -9,15 +9,17 @@ import '../widgets/dynamic_ui.dart';
 import '../routing/app_router.dart';
 import '../models/profile.dart';
 import '../models/guardian.dart';
+import '../theme/app_theme.dart';
 
 class SettingsScreen extends ConsumerWidget {
   const SettingsScreen({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
     final profileAsync = ref.watch(profileProvider);
     final guardiansAsync = ref.watch(guardiansProvider);
-    final theme = Theme.of(context);
 
     return Scaffold(
       body: CustomScrollView(
@@ -31,77 +33,77 @@ class SettingsScreen extends ConsumerWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   _buildProfileHeader(context, profileAsync),
-                  const SizedBox(height: 32),
+                  const SizedBox(height: 40),
                   _buildSectionTitle(context, 'ACCOUNT'),
                   _buildSettingsCard(context, [
                     _buildSettingsTile(
                       context,
                       icon: Icons.person_outline,
                       title: 'Edit Profile',
-                      subtitle: 'Change your name and personal details',
+                      subtitle: 'Update your personal info',
                       onTap: () => context.push(AppRoutes.editProfile),
                     ),
                     _buildSettingsTile(
                       context,
                       icon: Icons.history,
                       title: 'History',
-                      subtitle: 'View your past journeys',
+                      subtitle: 'View past journeys',
                       onTap: () => context.push(AppRoutes.history),
                     ),
                     _buildSettingsTile(
                       context,
                       icon: Icons.lock_outline,
                       title: 'Security',
-                      subtitle: 'Password, Biometrics & 2FA',
+                      subtitle: 'Password and biometric access',
                       onTap: () {},
                     ),
                   ]),
-                  const SizedBox(height: 24),
-                  _buildSectionTitle(context, 'SAFETY & PROTECTION'),
+                  const SizedBox(height: 32),
+                  _buildSectionTitle(context, 'SAFETY'),
                   _buildSettingsCard(context, [
                     _buildSettingsTile(
                       context,
                       icon: Icons.safety_check,
-                      title: 'Emergency Contacts',
-                      subtitle: '${guardiansAsync.value?.length ?? 0} active lifelines',
+                      title: 'Safe Circle',
+                      subtitle: '${guardiansAsync.value?.length ?? 0} active contacts',
                       onTap: () => context.push(AppRoutes.manageGuardians),
                     ),
                     _buildSettingsTile(
                       context,
                       icon: Icons.touch_app_outlined,
-                      title: 'SOS Sensitivity',
-                      subtitle: 'Vibration and tap triggers',
+                      title: 'SOS Settings',
+                      subtitle: 'Sensitivity and triggers',
                       onTap: () {},
                     ),
                   ]),
-                  const SizedBox(height: 24),
-                  _buildSectionTitle(context, 'SYSTEM'),
+                  const SizedBox(height: 32),
+                  _buildSectionTitle(context, 'PREFERENCES'),
                   _buildSettingsCard(context, [
                     _buildSettingsTile(
                       context,
                       icon: Icons.notifications_none,
-                      title: 'Notifications',
-                      subtitle: 'Alerts, sound and vibration',
+                      title: 'Alerts',
+                      subtitle: 'Notifications and sound',
                       onTap: () {},
                     ),
                     _buildSettingsTile(
                       context,
                       icon: Icons.palette_outlined,
                       title: 'Appearance',
-                      subtitle: 'Theme, colors and layout',
+                      subtitle: 'Theme and visual style',
                       onTap: () => context.push(AppRoutes.appearance),
                     ),
                     _buildSettingsTile(
                       context,
                       icon: Icons.privacy_tip_outlined,
                       title: 'Privacy',
-                      subtitle: 'Location sharing & permissions',
+                      subtitle: 'Location and data sharing',
                       onTap: () => context.push(AppRoutes.privacy),
                     ),
                   ]),
-                  const SizedBox(height: 32),
+                  const SizedBox(height: 48),
                   _buildLogoutButton(context, ref),
-                  const SizedBox(height: 12),
+                  const SizedBox(height: 16),
                   _buildDeleteAccountButton(context, ref),
                   const SizedBox(height: 100),
                 ],
@@ -119,24 +121,15 @@ class SettingsScreen extends ConsumerWidget {
       expandedHeight: 0,
       floating: true,
       pinned: true,
-      backgroundColor: kIsWeb ? Colors.transparent : theme.scaffoldBackgroundColor.withValues(alpha: 0.8),
       elevation: 0,
       centerTitle: true,
       automaticallyImplyLeading: false,
-      flexibleSpace: ClipRRect(
-        child: SafeBackdrop(
-          blur: 10,
-          fallbackColor: theme.scaffoldBackgroundColor.withValues(alpha: 0.8),
-          child: Container(color: Colors.transparent),
-        ),
-      ),
       title: Text(
         'SETTINGS',
-        style: GoogleFonts.manrope(
+        style: theme.textTheme.bodySmall?.copyWith(
           fontSize: 14,
-          fontWeight: FontWeight.w800,
+          fontWeight: FontWeight.w900,
           letterSpacing: 2,
-          color: theme.textTheme.displayLarge?.color,
         ),
       ),
     );
@@ -144,20 +137,14 @@ class SettingsScreen extends ConsumerWidget {
 
   Widget _buildProfileHeader(BuildContext context, AsyncValue<Profile?> profileAsync) {
     final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
     return profileAsync.when(
       data: (profile) => Container(
-        padding: const EdgeInsets.all(24),
+        padding: const EdgeInsets.all(28),
         decoration: BoxDecoration(
-          color: theme.colorScheme.surface,
-          borderRadius: BorderRadius.circular(32),
-          border: Border.all(color: theme.dividerColor.withValues(alpha: 0.05)),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withValues(alpha: 0.05),
-              blurRadius: 20,
-              offset: const Offset(0, 10),
-            ),
-          ],
+          color: colorScheme.surface,
+          borderRadius: BorderRadius.circular(24),
+          border: Border.all(color: theme.dividerColor, width: 1),
         ),
         child: Row(
           children: [
@@ -166,7 +153,7 @@ class SettingsScreen extends ConsumerWidget {
               height: 80,
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
-                color: theme.primaryColor.withValues(alpha: 0.1),
+                border: Border.all(color: colorScheme.onSurface, width: 2),
                 image: profile?.avatarUrl != null
                     ? DecorationImage(
                         image: NetworkImage(profile!.avatarUrl!),
@@ -175,42 +162,41 @@ class SettingsScreen extends ConsumerWidget {
                     : null,
               ),
               child: profile?.avatarUrl == null
-                  ? Icon(Icons.person, size: 40, color: theme.primaryColor)
+                  ? Icon(Icons.person, size: 40, color: colorScheme.onSurface)
                   : null,
             ),
-            const SizedBox(width: 20),
+            const SizedBox(width: 24),
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    (profile?.fullName?.isNotEmpty == true) ? profile!.fullName : 'Safe User',
-                    style: GoogleFonts.manrope(
-                      fontSize: 20,
-                      fontWeight: FontWeight.w800,
-                      color: theme.textTheme.displayLarge?.color,
+                    (profile?.fullName?.isNotEmpty == true) ? profile!.fullName : 'User',
+                    style: theme.textTheme.titleLarge?.copyWith(
+                      fontWeight: FontWeight.w900,
+                      letterSpacing: 1,
                     ),
                   ),
+                  const SizedBox(height: 4),
                   Text(
-                    (profile?.email?.isNotEmpty == true) ? profile!.email : ((profile?.phoneNumber?.isNotEmpty == true) ? profile!.phoneNumber! : 'user@safepath.com'),
-                    style: GoogleFonts.inter(
-                      fontSize: 13,
-                      color: theme.textTheme.bodyMedium?.color,
+                    (profile?.email?.isNotEmpty == true) ? profile!.email : 'Unverified Account',
+                    style: theme.textTheme.bodySmall?.copyWith(
+                      fontWeight: FontWeight.w600,
                     ),
                   ),
-                  const SizedBox(height: 12),
+                  const SizedBox(height: 16),
                   Container(
                     padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                     decoration: BoxDecoration(
-                      color: theme.primaryColor.withValues(alpha: 0.1),
-                      borderRadius: BorderRadius.circular(20),
+                      color: colorScheme.onSurface,
+                      borderRadius: BorderRadius.circular(4),
                     ),
                     child: Text(
-                      'PREMIUM PROTECTION',
-                      style: GoogleFonts.manrope(
+                      'ACTIVE PROTECTION',
+                      style: theme.textTheme.bodySmall?.copyWith(
                         fontSize: 9,
                         fontWeight: FontWeight.w900,
-                        color: theme.primaryColor,
+                        color: colorScheme.surface,
                         letterSpacing: 1,
                       ),
                     ),
@@ -221,8 +207,8 @@ class SettingsScreen extends ConsumerWidget {
           ],
         ),
       ),
-      loading: () => const Center(child: CircularProgressIndicator()),
-      error: (_, __) => const Text('Error loading profile'),
+      loading: () => Center(child: CircularProgressIndicator(color: colorScheme.onSurface, strokeWidth: 2)),
+      error: (_, __) => Text('CRITICAL: Profiling Error', style: TextStyle(color: colorScheme.error)),
     );
   }
 
@@ -232,11 +218,10 @@ class SettingsScreen extends ConsumerWidget {
       padding: const EdgeInsets.only(left: 8, bottom: 16),
       child: Text(
         title,
-        style: GoogleFonts.manrope(
-          fontSize: 11,
-          fontWeight: FontWeight.w800,
-          letterSpacing: 2,
-          color: theme.textTheme.bodySmall?.color?.withValues(alpha: 0.4),
+        style: theme.textTheme.bodySmall?.copyWith(
+          fontSize: 10,
+          fontWeight: FontWeight.w900,
+          letterSpacing: 2.5,
         ),
       ),
     );
@@ -244,11 +229,12 @@ class SettingsScreen extends ConsumerWidget {
 
   Widget _buildSettingsCard(BuildContext context, List<Widget> children) {
     final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
     return Container(
       decoration: BoxDecoration(
-        color: theme.colorScheme.surface,
-        borderRadius: BorderRadius.circular(28),
-        border: Border.all(color: theme.dividerColor.withValues(alpha: 0.05)),
+        color: colorScheme.surface,
+        borderRadius: BorderRadius.circular(24),
+        border: Border.all(color: theme.dividerColor, width: 1),
       ),
       child: Column(children: children),
     );
@@ -262,64 +248,60 @@ class SettingsScreen extends ConsumerWidget {
     required VoidCallback onTap,
   }) {
     final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
     return ListTile(
-      contentPadding: const EdgeInsets.symmetric(horizontal: 24, vertical: 8),
+      contentPadding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
       leading: Container(
         padding: const EdgeInsets.all(12),
         decoration: BoxDecoration(
-          color: theme.primaryColor.withValues(alpha: 0.08),
-          borderRadius: BorderRadius.circular(16),
+          color: colorScheme.onSurface.withValues(alpha: 0.05),
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(color: theme.dividerColor),
         ),
-        child: Icon(icon, color: theme.primaryColor, size: 22),
+        child: Icon(icon, color: colorScheme.onSurface, size: 20),
       ),
       title: Text(
         title,
-        style: GoogleFonts.manrope(
-          fontSize: 16,
-          fontWeight: FontWeight.w700,
-          color: theme.textTheme.bodyLarge?.color,
+        style: theme.textTheme.titleMedium?.copyWith(
+          fontWeight: FontWeight.w800,
         ),
       ),
       subtitle: subtitle != null
           ? Text(
               subtitle,
-              style: GoogleFonts.inter(
-                fontSize: 12,
-                color: theme.textTheme.bodyMedium?.color?.withValues(alpha: 0.6),
+              style: theme.textTheme.bodySmall?.copyWith(
+                fontWeight: FontWeight.w500,
               ),
             )
           : null,
-      trailing: Icon(Icons.chevron_right, color: theme.dividerColor.withValues(alpha: 0.2), size: 20),
+      trailing: Icon(Icons.arrow_forward_ios_rounded, color: colorScheme.onSurface.withValues(alpha: 0.2), size: 14),
       onTap: onTap,
     );
   }
 
   Widget _buildLogoutButton(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
     return SizedBox(
       width: double.infinity,
-      height: 60,
-      child: TextButton(
+      height: 64,
+      child: OutlinedButton(
         onPressed: () => _showLogoutConfirmation(context, ref),
-        style: TextButton.styleFrom(
-          backgroundColor: theme.colorScheme.surface,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(20),
-            side: BorderSide(color: theme.dividerColor.withValues(alpha: 0.05)),
-          ),
+        style: OutlinedButton.styleFrom(
+          side: BorderSide(color: colorScheme.onSurface.withValues(alpha: 0.2), width: 1.5),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
         ),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(Icons.logout_rounded, color: theme.textTheme.bodyLarge?.color?.withValues(alpha: 0.7), size: 20),
+            Icon(Icons.power_settings_new_rounded, color: colorScheme.onSurface.withValues(alpha: 0.5), size: 20),
             const SizedBox(width: 12),
             Text(
               'LOG OUT',
-              style: GoogleFonts.manrope(
-                fontSize: 14,
-                fontWeight: FontWeight.w800,
+              style: theme.textTheme.bodySmall?.copyWith(
+                fontSize: 13,
+                fontWeight: FontWeight.w900,
                 letterSpacing: 2.0,
-                color: theme.textTheme.bodyLarge?.color?.withValues(alpha: 0.7),
               ),
             ),
           ],
@@ -329,33 +311,25 @@ class SettingsScreen extends ConsumerWidget {
   }
 
   Widget _buildDeleteAccountButton(BuildContext context, WidgetRef ref) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
     return SizedBox(
       width: double.infinity,
-      height: 60,
+      height: 64,
       child: TextButton(
         onPressed: () => _showDeleteConfirmation(context, ref),
         style: TextButton.styleFrom(
-          backgroundColor: Colors.red.withValues(alpha: 0.05),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(20),
-            side: BorderSide(color: Colors.red.withValues(alpha: 0.1)),
-          ),
+          backgroundColor: colorScheme.error.withValues(alpha: 0.1),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
         ),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            const Icon(Icons.delete_outline_rounded, color: Colors.redAccent, size: 20),
-            const SizedBox(width: 12),
-            Text(
-              'DELETE ACCOUNT',
-              style: GoogleFonts.manrope(
-                fontSize: 14,
-                fontWeight: FontWeight.w800,
-                letterSpacing: 2.0,
-                color: Colors.redAccent,
-              ),
-            ),
-          ],
+        child: Text(
+          'DELETE ACCOUNT',
+          style: theme.textTheme.bodySmall?.copyWith(
+            fontSize: 13,
+            fontWeight: FontWeight.w900,
+            letterSpacing: 2.0,
+            color: colorScheme.error,
+          ),
         ),
       ),
     );
@@ -363,27 +337,29 @@ class SettingsScreen extends ConsumerWidget {
 
   void _showLogoutConfirmation(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        backgroundColor: theme.colorScheme.surface,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
         title: Text(
           'Log Out?',
-          style: GoogleFonts.manrope(fontWeight: FontWeight.bold),
+          style: theme.textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w900),
         ),
-        content: const Text('Are you sure you want to sign out of your account?'),
+        content: const Text(
+          'Are you sure you want to sign out of your account?',
+        ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: Text('CANCEL', style: GoogleFonts.manrope(color: theme.textTheme.bodySmall?.color)),
+            child: Text('CANCEL', style: TextStyle(color: colorScheme.onSurface.withValues(alpha: 0.5), fontWeight: FontWeight.w900)),
           ),
-          TextButton(
+          ElevatedButton(
             onPressed: () {
               Navigator.pop(context);
               ref.read(authNotifierProvider.notifier).signOut();
             },
-            child: Text('LOG OUT', style: GoogleFonts.manrope(color: theme.primaryColor, fontWeight: FontWeight.bold)),
+            style: ElevatedButton.styleFrom(backgroundColor: colorScheme.onSurface, foregroundColor: colorScheme.surface),
+            child: const Text('LOG OUT'),
           ),
         ],
       ),
@@ -392,29 +368,29 @@ class SettingsScreen extends ConsumerWidget {
 
   void _showDeleteConfirmation(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        backgroundColor: theme.colorScheme.surface,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
         title: Text(
           'Delete Account?',
-          style: GoogleFonts.manrope(fontWeight: FontWeight.bold, color: Colors.redAccent),
+          style: theme.textTheme.titleLarge?.copyWith(color: colorScheme.error, fontWeight: FontWeight.w900),
         ),
         content: const Text(
-          'This action is permanent and will delete all your data. Are you sure you want to proceed?',
+          'This action is permanent. All your data and contacts will be erased.',
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: Text('NO, KEEP IT', style: GoogleFonts.manrope(color: theme.textTheme.bodySmall?.color)),
+            child: Text('CANCEL', style: TextStyle(color: colorScheme.onSurface.withValues(alpha: 0.5), fontWeight: FontWeight.w900)),
           ),
-          TextButton(
+          ElevatedButton(
             onPressed: () {
               Navigator.pop(context);
               ref.read(authNotifierProvider.notifier).deleteAccount();
             },
-            child: const Text('YES, DELETE', style: Color(0xFFD32F2F) != null ? TextStyle(color: Colors.redAccent, fontWeight: FontWeight.bold) : null),
+            style: ElevatedButton.styleFrom(backgroundColor: colorScheme.error, foregroundColor: Colors.white),
+            child: const Text('DELETE'),
           ),
         ],
       ),

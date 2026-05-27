@@ -2,18 +2,28 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 class AppColors {
-  static const darkBackground = Color(0xFF000000); // Pure Black
+  // Deep Obsidian (Tinted Neutral)
+  static const darkBackground = Color(0xFF0A0C10); 
   static const lightBackground = Color(0xFFF8F9FE);
   
-  static const surfaceDark = Color(0xFF111111); // Very deep gray surface
+  // Elevated Surfaces
+  static const surfaceDark = Color(0xFF14171C); 
   static const surfaceLight = Colors.white;
   
-  static const textDark = Color(0xFF0F1724);
-  static const textLight = Color(0xFFE0E0E0); // Soft Ivory/White
-  static const textMutedDark = Color(0xFF5A6275);
-  static const textMutedLight = Color(0xFF888888); // Muted Silver
+  // Accents
+  static const primaryBlue = Color(0xFF5C79FF); // Electric Blue
+  static const secondaryCrimson = Color(0xFFF43F5E); // Urgent Rose/Crimson
+  static const successEmerald = Color(0xFF10B981); // Success Green
   
-  static const accentSmooth = Color(0xFF5C79FF); // Smooth Steel Blue
+  // Borders
+  static const borderDark = Color(0xFF22262E); 
+  static const borderLight = Color(0xFFE2E8F0);
+  
+  // Text
+  static const textHighDark = Color(0xFFF1F5F9); 
+  static const textHighLight = Color(0xFF0F172A);
+  static const textMutedDark = Color(0xFF94A3B8);
+  static const textMutedLight = Color(0xFF64748B);
 }
 
 class AppTheme {
@@ -23,34 +33,36 @@ class AppTheme {
     
     final background = isDark ? AppColors.darkBackground : AppColors.lightBackground;
     final surface = isDark ? AppColors.surfaceDark : AppColors.surfaceLight;
-    final onSurface = isDark ? AppColors.textLight : AppColors.textDark;
-    final onSurfaceMuted = isDark ? AppColors.textMutedLight : AppColors.textMutedDark;
+    final onSurface = isDark ? AppColors.textHighDark : AppColors.textHighLight;
+    final onSurfaceMuted = isDark ? AppColors.textMutedDark : AppColors.textMutedLight;
+    final borderColor = isDark ? AppColors.borderDark : AppColors.borderLight;
 
     return ThemeData(
+      useMaterial3: true,
       brightness: brightness,
       scaffoldBackgroundColor: background,
-      primaryColor: primaryColor,
+      primaryColor: AppColors.primaryBlue,
       colorScheme: ColorScheme.fromSeed(
-        seedColor: primaryColor,
+        seedColor: AppColors.primaryBlue,
         brightness: brightness,
-        primary: primaryColor,
+        primary: AppColors.primaryBlue,
         surface: surface,
         onSurface: onSurface,
-        background: background,
-        onBackground: onSurface,
-        secondary: secondaryColor,
-        onSecondary: isDark ? Colors.white : Colors.black,
+        secondary: AppColors.secondaryCrimson,
+        error: AppColors.secondaryCrimson,
       ),
       textTheme: TextTheme(
         displayLarge: GoogleFonts.manrope(
           color: onSurface,
           fontWeight: FontWeight.w800,
           fontSize: 32,
+          letterSpacing: -0.5,
         ),
         displayMedium: GoogleFonts.manrope(
           color: onSurface,
           fontWeight: FontWeight.w800,
           fontSize: 24,
+          letterSpacing: -0.5,
         ),
         displaySmall: GoogleFonts.manrope(
           color: onSurface,
@@ -59,17 +71,17 @@ class AppTheme {
         ),
         headlineLarge: GoogleFonts.manrope(
           color: onSurface,
-          fontWeight: FontWeight.bold,
+          fontWeight: FontWeight.w700,
           fontSize: 18,
         ),
         headlineMedium: GoogleFonts.manrope(
           color: onSurface,
-          fontWeight: FontWeight.w700,
+          fontWeight: FontWeight.w600,
           fontSize: 16,
         ),
         titleLarge: GoogleFonts.manrope(
           color: onSurface,
-          fontWeight: FontWeight.w700,
+          fontWeight: FontWeight.w600,
           fontSize: 18,
         ),
         titleMedium: GoogleFonts.manrope(
@@ -80,46 +92,54 @@ class AppTheme {
         bodyLarge: GoogleFonts.inter(
           color: onSurface,
           fontSize: 16,
+          fontWeight: FontWeight.w500,
+          height: 1.5,
         ),
         bodyMedium: GoogleFonts.inter(
           color: onSurfaceMuted,
           fontSize: 14,
+          height: 1.5,
         ),
         bodySmall: GoogleFonts.inter(
           color: onSurfaceMuted,
           fontSize: 12,
         ),
-        labelLarge: GoogleFonts.manrope(
-          color: onSurfaceMuted,
-          fontWeight: FontWeight.w600,
-          fontSize: 12,
-          letterSpacing: 0.5,
-        ),
       ),
       appBarTheme: AppBarTheme(
-        backgroundColor: Colors.transparent,
+        backgroundColor: background,
+        surfaceTintColor: Colors.transparent,
         elevation: 0,
+        centerTitle: false,
         titleTextStyle: GoogleFonts.manrope(
           color: onSurface,
-          fontSize: 16,
+          fontSize: 18,
           fontWeight: FontWeight.w800,
         ),
-        iconTheme: IconThemeData(color: onSurface),
+        iconTheme: IconThemeData(color: onSurface, size: 24),
       ),
-      dividerColor: onSurface.withValues(alpha: 0.1),
+      dividerTheme: DividerThemeData(
+        color: borderColor,
+        thickness: 1,
+        space: 1,
+      ),
       cardTheme: CardThemeData(
         color: surface,
         elevation: 0,
+        margin: EdgeInsets.zero,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(16),
+          side: BorderSide(color: borderColor, width: 1),
         ),
       ),
       elevatedButtonTheme: ElevatedButtonThemeData(
         style: ElevatedButton.styleFrom(
-          backgroundColor: primaryColor,
-          foregroundColor: isDark ? Colors.white : Colors.black,
+          backgroundColor: AppColors.primaryBlue,
+          foregroundColor: Colors.white,
+          elevation: 0,
+          minimumSize: const Size(64, 56),
           textStyle: GoogleFonts.manrope(
             fontWeight: FontWeight.w700,
+            fontSize: 16,
           ),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(12),
@@ -128,14 +148,37 @@ class AppTheme {
       ),
       inputDecorationTheme: InputDecorationTheme(
         filled: true,
-        fillColor: isDark ? const Color(0xFF1E2633) : const Color(0xFFF0F2F7),
+        fillColor: isDark ? const Color(0xFF0F1216) : Colors.white,
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
-          borderSide: BorderSide.none,
+          borderSide: BorderSide(color: borderColor),
         ),
-        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
-        hintStyle: GoogleFonts.inter(
-          color: onSurfaceMuted.withValues(alpha: 0.5),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: BorderSide(color: borderColor),
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: const BorderSide(color: AppColors.primaryBlue, width: 2),
+        ),
+        contentPadding: const EdgeInsets.all(16),
+        hintStyle: GoogleFonts.inter(color: onSurfaceMuted),
+      ),
+      dialogTheme: DialogThemeData(
+        backgroundColor: surface,
+        elevation: 0,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(20),
+          side: BorderSide(color: borderColor),
+        ),
+      ),
+      snackBarTheme: SnackBarThemeData(
+        backgroundColor: surface,
+        contentTextStyle: GoogleFonts.inter(color: onSurface),
+        behavior: SnackBarBehavior.floating,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(12),
+          side: BorderSide(color: borderColor),
         ),
       ),
     );
@@ -143,20 +186,22 @@ class AppTheme {
   
   // Helper to get appropriate text color based on brightness
   static Color getTextColor(BuildContext context, {bool muted = false}) {
-    final brightness = Theme.of(context).brightness;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     if (muted) {
-      return brightness == Brightness.dark ? AppColors.textMutedLight : AppColors.textMutedDark;
+      return isDark ? AppColors.textMutedDark : AppColors.textMutedLight;
     }
-    return brightness == Brightness.dark ? AppColors.textLight : AppColors.textDark;
+    return isDark ? AppColors.textHighDark : AppColors.textHighLight;
   }
   
   static Color getBackgroundColor(BuildContext context) {
-    final brightness = Theme.of(context).brightness;
-    return brightness == Brightness.dark ? AppColors.darkBackground : AppColors.lightBackground;
+    return Theme.of(context).brightness == Brightness.dark 
+        ? AppColors.darkBackground 
+        : AppColors.lightBackground;
   }
   
   static Color getSurfaceColor(BuildContext context) {
-    final brightness = Theme.of(context).brightness;
-    return brightness == Brightness.dark ? AppColors.surfaceDark : AppColors.surfaceLight;
+    return Theme.of(context).brightness == Brightness.dark 
+        ? AppColors.surfaceDark 
+        : AppColors.surfaceLight;
   }
 }

@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../repositories/virustotal_repository.dart';
+import '../theme/app_theme.dart';
 
 class AegisGuardScreen extends ConsumerStatefulWidget {
   const AegisGuardScreen({super.key});
@@ -79,27 +80,22 @@ class _AegisGuardScreenState extends ConsumerState<AegisGuardScreen> with Single
   void _showResultPopup(ScanResult result) {
     if (!mounted) return;
     final isMalicious = result.isMalicious;
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
     
     showDialog(
       context: context,
       builder: (context) => Center(
         child: Container(
           margin: const EdgeInsets.symmetric(horizontal: 40),
-          padding: const EdgeInsets.all(24),
+          padding: const EdgeInsets.all(32),
           decoration: BoxDecoration(
-            color: const Color(0xFF0A1220),
+            color: colorScheme.surface,
             borderRadius: BorderRadius.circular(24),
             border: Border.all(
-              color: isMalicious ? Colors.redAccent.withValues(alpha: 0.5) : Colors.greenAccent.withValues(alpha: 0.5),
-              width: 2,
+              color: isMalicious ? colorScheme.error : colorScheme.onSurface,
+              width: 1,
             ),
-            boxShadow: [
-              BoxShadow(
-                color: (isMalicious ? Colors.redAccent : Colors.greenAccent).withValues(alpha: 0.2),
-                blurRadius: 20,
-                spreadRadius: 5,
-              ),
-            ],
           ),
           child: Material(
             color: Colors.transparent,
@@ -108,56 +104,50 @@ class _AegisGuardScreenState extends ConsumerState<AegisGuardScreen> with Single
               children: [
                 Icon(
                   isMalicious ? Icons.gpp_bad : Icons.gpp_good,
-                  color: isMalicious ? Colors.redAccent : Colors.greenAccent,
-                  size: 64,
+                  color: isMalicious ? colorScheme.error : AppColors.successEmerald,
+                  size: 80,
                 ),
-                const SizedBox(height: 16),
+                const SizedBox(height: 24),
                 Text(
                   isMalicious ? 'THREAT DETECTED' : 'SYSTEM SECURE',
-                  style: GoogleFonts.outfit(
-                    color: isMalicious ? Colors.redAccent : Colors.greenAccent,
-                    fontSize: 22,
-                    fontWeight: FontWeight.bold,
-                    letterSpacing: 1.5,
+                  style: theme.textTheme.displaySmall?.copyWith(
+                    fontWeight: FontWeight.w900,
+                    letterSpacing: 2,
                   ),
                 ),
-                const SizedBox(height: 12),
+                const SizedBox(height: 16),
                 Container(
-                  padding: const EdgeInsets.all(12),
+                  padding: const EdgeInsets.all(16),
                   decoration: BoxDecoration(
-                    color: Colors.white.withValues(alpha: 0.05),
+                    color: colorScheme.onSurface.withValues(alpha: 0.05),
                     borderRadius: BorderRadius.circular(12),
+                    border: Border.all(color: theme.dividerColor),
                   ),
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      Icon(Icons.security, color: isMalicious ? Colors.redAccent : Colors.greenAccent, size: 16),
-                      const SizedBox(width: 8),
-                      Text(
-                        '${result.malicious} of ${result.totalEngines} engines detected threats',
-                        style: const TextStyle(color: Colors.white70, fontSize: 13),
+                      Icon(Icons.security, color: isMalicious ? colorScheme.error : colorScheme.onSurface.withValues(alpha: 0.6), size: 18),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: Text(
+                          '${result.malicious} of ${result.totalEngines} engines flagged as malicious.',
+                          style: theme.textTheme.bodySmall?.copyWith(fontWeight: FontWeight.w600),
+                          textAlign: TextAlign.center,
+                        ),
                       ),
                     ],
                   ),
                 ),
-                if (result.link != null) ...[
-                  const SizedBox(height: 16),
-                  TextButton.icon(
-                    onPressed: () {}, // Link to VT GUI could go here
-                    icon: const Icon(Icons.open_in_new, size: 14),
-                    label: const Text('VIEW FULL REPORT', style: TextStyle(fontSize: 12)),
-                  ),
-                ],
-                const SizedBox(height: 24),
+                const SizedBox(height: 32),
                 ElevatedButton(
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: isMalicious ? Colors.redAccent : Colors.greenAccent,
-                    foregroundColor: Colors.white,
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                    minimumSize: const Size(double.infinity, 50),
+                    backgroundColor: colorScheme.onSurface,
+                    foregroundColor: colorScheme.surface,
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                    minimumSize: const Size(double.infinity, 56),
                   ),
                   onPressed: () => Navigator.pop(context),
-                  child: const Text('DISMISS', style: TextStyle(fontWeight: FontWeight.bold)),
+                  child: const Text('DISMISS PROTOCOL', style: TextStyle(fontWeight: FontWeight.w900, fontSize: 14)),
                 ),
               ],
             ),
@@ -171,8 +161,8 @@ class _AegisGuardScreenState extends ConsumerState<AegisGuardScreen> with Single
     if (!mounted) return;
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
-        content: Text(error),
-        backgroundColor: Colors.orangeAccent,
+        content: Text(error, style: const TextStyle(fontWeight: FontWeight.bold)),
+        backgroundColor: Colors.redAccent,
         behavior: SnackBarBehavior.floating,
       ),
     );
@@ -180,33 +170,24 @@ class _AegisGuardScreenState extends ConsumerState<AegisGuardScreen> with Single
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
     return Scaffold(
-      backgroundColor: const Color(0xFF030A14), // Ultra deep navy
       appBar: AppBar(
-        backgroundColor: Colors.transparent,
-        elevation: 0,
-        leading: Padding(
-          padding: const EdgeInsets.all(12.0),
-          child: Container(
-            decoration: BoxDecoration(
-              color: const Color(0xFF1B498A),
-              borderRadius: BorderRadius.circular(8),
-            ),
-            child: const Icon(Icons.shield, color: Colors.white, size: 20),
-          ),
+        leading: IconButton(
+          icon: Icon(Icons.arrow_back_ios_new, color: colorScheme.onSurface, size: 20),
+          onPressed: () => Navigator.pop(context),
         ),
         title: Text(
-          'SAFEPATH',
-          style: GoogleFonts.outfit(
+          'AEGIS GUARD',
+          style: theme.textTheme.titleMedium?.copyWith(
             fontWeight: FontWeight.w900,
             letterSpacing: 2,
-            fontSize: 18,
-            color: Colors.white,
           ),
         ),
         actions: [
           IconButton(
-            icon: const Icon(Icons.notifications_none, color: Colors.white70),
+            icon: Icon(Icons.info_outline, color: colorScheme.onSurface.withValues(alpha: 0.7)),
             onPressed: () {},
           ),
         ],
@@ -214,95 +195,89 @@ class _AegisGuardScreenState extends ConsumerState<AegisGuardScreen> with Single
       body: Stack(
         children: [
           SingleChildScrollView(
-            padding: const EdgeInsets.symmetric(horizontal: 20),
+            padding: const EdgeInsets.symmetric(horizontal: 24),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 const SizedBox(height: 20),
-                _buildSentinelBanner(),
-                const SizedBox(height: 32),
-                _buildScanHeader('Scan URL', 'PROTOCOL 4.0'),
+                _buildSentinelBanner(context),
+                const SizedBox(height: 40),
+                _buildScanHeader(context, 'URL ANALYSIS', 'PROTOCOL 4.0'),
                 const SizedBox(height: 16),
-                _buildUrlScanBox(),
-                const SizedBox(height: 32),
-                _buildScanHeader('Scan File', 'DEEP SANDBOX'),
+                _buildUrlScanBox(context),
+                const SizedBox(height: 40),
+                _buildScanHeader(context, 'FILE SANDBOX', 'DEEP SCAN'),
                 const SizedBox(height: 16),
-                _buildFileScanBox(),
-                const SizedBox(height: 32),
+                _buildFileScanBox(context),
                 const SizedBox(height: 40),
               ],
             ),
           ),
-          if (_isUrlScanning || _isFileScanning) _buildScanningOverlay(),
+          if (_isUrlScanning || _isFileScanning) _buildScanningOverlay(context),
         ],
       ),
     );
   }
 
-  Widget _buildSentinelBanner() {
+  Widget _buildSentinelBanner(BuildContext context) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
     return Container(
       width: double.infinity,
       decoration: BoxDecoration(
-        gradient: const LinearGradient(
-          colors: [Color(0xFF0D2545), Color(0xFF030A14)],
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-        ),
+        color: colorScheme.surface,
         borderRadius: BorderRadius.circular(24),
-        border: Border.all(color: Colors.white.withValues(alpha: 0.05)),
+        border: Border.all(color: theme.dividerColor, width: 1),
       ),
       child: Stack(
         children: [
           Positioned(
-            right: 0,
-            top: 0,
+            right: -20,
+            top: -20,
             child: Opacity(
-              opacity: 0.1,
-              child: Icon(Icons.shield_outlined, size: 100, color: Colors.blue.withValues(alpha: 0.5)),
+              opacity: 0.05,
+              child: Icon(Icons.shield, size: 160, color: colorScheme.onSurface),
             ),
           ),
           Padding(
-            padding: const EdgeInsets.all(24.0),
+            padding: const EdgeInsets.all(32.0),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
                   'SENTINEL STATUS',
-                  style: GoogleFonts.outfit(
-                    color: const Color(0xFF64B5F6),
-                    fontWeight: FontWeight.bold,
-                    letterSpacing: 1.5,
-                    fontSize: 12,
+                  style: theme.textTheme.bodySmall?.copyWith(
+                    fontWeight: FontWeight.w900,
+                    letterSpacing: 2,
                   ),
                 ),
-                const SizedBox(height: 8),
+                const SizedBox(height: 12),
                 Text(
-                  'Your Digital Perimeter is Secure',
-                  style: GoogleFonts.outfit(
-                    color: Colors.white,
-                    fontSize: 24,
-                    fontWeight: FontWeight.bold,
+                  'Digital Perimeter\nSecure.',
+                  style: theme.textTheme.displaySmall?.copyWith(
+                    fontWeight: FontWeight.w900,
+                    height: 1.1,
                   ),
                 ),
-                const SizedBox(height: 16),
+                const SizedBox(height: 24),
                 Row(
                   children: [
                     FadeTransition(
                       opacity: _pulseController,
                       child: Container(
-                        width: 8,
-                        height: 8,
-                        decoration: const BoxDecoration(
-                          color: Colors.greenAccent,
+                        width: 10,
+                        height: 10,
+                        decoration: BoxDecoration(
+                          color: AppColors.successEmerald,
                           shape: BoxShape.circle,
-                          boxShadow: [BoxShadow(color: Colors.greenAccent, blurRadius: 4)],
+                          boxShadow: [BoxShadow(color: AppColors.successEmerald, blurRadius: 8)],
                         ),
                       ),
                     ),
-                    const SizedBox(width: 8),
-                    Text(
+                    const SizedBox(width: 12),
+                    const Text(
                       'AI Surveillance Active',
-                      style: GoogleFonts.outfit(color: Colors.greenAccent, fontSize: 13, fontWeight: FontWeight.bold),
+                      style: TextStyle(color: AppColors.successEmerald, fontSize: 13, fontWeight: FontWeight.w900, letterSpacing: 0.5),
                     ),
                   ],
                 ),
@@ -314,160 +289,167 @@ class _AegisGuardScreenState extends ConsumerState<AegisGuardScreen> with Single
     );
   }
 
-  Widget _buildScanHeader(String title, String subtitle) {
+  Widget _buildScanHeader(BuildContext context, String title, String subtitle) {
+    final theme = Theme.of(context);
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
         Text(
           title,
-          style: GoogleFonts.outfit(
-            color: Colors.white,
-            fontSize: 20,
-            fontWeight: FontWeight.bold,
+          style: theme.textTheme.titleMedium?.copyWith(
+            fontWeight: FontWeight.w900,
+            letterSpacing: 1,
           ),
         ),
         Text(
           subtitle,
-          style: GoogleFonts.outfit(
-            color: Colors.white24,
-            fontSize: 10,
-            fontWeight: FontWeight.bold,
-            letterSpacing: 1,
+          style: theme.textTheme.bodySmall?.copyWith(
+            fontWeight: FontWeight.w900,
+            letterSpacing: 2,
           ),
         ),
       ],
     );
   }
 
-  Widget _buildUrlScanBox() {
+  Widget _buildUrlScanBox(BuildContext context) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
     return Container(
-      padding: const EdgeInsets.all(20),
+      padding: const EdgeInsets.all(24),
       decoration: BoxDecoration(
-        color: const Color(0xFF0A1220),
+        color: colorScheme.surface,
         borderRadius: BorderRadius.circular(24),
-        border: Border.all(color: Colors.white10),
+        border: Border.all(color: theme.dividerColor, width: 1),
       ),
       child: Column(
         children: [
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 16),
             decoration: BoxDecoration(
-              color: Colors.white.withValues(alpha: 0.05),
+              color: colorScheme.onSurface.withValues(alpha: 0.05),
               borderRadius: BorderRadius.circular(12),
+              border: Border.all(color: theme.dividerColor),
             ),
             child: TextField(
               controller: _urlController,
-              style: const TextStyle(color: Colors.white),
+              style: theme.textTheme.bodyLarge?.copyWith(fontWeight: FontWeight.w600),
               decoration: InputDecoration(
                 hintText: 'https://secure-link.com/check',
-                hintStyle: const TextStyle(color: Colors.white24),
+                hintStyle: theme.textTheme.bodyMedium,
                 border: InputBorder.none,
-                icon: const Icon(Icons.link, color: Colors.white24, size: 20),
+                enabledBorder: InputBorder.none,
+                focusedBorder: InputBorder.none,
+                icon: Icon(Icons.link, color: colorScheme.onSurface.withValues(alpha: 0.4), size: 20),
               ),
             ),
           ),
-          const SizedBox(height: 20),
+          const SizedBox(height: 24),
           SizedBox(
             width: double.infinity,
-            height: 55,
+            height: 60,
             child: ElevatedButton.icon(
               onPressed: _isUrlScanning ? null : _handleUrlScan,
               style: ElevatedButton.styleFrom(
-                backgroundColor: const Color(0xFF0D2545),
-                foregroundColor: Colors.white,
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-                side: BorderSide(color: Colors.white.withValues(alpha: 0.05)),
+                backgroundColor: colorScheme.onSurface,
+                foregroundColor: colorScheme.surface,
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
               ),
               icon: _isUrlScanning 
-                ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))
-                : const Icon(Icons.radar),
-              label: Text(
-                'Check Link',
-                style: GoogleFonts.outfit(fontWeight: FontWeight.bold, fontSize: 16),
+                ? SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 3, color: colorScheme.surface))
+                : const Icon(Icons.radar, size: 20),
+              label: const Text(
+                'EXECUTE ANALYSIS',
+                style: TextStyle(fontWeight: FontWeight.w900, fontSize: 14, letterSpacing: 1),
               ),
             ),
           ),
-          const SizedBox(height: 12),
-          const Text(
-            'Instant analysis for phishing, malware, and social engineering threats.',
+          const SizedBox(height: 16),
+          Text(
+            'Analysis for phishing, malware, and social engineering.',
             textAlign: TextAlign.center,
-            style: TextStyle(color: Colors.white24, fontSize: 11),
+            style: theme.textTheme.bodySmall,
           ),
         ],
       ),
     );
   }
 
-  Widget _buildFileScanBox() {
+  Widget _buildFileScanBox(BuildContext context) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.all(40),
       decoration: BoxDecoration(
-        color: const Color(0xFF0A1220),
+        color: colorScheme.surface,
         borderRadius: BorderRadius.circular(24),
-        border: Border.all(color: Colors.white.withValues(alpha: 0.05)),
+        border: Border.all(color: theme.dividerColor, width: 1),
       ),
       child: Column(
         children: [
           Container(
-            padding: const EdgeInsets.all(16),
+            padding: const EdgeInsets.all(20),
             decoration: BoxDecoration(
-              color: Colors.white.withValues(alpha: 0.05),
-              borderRadius: BorderRadius.circular(16),
+              color: colorScheme.onSurface.withValues(alpha: 0.05),
+              borderRadius: BorderRadius.circular(20),
+              border: Border.all(color: theme.dividerColor),
             ),
-            child: const Icon(Icons.file_upload_outlined, color: Colors.blueAccent, size: 32),
-          ),
-          const SizedBox(height: 20),
-          Text(
-            'Drop secure file here',
-            style: GoogleFonts.outfit(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold),
-          ),
-          const SizedBox(height: 4),
-          const Text(
-            'Supports PDF, EXE, ZIP up to 32MB',
-            style: TextStyle(color: Colors.white24, fontSize: 12),
+            child: Icon(Icons.file_upload_outlined, color: colorScheme.onSurface, size: 40),
           ),
           const SizedBox(height: 24),
-          OutlinedButton(
-            onPressed: _isFileScanning ? null : _handleFileScan,
-            style: OutlinedButton.styleFrom(
-              foregroundColor: Colors.white,
-              side: BorderSide(color: Colors.white.withValues(alpha: 0.1)),
-              padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 16),
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-              backgroundColor: Colors.white.withValues(alpha: 0.03),
+          Text(
+            'UPLOAD ENCRYPTED FILE',
+            style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w900, letterSpacing: 1),
+          ),
+          const SizedBox(height: 8),
+          Text(
+            'MAX 32MB • PDF, EXE, ZIP, BIN',
+            style: theme.textTheme.bodySmall?.copyWith(fontWeight: FontWeight.w900, letterSpacing: 1),
+          ),
+          const SizedBox(height: 32),
+          SizedBox(
+            width: double.infinity,
+            child: OutlinedButton(
+              onPressed: _isFileScanning ? null : _handleFileScan,
+              style: OutlinedButton.styleFrom(
+                foregroundColor: colorScheme.onSurface,
+                side: BorderSide(color: colorScheme.onSurface, width: 2),
+                padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 18),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+              ),
+              child: _isFileScanning
+                ? SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 3, color: colorScheme.onSurface))
+                : const Text('BROWSE DIRECTORY', style: TextStyle(fontWeight: FontWeight.w900, letterSpacing: 1.5, fontSize: 12)),
             ),
-            child: _isFileScanning
-              ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))
-              : Text('BROWSE FILES', style: GoogleFonts.outfit(fontWeight: FontWeight.bold, letterSpacing: 1)),
           ),
         ],
       ),
     );
   }
 
-  Widget _buildScanningOverlay() {
+  Widget _buildScanningOverlay(BuildContext context) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
     return Positioned.fill(
       child: Container(
-        color: Colors.black.withValues(alpha: 0.8),
+        color: theme.scaffoldBackgroundColor.withValues(alpha: 0.9),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            const RadarScanner(),
-            const SizedBox(height: 40),
+            RadarScanner(color: colorScheme.onSurface),
+            const SizedBox(height: 48),
             Text(
-              'SCANNING PERIMETER...',
-              style: GoogleFonts.outfit(
-                color: Colors.blueAccent,
-                fontWeight: FontWeight.bold,
-                letterSpacing: 4,
-                fontSize: 14,
+              'SCANNING PERIMETER',
+              style: theme.textTheme.titleMedium?.copyWith(
+                fontWeight: FontWeight.w900,
+                letterSpacing: 6,
               ),
             ),
             const SizedBox(height: 12),
-            const Text(
-              'Engaging Deep Sandbox Protocols',
-              style: TextStyle(color: Colors.white38, fontSize: 12),
+            Text(
+              'ENGAGING DEEP SANDBOX PROTOCOLS',
+              style: theme.textTheme.bodySmall?.copyWith(fontWeight: FontWeight.w900, letterSpacing: 2),
             ),
           ],
         ),
@@ -475,9 +457,9 @@ class _AegisGuardScreenState extends ConsumerState<AegisGuardScreen> with Single
     );
   }
 }
-
 class RadarScanner extends StatefulWidget {
-  const RadarScanner({super.key});
+  final Color color;
+  const RadarScanner({super.key, required this.color});
 
   @override
   State<RadarScanner> createState() => _RadarScannerState();
@@ -508,7 +490,7 @@ class _RadarScannerState extends State<RadarScanner> with SingleTickerProviderSt
       builder: (context, child) {
         return CustomPaint(
           size: const Size(200, 200),
-          painter: RadarPainter(_controller.value),
+          painter: RadarPainter(_controller.value, widget.color),
         );
       },
     );
@@ -517,7 +499,8 @@ class _RadarScannerState extends State<RadarScanner> with SingleTickerProviderSt
 
 class RadarPainter extends CustomPainter {
   final double angle;
-  RadarPainter(this.angle);
+  final Color color;
+  RadarPainter(this.angle, this.color);
 
   @override
   void paint(Canvas canvas, Size size) {
@@ -525,9 +508,9 @@ class RadarPainter extends CustomPainter {
     final radius = size.width / 2;
 
     final paintCircle = Paint()
-      ..color = Colors.blueAccent.withValues(alpha: 0.1)
+      ..color = color.withValues(alpha: 0.15)
       ..style = PaintingStyle.stroke
-      ..strokeWidth = 1.0;
+      ..strokeWidth = 1.5;
 
     // Circles
     canvas.drawCircle(center, radius, paintCircle);
@@ -541,7 +524,7 @@ class RadarPainter extends CustomPainter {
     // Radar scan
     final sweepPaint = Paint()
       ..shader = SweepGradient(
-        colors: [Colors.blueAccent.withValues(alpha: 0.0), Colors.blueAccent.withValues(alpha: 0.4)],
+        colors: [color.withValues(alpha: 0.0), color.withValues(alpha: 0.4)],
         stops: const [0.8, 1.0],
         transform: GradientRotation(angle * 2 * 3.14159),
       ).createShader(Rect.fromCircle(center: center, radius: radius));
@@ -550,8 +533,8 @@ class RadarPainter extends CustomPainter {
 
     // Scanner beam edge
     final beamPaint = Paint()
-      ..color = Colors.blueAccent
-      ..strokeWidth = 2.0;
+      ..color = color
+      ..strokeWidth = 2.5;
     
     final lineAngle = angle * 2 * 3.14159;
     canvas.drawLine(

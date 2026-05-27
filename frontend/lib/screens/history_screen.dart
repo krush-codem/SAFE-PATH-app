@@ -103,24 +103,25 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
                   // Search Bar
                   Container(
                     decoration: BoxDecoration(
-                      color: isDark ? const Color(0xFF1E2633) : Colors.grey.shade100,
+                      color: theme.colorScheme.surface,
                       borderRadius: BorderRadius.circular(16),
+                      border: Border.all(color: theme.dividerColor.withValues(alpha: 0.1)),
                     ),
                     child: TextField(
                       controller: _searchController,
                       style: GoogleFonts.inter(
                         fontSize: 14,
-                        color: theme.textTheme.bodyLarge?.color,
+                        color: theme.colorScheme.onSurface,
                       ),
                       decoration: InputDecoration(
                         hintText: 'Search journeys...',
                         hintStyle: GoogleFonts.inter(
                           fontSize: 14,
-                          color: theme.textTheme.bodySmall?.color?.withValues(alpha: 0.4),
+                          color: theme.colorScheme.onSurface.withValues(alpha: 0.38),
                         ),
                         prefixIcon: Icon(
                           Icons.search,
-                          color: theme.textTheme.bodySmall?.color?.withValues(alpha: 0.5),
+                          color: theme.colorScheme.onSurface.withValues(alpha: 0.38),
                         ),
                         border: InputBorder.none,
                         contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
@@ -147,7 +148,7 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
                           IconButton(
                             icon: Icon(
                               Icons.filter_list,
-                              color: theme.textTheme.bodySmall?.color?.withValues(alpha: 0.5),
+                              color: theme.colorScheme.onSurface.withValues(alpha: 0.38),
                               size: 20,
                             ),
                             onPressed: () {},
@@ -204,7 +205,7 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
                       const SizedBox(height: 16),
                       Text(
                         'Error loading history',
-                        style: GoogleFonts.manrope(color: theme.textTheme.bodySmall?.color),
+                        style: GoogleFonts.manrope(color: theme.colorScheme.onSurface.withValues(alpha: 0.38)),
                       ),
                       const SizedBox(height: 8),
                       TextButton(
@@ -225,7 +226,6 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
   Widget _buildFilterChip(String label, JourneyType type, ValueNotifier<JourneyType> filterNotifier, int count, [Color? accentColor]) {
     final isSelected = filterNotifier.value == type;
     final theme = Theme.of(context);
-    final isDark = theme.brightness == Brightness.dark;
 
     return GestureDetector(
       onTap: () {
@@ -236,13 +236,14 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
         decoration: BoxDecoration(
           color: isSelected
               ? (accentColor?.withValues(alpha: 0.15) ?? theme.primaryColor.withValues(alpha: 0.15))
-              : isDark
-                  ? const Color(0xFF1E2633)
-                  : Colors.grey.shade200,
+              : theme.colorScheme.surface,
           borderRadius: BorderRadius.circular(20),
-          border: isSelected && accentColor != null
-              ? Border.all(color: accentColor.withValues(alpha: 0.3), width: 1)
-              : null,
+          border: Border.all(
+            color: isSelected && accentColor != null
+                ? accentColor.withValues(alpha: 0.3)
+                : theme.dividerColor.withValues(alpha: 0.1),
+            width: 1,
+          ),
         ),
         child: Row(
           mainAxisSize: MainAxisSize.min,
@@ -254,7 +255,7 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
                 fontWeight: isSelected ? FontWeight.w700 : FontWeight.w600,
                 color: isSelected
                     ? (accentColor ?? theme.primaryColor)
-                    : theme.textTheme.bodySmall?.color?.withValues(alpha: 0.6),
+                    : theme.colorScheme.onSurface.withValues(alpha: 0.54),
               ),
             ),
             if (count > 0) ...[
@@ -274,7 +275,7 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
                     fontWeight: FontWeight.w700,
                     color: isSelected
                         ? (accentColor ?? theme.primaryColor)
-                        : theme.textTheme.bodySmall?.color?.withValues(alpha: 0.5),
+                        : theme.colorScheme.onSurface.withValues(alpha: 0.38),
                   ),
                 ),
               ),
@@ -301,7 +302,7 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
             style: GoogleFonts.manrope(
               fontSize: 18,
               fontWeight: FontWeight.w700,
-              color: theme.textTheme.bodyLarge?.color?.withValues(alpha: 0.5),
+              color: theme.colorScheme.onSurface.withValues(alpha: 0.5),
             ),
           ),
           const SizedBox(height: 8),
@@ -309,7 +310,7 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
             'Your journey history will appear here',
             style: GoogleFonts.inter(
               fontSize: 14,
-              color: theme.textTheme.bodySmall?.color?.withValues(alpha: 0.4),
+              color: theme.colorScheme.onSurface.withValues(alpha: 0.38),
             ),
           ),
         ],
@@ -319,7 +320,6 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
 
   Widget _buildTimelineCard(BuildContext context, Journey journey, bool isLast) {
     final theme = Theme.of(context);
-    final isDark = theme.brightness == Brightness.dark;
 
     // Determine status styling
     Color statusColor;
@@ -392,7 +392,7 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
                         end: Alignment.bottomCenter,
                         colors: [
                           statusColor.withValues(alpha: 0.5),
-                          isDark ? Colors.white.withValues(alpha: 0.1) : Colors.grey.withValues(alpha: 0.2),
+                          theme.dividerColor.withValues(alpha: 0.1),
                         ],
                       ),
                     ),
@@ -407,15 +407,16 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
               margin: const EdgeInsets.only(bottom: 20),
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
-                color: isDark ? const Color(0xFF1E2633) : Colors.white,
+                color: theme.colorScheme.surface,
                 borderRadius: BorderRadius.circular(20),
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.black.withValues(alpha: isDark ? 0.2 : 0.05),
+                    color: Colors.black.withValues(alpha: theme.brightness == Brightness.dark ? 0.2 : 0.05),
                     blurRadius: 10,
                     offset: const Offset(0, 4),
                   ),
                 ],
+                border: Border.all(color: theme.dividerColor.withValues(alpha: 0.1)),
               ),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -429,7 +430,7 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
                         style: GoogleFonts.manrope(
                           fontSize: 12,
                           fontWeight: FontWeight.w600,
-                          color: theme.textTheme.bodySmall?.color?.withValues(alpha: 0.6),
+                          color: theme.colorScheme.onSurface.withValues(alpha: 0.54),
                         ),
                       ),
                       Container(
@@ -503,7 +504,7 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
                 style: GoogleFonts.manrope(
                   fontSize: 10,
                   fontWeight: FontWeight.w700,
-                  color: theme.textTheme.bodySmall?.color?.withValues(alpha: 0.4),
+                  color: theme.colorScheme.onSurface.withValues(alpha: 0.38),
                   letterSpacing: 0.5,
                 ),
               ),
@@ -513,7 +514,7 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
                 style: GoogleFonts.manrope(
                   fontSize: 14,
                   fontWeight: FontWeight.w600,
-                  color: theme.textTheme.bodyLarge?.color,
+                  color: theme.colorScheme.onSurface,
                   height: 1.3,
                 ),
                 maxLines: 2,
@@ -527,22 +528,22 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
   }
 
   Widget _buildActivitySummary(ThemeData theme, Map<String, dynamic> stats) {
-    final isDark = theme.brightness == Brightness.dark;
     final arrivalRate = stats['arrivalRate'] as int? ?? 0;
 
     return Container(
       margin: const EdgeInsets.fromLTRB(28, 16, 0, 32),
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: isDark ? const Color(0xFF1E2633) : Colors.white,
+        color: theme.colorScheme.surface,
         borderRadius: BorderRadius.circular(20),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: isDark ? 0.3 : 0.08),
+            color: Colors.black.withValues(alpha: theme.brightness == Brightness.dark ? 0.3 : 0.08),
             blurRadius: 20,
             offset: const Offset(0, 8),
           ),
         ],
+        border: Border.all(color: theme.dividerColor.withValues(alpha: 0.1)),
       ),
       child: Column(
         children: [
@@ -561,7 +562,7 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
                 style: GoogleFonts.manrope(
                   fontSize: 14,
                   fontWeight: FontWeight.w700,
-                  color: theme.textTheme.bodyLarge?.color?.withValues(alpha: 0.8),
+                  color: theme.colorScheme.onSurface.withValues(alpha: 0.8),
                 ),
               ),
             ],
@@ -603,7 +604,7 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
             style: GoogleFonts.manrope(
               fontSize: 12,
               fontWeight: FontWeight.w700,
-              color: theme.textTheme.bodySmall?.color?.withValues(alpha: 0.5),
+              color: theme.colorScheme.onSurface.withValues(alpha: 0.5),
               letterSpacing: 1,
             ),
           ),
@@ -632,7 +633,7 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
           style: GoogleFonts.manrope(
             fontSize: 20,
             fontWeight: FontWeight.w800,
-            color: accentColor ?? theme.textTheme.bodyLarge?.color,
+            color: accentColor ?? theme.colorScheme.onSurface,
           ),
         ),
         const SizedBox(height: 4),
@@ -641,7 +642,7 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
           style: GoogleFonts.manrope(
             fontSize: 11,
             fontWeight: FontWeight.w600,
-            color: theme.textTheme.bodySmall?.color?.withValues(alpha: 0.5),
+            color: theme.colorScheme.onSurface.withValues(alpha: 0.5),
           ),
         ),
       ],
